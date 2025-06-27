@@ -1,0 +1,258 @@
+.App {
+  /* text-align: center; PRAVI PROBLEM ZA autoSuggeste */
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  /* min-height: 100vh; */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.glimmer-panel {
+  border: 1px dashed #aaa;
+  background: linear-gradient(90deg, rgba(221, 221, 221, 1) 0%, rgba(255, 255, 255, 1) 100%);
+  border-radius: 6px;
+  margin-top: 20px;
+  padding: 10px;
+}
+
+.glimmer-line {
+  display: block;
+  width: 60%;
+  height: 20px;
+  margin: 10px;
+  border-radius: 4px;
+  background: #f0f0f0;
+}
+
+.wrapper {
+  padding-top: 30px;
+}
+
+body h3 {
+  margin-bottom: 25px;
+}
+
+.navbar-brand a {
+  color: #ffffff;
+}
+
+label {
+  color: silver;
+  margin-bottom: 3;
+}
+
+.form-wrapper {
+  border: 1px solid silver;
+  border-radius: 5px
+}
+
+/* .table-wrapper {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.table-wrapper {
+  max-width: 700px;
+} */
+
+.edit-link {
+  padding: 7px 10px;
+  font-size: 0.875rem;
+  line-height: normal;
+  border-radius: 0.2rem;
+  color: #fff;
+  background-color: #28a745;
+  border-color: #28a745;
+  margin-right: 10px;
+  position: relative;
+  top: 1px;
+}
+
+.edit-link:hover {
+  text-decoration: none;
+  color: #ffffff;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+.row-buttons {
+  display: flex;
+  justify-content: flex-end;
+  align-items: 'center';
+}
+
+.fieldsets {
+  border: '1px solid silver';
+  border-radius: '5px';
+  padding: '5px'
+}
+
+/* nav a:hover { */
+@media(hover: hover) and (pointer: fine) {
+  a:hover {
+    background: transparent;
+  }
+}
+
+.nav-link {
+  margin-left: 10px;
+}
+
+/*
+ * Modal ChatBot
+ */
+
+.buddy-fixed {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  font-size: small;
+}
+
+.chat-bot-dlg {
+  background-color: rgb(107, 137, 182) !important;
+}
+
+/*
+.modal.right .modal-dialog {
+  position: fixed !important;
+  margin: auto !important;
+  width: 30% !important;
+  height: 100% !important;
+  -webkit-transform: translate3d(0%, 0, 0) !important;
+  -ms-transform: translate3d(0%, 0, 0) !important;
+  transform: translate3d(0%, 0, 0) !important;
+}
+
+.modal.right .modal-content {
+  margin-top: 10% !important;
+  height: 100% !important;
+  width: 100% !important;
+  overflow-y: auto !important;
+}
+
+.modal.right.fade .modal-dialog {
+  right: -120px !important;
+  -webkit-transition: opacity 1.5s linear, right 1.5s ease-out !important;
+  -moz-transition: opacity 1.5s linear, right 1.5s ease-out !important;
+  -o-transition: opacity 1.5s linear, right 1.5s ease-out !important;
+  transition: opacity 1.5s linear, right 1.5s ease-out !important;
+}
+
+.modal.right.fade.in .modal-dialog {
+  right: 0 !important;
+}
+*/
+
+.kkknowledge-row {
+  flex-wrap: nowrap !important;
+  overflow-x: hidden !important;
+}
+
+/* .category-row { */
+  /* rgb(13, 110, 253) */
+   /* background-color: rgb(239, 217, 253); */
+   /* color:#aaa */
+/* } */
+
+.question-row {
+   /* background-color: rgb(239, 217, 253); */
+   color:#aaa
+}
+
+.answer form-label {
+  color: white;
+  margin-bottom: 3;
+}
+
+
+.warning {
+  background-color: antiquewhite
+}
+
+.created-modified {
+  font-size: 13px !important;
+}
+
+.category-form {
+  background-color: rgb(207, 226, 255)
+  /* background-color: rgb(239, 217, 253);  */
+}
+
+.category-form label {
+  color: rgba(33, 37, 41, 0.75);
+  font-size: 14px;
+}
+
+.question-form {
+  background-color: rgb(239, 217, 253);
+}
+
+.question-form label {
+  color: darkolivegreen;
+  font-size: 14px;
+}
+
+
+.answer-form {
+  background-color: rgb(239, 217, 253);
+}
+
+.answer-form label {
+  color: darkolivegreen;
+  font-size: 14px;
+}
+
+
+.dropdown-menu.show {
+  width: 30vw !important;
+  /* min-width: 200px; */
+}
+
+/* .dropdown-menu li a { */
+.dropdown-menu li div button {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

@@ -1,0 +1,241 @@
+ .react-autosuggest__container {
+ 	position: relative;
+ 	width: 100%;
+ }
+
+ .react-autosuggest__input {
+ 	width: 100%;
+ 	/* 240px; */
+ 	height: 30px;
+ 	padding: 5px 20px;
+ 	font-family: Helvetica, sans-serif;
+ 	font-weight: 300;
+ 	font-size: 15px;
+ 	border: 1px solid #aaa;
+ 	border-radius: 4px;
+ 	color: rgb(10, 109, 143);
+ }
+
+ .react-autosuggest__input--focused {
+ 	outline: none;
+ }
+
+ .react-autosuggest__input--open {
+ 	border-bottom-left-radius: 0;
+ 	border-bottom-right-radius: 0;
+ }
+
+ .react-autosuggest__suggestions-container {
+ 	display: none;
+ }
+
+ .react-autosuggest__suggestions-container--open {
+ 	display: block;
+ 	position: absolute;
+ 	top: 30px;
+ 	/* dlg */
+ 	/* right: 0; */
+ 	max-width: 100%;
+ 	/* dlg */
+
+ 	/* z-index: 999 !important; */
+ 	font-family: Helvetica, sans-serif;
+ 	font-weight: 300;
+ 	font-size: 15px;
+ 	border-bottom-left-radius: 4px;
+ 	border-bottom-right-radius: 4px;
+ 	max-height: 80vh;
+ 	overflow-y: auto;
+ 	z-index: 2;
+ }
+
+
+
+ .questions .react-autosuggest__suggestions-list {
+ 	margin: 0;
+ 	padding: 0;
+ 	list-style-type: none;
+ }
+
+ .questions .react-autosuggest__suggestion {
+ 	cursor: pointer;
+ 	padding: 10px 20px;
+ }
+
+ .questions .react-autosuggest__suggestion--highlighted {
+ 	background-color: #ddd;
+ }
+
+ /*     ======== */
+
+ .questions .react-autosuggest__suggestion {
+ 	cursor: pointer;
+ 	padding: 3px 20px;
+ 	font-size: 13px;
+ }
+
+ .questions .react-autosuggest__suggestion-match {
+ 	color: rgb(20, 158, 202);
+ 	font-weight: bold;
+ }
+
+ /* ======================================================== */
+
+ .questions .light .react-autosuggest__suggestion {
+ 	color: #212529;
+ 	background-color: #eff;
+ }
+
+ .questions .light .react-autosuggest__suggestion:hover {
+ 	background-color: #ddd;
+ }
+
+ .questions .light .react-autosuggest__suggestions-container {
+ 	border: 1px solid #aaa;
+ }
+
+ .questions .light .react-autosuggest__suggestions-container--open {
+ 	border: 3px solid #aaa;
+ 	background-color: rgb(255, 193, 7)
+ }
+
+ .questions .light .react-autosuggest__suggestion--highlighted {
+ 	color: #111;
+ 	background-color: lightsteelblue;
+ }
+
+ .questions .react-autosuggest__suggestions-container--open {
+ 	width: 70vw;
+ 	overflow-x: visible;
+ }
+
+ .dark .questions .react-autosuggest__suggestions-container--open {
+ 	/* border: 0px solid #aaa; */
+ 	background-color: rgb(255, 193, 7);
+ 	width: 80vw;
+ 	/* overflow-x: visible; */
+ }
+
+ .dark .questions .react-autosuggest__suggestion {
+ 	color: #fff;
+ 	background-color: rgb(255, 193, 7);
+ 	display: flex;
+ 	flex-wrap: wrap;
+ 	/* width: 80vw; */
+ 	/* border: 1px solid blue; */
+ }
+
+ /* span:nth-child(1) */
+ .dddlg .dark .questions .react-autosuggest__suggestion > span  {
+ 	color: #fff;
+ 	background-color: blue;
+ 	display: flex;
+ 	flex-wrap: wrap;
+ 	width: 200px;
+ 	/* 100%; */
+ 	/* max-width: 100%; */
+ 	border: 3px solid red;
+ }
+
+  .dddlg .dark .questions .react-autosuggest__suggestion > span > span {
+	border: 1px solid navajowhite;
+ 	color: #fff;
+ 	background-color: blue;
+ 	display: flex;
+ 	flex-wrap: wrap;
+ 	width: 200px;
+ 	/* 100%; */
+ 	/* max-width: 100%; */
+ 	border: 3px solid red;
+ }
+
+
+ /* .dlg .dark .questions .react-autosuggest__suggestion  span {
+ 	width: 100%;
+	display: flex;
+	flex-wrap: wrap;
+ } */
+
+ /* .dddlg .dark .questions .react-autosuggest__suggestion span  {
+ 	color: #fff;
+ 	background-color: blue;
+ 	display: inline-block;
+	text-wrap: wrap; */
+ 	/* flex-wrap: wrap; */
+ 	/* width: 80%; */
+ 	/* max-width: 100%; */
+ 	/* border: 5px solid red;
+ } */
+
+ .questions .no-suggestions {
+ 	background-color: rgb(255, 193, 7);
+ 	color: #fff;
+ 	padding: 1px 3px;
+ }
+
+ .dark .questions .react-autosuggest__suggestion:hover {
+ 	background-color: #adb5bd;
+ }
+
+ /*
+.react-autosuggest__container',
+.react-autosuggest__container--open',
+.react-autosuggest__input',
+.react-autosuggest__input--open',
+.react-autosuggest__input--focused',
+.react-autosuggest__suggestions-container',
+.react-autosuggest__suggestions-container--open',
+.react-autosuggest__suggestions-list',
+.react-autosuggest__suggestion',
+.react-autosuggest__suggestion--first',
+.react-autosuggest__suggestion--highlighted',
+*/
+
+ .questions .react-autosuggest__section-title {
+ 	font-size: 12px;
+ 	/* font-weight: bold; */
+ 	padding: 1px 5px;
+ 	font-style: oblique;
+ }
+
+ .questions .light .react-autosuggest__section-container {
+ 	background-color: #ffb;
+ }
+
+ .questions .light .react-autosuggest__section-container--first {
+ 	background-color: #ffb;
+ }
+
+ .questions .light .react-autosuggest__section-title {
+ 	background-color: #eff;
+ }
+
+ .questions .light .react-autosuggest__suggestion--highlighted {
+ 	color: #000
+ }
+
+ .questions .light .react-autosuggest__suggestions-list {
+ 	background-color: #ffc;
+ }
+
+
+
+ .dark .questions .react-autosuggest__section-container {
+ 	/* background-color: #343a40; */
+ 	background-color: #E8EAFB;
+ }
+
+ /* .dark .questions .react-autosuggest__section-container--first {
+ 	background-color: #343a40;
+ } */
+
+ .dark .questions .react-autosuggest__section-title {
+ 	color: rgb(13, 110, 253);
+ 	background-color: #E8EAFB;
+ 	/* #343a40; */
+ }
+
+ .dark .questions .react-autosuggest__suggestion--highlighted {
+ 	color: #fff;
+ 	background-color: #343a40;
+ }
