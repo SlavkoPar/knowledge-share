@@ -1,38 +1,29 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { ListGroup } from "react-bootstrap";
 import GroupRow from "groups/components/GroupRow";
-import { GroupKey, IGroup, IParentInfo } from "groups/types";
+import { GroupKey, IGroup, IGroupRow, IParentInfo } from "groups/types";
 import { useGroupContext } from "groups/GroupProvider";
 
+const GroupList = ({ title, groupRow, level, isExpanded }: IParentInfo) => {
 
-const GroupList = ({ title, groupKey, level }: IParentInfo) => {
-    const { state, getSubGroups } = useGroupContext();
-    const { groups, groupKeyExpanded } = state;
-    // { error, }
-    const { partitionKey, id } = groupKey;
-    const { answerId } = groupKeyExpanded!;
+    const { state } = useGroupContext();
+    const { groupKeyExpanded } = state;
 
-    useEffect(() => {
-        (async () => {
-            await getSubGroups(groupKey)
-                .then((response: boolean) => {
-                });
-        })()
-    }, [getSubGroups, groupKey]);
-
-    const mySubGroups = groupKey.id === 'null'
-        ? groups.filter(c => c.parentGroup === null)
-        : groups.filter(c => c.parentGroup === id);
-    // console.log("+++++++>>>>>>> GroupList ", { groupKey, mySubGroups });
+    const { partitionKey, id, answerId } = groupKeyExpanded
+        ? groupKeyExpanded
+        : { partitionKey: null, id: null, answerId: null };
+    const { groupRows: subGroups } = groupRow;
+    //console.log('<<<<<<<<<GroupList', groupRow.id, subGroups )
 
     return (
         <div className={level! > 1 ? 'ms-2' : ''}>
             <>
-                <ListGroup as="ul" variant='dark' className="mb-0 text-info">
-                    {mySubGroups.map((c: IGroup) =>
+                <ListGroup as="ul" variant='dark' className="mb-0">
+                    {subGroups!.map((c: IGroupRow) =>
                         <GroupRow
-                            group={{ ...c, isSelected: c.id === id }}
-                            answerId={answerId}
+                            //groupRow={{ ...c, isSelected: c.id === id }}
+                            groupRow={c}
+                            answerId={c.partitionKey === partitionKey && c.id === id ? answerId : null}
                             key={c.id}
                         />
                     )}

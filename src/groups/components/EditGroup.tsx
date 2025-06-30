@@ -11,10 +11,8 @@ const EditGroup = ({ inLine }: { inLine: boolean }) => {
 
     const { state, updateGroup } = useGroupContext();
 
-    const { groups, groupInViewingOrEditing, groupKeyExpanded } = state;
-    const { id } = groupInViewingOrEditing!;
-    const group = groups.find(c => c.id === id);
-    const { answerId } = groupKeyExpanded!;
+    const { activeGroup, groupKeyExpanded } = state;
+    const answerId  = groupKeyExpanded ? groupKeyExpanded.id : null;;
 
     const submitForm = async (groupObject: IGroup) => {
         const object: IGroup = {
@@ -31,9 +29,9 @@ const EditGroup = ({ inLine }: { inLine: boolean }) => {
     return (
         <GroupForm
             inLine={inLine}
-            group={group!}
+            group={{ ...activeGroup! }}
             answerId={answerId}
-            mode={FormMode.editing}
+            formMode={FormMode.EditingGroup}
             submitForm={submitForm}
         >
             Update Group

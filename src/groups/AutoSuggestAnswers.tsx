@@ -6,8 +6,7 @@ import { isMobile } from 'react-device-detect'
 
 import { debounce, escapeRegexCharacters } from 'common/utilities'
 import './AutoSuggestAnswers.css'
-import { IAnswerKey, IAnswerRow } from 'groups/types';
-import { IShortGroup } from 'global/types';
+import { IAnswerKey, IAnswerRow, IGroupRow } from 'groups/types';
 
 
 interface IGroupMy {
@@ -45,14 +44,14 @@ export class AutoSuggestAnswers extends React.Component<{
 	tekst: string | undefined,
 	onSelectAnswer: (answerKey: IAnswerKey, underFilter: string) => void,
 	alreadyAssigned?: string[],
-	shortGroups: Map<string, IShortGroup>,
+	shortGroups: Map<string, IGroupRow>,
 	searchAnswers: (filter: string, count: number) => Promise<IAnswerRow[]>
 }, any> {
 	// region Fields
 	alreadyAssigned: string[];
 	state: any;
 	isMob: boolean;
-	shortGroups: Map<string, IShortGroup>;
+	shortGroups: Map<string, IGroupRow>;
 	searchAnswers: (filter: string, count: number) => Promise<IAnswerRow[]>;
 	debouncedLoadSuggestions: (value: string) => void;
 	//inputAutosuggest: React.RefObject<HTMLInputElement>;
@@ -172,7 +171,7 @@ export class AutoSuggestAnswers extends React.Component<{
 			console.log('--------->>>>> getSuggestions')
 			var answerRows: IAnswerRow[] = await this.searchAnswers(escapedValue, 20);
 			answerRows.forEach((row: IAnswerRow) => {
-				const { id, partitionKey, parentGroup, title, isSelected } = row;
+				const { id, partitionKey, parentGroup, title, isSelected, rootId } = row;
 
 				if (!this.alreadyAssigned.includes(id)) {
 					const answerKey = { partitionKey, id }
@@ -180,19 +179,20 @@ export class AutoSuggestAnswers extends React.Component<{
 						answerKeys.push(answerKey);
 
 						// 2) Group answers by parentGroup
-						const quest: IAnswerRow = {
+						const answ: IAnswerRow = {
 							partitionKey,
 							id,
 							parentGroup,
 							title,
 							groupTitle: '',
-							isSelected
+							isSelected,
+							rootId
 						}
 						if (!groupAnswers.has(parentGroup)) {
-							groupAnswers.set(parentGroup, [quest]);
+							groupAnswers.set(parentGroup, [answ]);
 						}
 						else {
-							groupAnswers.get(parentGroup)!.push(quest);
+							groupAnswers.get(parentGroup)!.push(answ);
 						}
 					}
 				}
@@ -278,7 +278,7 @@ export class AutoSuggestAnswers extends React.Component<{
 					if (group) {
 						const { title, titlesUpTheTree/*, variations*/ } = group!;
 						groupSection.groupTitle = title;
-						groupSection.parentGroupUp = titlesUpTheTree;
+						groupSection.parentGroupUp = titlesUpTheTree!;
 						//variationsss = variations;
 					}
 					else {

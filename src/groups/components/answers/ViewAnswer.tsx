@@ -5,21 +5,21 @@ import AnswerForm from "groups/components/answers/AnswerForm";
 
 const ViewAnswer = ({ inLine }: { inLine: boolean }) => {
     const { state } = useGroupContext();
-    const { answerLoading, groups, answerInViewingOrEditing } = state;
-    //const { partitionKey, id, parentGroup } = answerInViewingOrEditing!;
+    const { answerLoading, topGroupRows: groups, activeAnswer } = state;
+    //const { partitionKey, id, parentGroup } = activeAnswer!;
 
     const [answer, setAnswer] = useState<IAnswer | null>(null);
 
-     useEffect(() => {
-            //const q = group!.answers.find(q => q.inEditing)
-            //if (group) {
-                //const q = group!.answers.find(q => q.id === id)
-                console.log("#################################### ViewAnswer setAnswer ...", { answerInViewingOrEditing })
-                //if (q) {
-                    setAnswer(answerInViewingOrEditing);
-                //}
-            //}
-        }, [answerInViewingOrEditing]) // answerLoading
+    useEffect(() => {
+        //const q = group!.answers.find(q => q.inEditing)
+        //if (group) {
+        //const q = group!.answers.find(q => q.id === id)
+        console.log("#################################### ViewAnswer setAnswer ...", { activeAnswer })
+        //if (q) {
+        setAnswer(activeAnswer);
+        //}
+        //}
+    }, [activeAnswer]) // answerLoading
     // if (answerLoading)
     //     return <div>Loading answer...</div>
     return (
@@ -27,7 +27,6 @@ const ViewAnswer = ({ inLine }: { inLine: boolean }) => {
             answer={answer!}
             showCloseButton={true}
             source={0}
-            mode={FormMode.viewing}
             submitForm={() => { }}
         >
             View Answer

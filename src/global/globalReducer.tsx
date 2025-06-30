@@ -1,7 +1,8 @@
 
 import { Reducer } from 'react'
-import { IGlobalState, GlobalActionTypes, GlobalActions, ROLES, IAuthUser, IGlobalStateFromLocalStorage, IShortGroup } from "./types";
+import { IGlobalState, GlobalActionTypes, GlobalActions, ROLES, IAuthUser, IGlobalStateFromLocalStorage } from "./types";
 import { ICategoryRow } from 'categories/types';
+import { IGroupRow } from 'groups/types';
 
 const initialAuthUser: IAuthUser = {
     nickName: '',
@@ -24,7 +25,7 @@ const initGlobalState: IGlobalState = {
     loading: false,
     categoryRows: new Map<string, ICategoryRow>(),
     categoryRowsLoaded: undefined,
-    shortGroups: new Map<string, IShortGroup>(),
+    groupRows: new Map<string, IGroupRow>(),
     shortGroupsLoaded: undefined,
     nodesReLoaded: false,
     lastRouteVisited: '/categories'
@@ -191,12 +192,12 @@ const reducer: Reducer<IGlobalState, GlobalActions> = (state, action) => {
             };
         }
 
-        case GlobalActionTypes.SET_ALL_SHORT_GROUPS: {
-            const { shortGroups } = action.payload;
+        case GlobalActionTypes.SET_ALL_GROUP_ROWS: {
+            const { groupRows: shortGroups } = action.payload;
             console.log("loadShortGroups SET_ALL_SHORT_GROUPS", shortGroups)
             return {
                 ...state,
-                shortGroups,
+                groupRows: shortGroups,
                 shortGroupsLoaded: Date.now()
             };
         }

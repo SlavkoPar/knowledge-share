@@ -6,8 +6,7 @@ import { isMobile } from 'react-device-detect'
 
 import { debounce, escapeRegexCharacters } from 'common/utilities'
 import './AutoSuggestAnswers.css'
-import { IAnswerRow, IAnswerKey, IAnswerRowDto } from 'groups/types';
-import { IShortGroup } from 'global/types';
+import { IAnswerRow, IAnswerKey, IAnswerRowDto, IGroupRow } from 'groups/types';
 
 
 interface IGoupMy {
@@ -45,7 +44,7 @@ export class AutoSuggestAnswers extends React.Component<{
 	tekst: string | undefined,
 	onSelectGroupAnswer: (answerKey: IAnswerKey) => void,
 	alreadyAssigned?: string[],
-	shortGroups: Map<string, IShortGroup>,
+	shortGroups: Map<string, IGroupRow>,
 	searchAnswers: (filter: string, count: number) => Promise<IAnswerRow[]>
 
 }, any> {
@@ -53,7 +52,7 @@ export class AutoSuggestAnswers extends React.Component<{
 	alreadyAssigned: string[];
 	state: any;
 	isMob: boolean;
-	shortGroups: Map<string, IShortGroup>;
+	shortGroups: Map<string, IGroupRow>;
 	searchAnswers: (filter: string, count: number) => Promise<IAnswerRow[]>;
 	debouncedLoadSuggestions: (value: string) => void;
 	//inputAutosuggest: React.RefObject<HTMLInputElement>;

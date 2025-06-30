@@ -7,7 +7,7 @@ import AssignedAnswer from "./AssignedAnswer";
 import { AutoSuggestAnswers } from 'groups/AutoSuggestAnswers'
 import { IWhoWhen } from "global/types";
 import { IAnswer, IAnswerKey } from "groups/types";
-import { initialAnswer } from 'groups/GroupsReducer'
+import { initialAnswer } from 'groups/GroupReducer'
 import AddAnswer from "categories/components/questions/AddAnswer"
 
 interface IProps {
@@ -19,8 +19,8 @@ interface IProps {
 
 const AssignedAnswers = ({ questionKey, questionTitle, assignedAnswers, isDisabled }: IProps) => {
 
-    const { globalState, searchAnswers, loadShortGroups } = useGlobalContext();
-    const { authUser, isDarkMode, variant, shortGroups, shortGroupsLoaded } = globalState;
+    const { globalState, searchAnswers, loadAndCacheAllGroupRows } = useGlobalContext();
+    const { authUser, isDarkMode, variant, groupRows: shortGroups, shortGroupsLoaded } = globalState;
 
     //const [assignedAnswers2, setAssignAnswers2] = useState<IAssignedAnswer[]>([]);
 
@@ -68,7 +68,7 @@ const AssignedAnswers = ({ questionKey, questionTitle, assignedAnswers, isDisabl
 
     const handleNewAnswer = () => {
         if (!shortGroupsLoaded) {
-            loadShortGroups();
+            loadAndCacheAllGroupRows();
         }
         setShowAssign(true);
     }

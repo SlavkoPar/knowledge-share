@@ -201,10 +201,7 @@ input[type=number] {
    color:#aaa
 }
 
-.answer form-label {
-  color: white;
-  margin-bottom: 3;
-}
+
 
 
 .warning {
@@ -234,9 +231,19 @@ input[type=number] {
   font-size: 14px;
 }
 
+.answer-row {
+   background-color: rgb(13, 202, 240);
+   color: #aaa;
+}
+
+.answer form-label {
+  color: white;
+  margin-bottom: 3;
+}
+
 
 .answer-form {
-  background-color: rgb(239, 217, 253);
+  background-color: rgb(107, 222, 245);
 }
 
 .answer-form label {

@@ -4,67 +4,67 @@ import { useGlobalState } from 'global/GlobalProvider'
 
 import AnswerForm from "groups/components/answers/AnswerForm";
 import { ActionTypes, FormMode, IAnswer, IAnswerRow } from "groups/types";
-import { initialAnswer } from "groups/GroupsReducer";
+import { initialAnswer } from "groups/GroupReducer";
 
 interface IProps {
-    answerRow: IAnswerRow;
     closeModal?: () => void;
-    inLine: boolean;
-    showCloseButton: boolean;
-    source: number;
+    showCloseButton?: boolean;
+    source?: number;
     setError?: (msg: string) => void;
 }
 
-const AddAnswer = ({ answerRow, inLine, closeModal, showCloseButton, source, setError }: IProps) => {
-    const globalState = useGlobalState();
-    const { authUser } = globalState;
-    const { nickName } = authUser;
+const AddAnswer = ({ closeModal, showCloseButton, source, setError }: IProps) => {
 
-    const answer = { ...initialAnswer, ...answerRow };
+    const { state, cancelAddAnswer, createAnswer } = useGroupContext();
+    const { activeAnswer } = state;
+    const rootId = activeAnswer
+        ? activeAnswer.rootId
+        : '';
 
-    // { error, execute }
-
-    const dispatch = useGroupDispatch();
-    const { state, createAnswer, reloadGroupNode } = useGroupContext();
     if (!closeModal) {
-        const cat = state.groups.find(c => c.id === answerRow.parentGroup)
-        answerRow.groupTitle = cat ? cat.title : '';
+        // const cat = state.topGroupRows.find(c => c.id === answerRow.parentGroup)
+        // answerRow.groupTitle = cat ? cat.title : '';
+    }
+
+    const cancelAdd = async () => {
+        await cancelAddAnswer();
     }
     
-    const [formValues] = useState(answer);
-
+    
     const submitForm = async (answerObject: IAnswer) => {
-        const obj: any = { ...answerObject }
-        delete obj.inAdding;
-        // delete obj.id;
-        const object: IAnswer = {
-            ...obj,
-            partitionKey: answer.partitionKey,
+        const newAnswer: IAnswer = {
+            ...answerObject,
+            rootId: rootId!,
             created: {
                 time: new Date(),
-                nickName: nickName
+                nickName: ''
             },
             modified: undefined
         }
-        const q = await createAnswer(object, closeModal !== undefined);
+        const q = await createAnswer(newAnswer, closeModal !== undefined);
         if (q) {
             if (q.message) {
                 setError!(q.message)
             }
             else if (closeModal) {
                 closeModal();
-                dispatch({ type: ActionTypes.CLEAN_TREE, payload: { id: q.parentGroup } })
-                await reloadGroupNode({ partitionKey: '', id: q.parentGroup, answerId: q.id });
+                //dispatch({ type: ActionTypes.CLEAN_TREE, payload: { id: q.parentGroup } })
+                //await openGroupNode({ partitionKey: '', id: q.parentGroup, answerId: q.id });
             }
         }
     }
+
+    if (!activeAnswer)
+        return null;
+
+    // activeAnswer.title += odakle
     return (
         <AnswerForm
-            answer={formValues}
-            showCloseButton={showCloseButton}
-            source={source}
-            closeModal={closeModal}
-            mode={FormMode.adding}
+            answer={activeAnswer!}
+            showCloseButton={showCloseButton ?? true}
+            source={source ?? 0}
+            closeModal={cancelAdd}
+            //formMode={FormMode.AddingAnswer}
             submitForm={submitForm}
         >
             Create Answer
@@ -73,4 +73,5 @@ const AddAnswer = ({ answerRow, inLine, closeModal, showCloseButton, source, set
 }
 
 export default AddAnswer
+
 

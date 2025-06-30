@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { Button, ListGroup, Modal } from "react-bootstrap";
-import { IQuestionKey } from "categories/types";
-import { useCategoryContext } from "categories/CategoryProvider";
+import { IAnswerKey } from "groups/types";
+import { useGroupContext } from "groups/GroupProvider";
 import { useGlobalContext } from "global/GlobalProvider";
 import { IWhoWhen } from "global/types";
-import { IRelatedFilter } from "categories/types";
-import RelatedFilter from 'categories/components/questions/RelatedFilter'
+import { IRelatedFilter } from "groups/types";
+import RelatedFilter from 'groups/components/answers/RelatedFilter'
 
 interface IProps {
-    questionKey: IQuestionKey,
-    questionTitle: string,
+    answerKey: IAnswerKey,
+    answerTitle: string,
     relatedFilters: IRelatedFilter[]
 }
 
-const RelatedFilters = ({ questionKey, questionTitle, relatedFilters }: IProps) => {
+const RelatedFilters = ({ answerKey, answerTitle, relatedFilters }: IProps) => {
 
     const { globalState } = useGlobalContext();
     const { authUser, isDarkMode, variant, groupRows: shortGroups } = globalState;
@@ -36,7 +36,7 @@ const RelatedFilters = ({ questionKey, questionTitle, relatedFilters }: IProps) 
     //     })()
     // }, [relatedFilters])
 
-    const { state } = useCategoryContext();
+    const { state } = useGroupContext();
     const [showAssign, setShowAssign] = useState(false);
 
     const unAssignFilter = async (relatedFilter: IRelatedFilter) => {
@@ -44,17 +44,17 @@ const RelatedFilters = ({ questionKey, questionTitle, relatedFilters }: IProps) 
             time: new Date(),
             nickName: globalState.authUser.nickName
         }
-        //await assignQuestionFilter('UnAssign', questionKey, answerKey, unAssigned);
+        //await assignAnswerFilter('UnAssign', answerKey, answerKey, unAssigned);
 
         // TODO in next version do not update MongoDB immediately, wait until users presses Save
-        // User could have canceled question update
+        // User could have canceled answer update
         //setShowAssign(false);
     }
 
     return (
         <div className='mx-0 my-1 border rounded-2 px-1 py-1 border border-light fs-6 bg-warning'>
             <div>
-                <label className="text-muted">Most frequently selected Filters <br />(as the next Question in ChatBot)</label>
+                <label className="text-muted">Most frequently selected Filters <br />(as the next Answer in ChatBot)</label>
                 {relatedFilters.length > 0
                     ? <ListGroup as="ul" variant={variant} className='my-1 bg-secondary'>
                         {relatedFilters.map((relatedFilter: IRelatedFilter) =>

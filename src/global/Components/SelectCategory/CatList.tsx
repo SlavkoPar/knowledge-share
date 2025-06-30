@@ -17,15 +17,11 @@ const CatList = ({ selId, categoryKey, level, setParentCategory }: ICatInfo) => 
         (async () => {
             const res = await getSubCats(id);
             const { subCats, parentHeader } = res;
-            console.log('getSubCats', categoryKey, subCats);
             dispatch({ type: CatsActionTypes.SET_SUB_CATS, payload: { subCats } });
         })()
     }, [getSubCats, catKey]);
 
-    //const parentCategory = categoryKey.id === 'null' ? null : categoryKey.id;
-    //const parentCategory = categoryKey ? categoryKey.id : null;
     const mySubCats = state.cats.filter(c => c.parentCategory === id);
-    console.log({ mySubCategories: mySubCats })
 
     const setParentCat = (cat: ICategoryRow) => {
         dispatch({ type: CatsActionTypes.SET_PARENT_CAT, payload: { cat } })

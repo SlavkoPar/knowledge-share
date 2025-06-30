@@ -5,35 +5,36 @@ import { faCaretRight, faCaretDown } from '@fortawesome/free-solid-svg-icons'
 import { ListGroup, Button } from "react-bootstrap";
 
 import { useGlobalState } from 'global/GlobalProvider'
-import { IShortGroup } from "global/types";
 
-import ShortGroupList from "global/Components/SelectShortGroup/ShortGroupList";
-import { ShortGroupsActions, ShortGroupsActionTypes } from './types';
+import GroupRowList from "global/Components/SelectGroup/GroupRowList";
+import { GroupRowsActions, GroupRowsActionTypes } from './types';
+import { IGroupRow } from 'groups/types';
 
 interface IShortGroupRow {
-    shortGroup: IShortGroup;
-    dispatch: React.Dispatch<ShortGroupsActions>;
-    setParentShortGroup: (shortGroup: IShortGroup) => void;
+    groupRow: IGroupRow;
+    selId: string | null;
+    dispatch: React.Dispatch<GroupRowsActions>;
+    setParentGroup: (groupRow: IGroupRow) => void;
 }
 
-const ShortGroupRow = ({ shortGroup , dispatch, setParentShortGroup }: IShortGroupRow) => {
+const SelGroupRow = ({ groupRow: shortGroup, dispatch, setParentGroup, selId }: IShortGroupRow) => {
     const { partitionKey, id, title, level, isExpanded } = shortGroup;
     const groupKey = { partitionKey, id };
 
     const { isDarkMode, variant, bg } = useGlobalState();
 
     const expand = (_id: IDBValidKey) => {
-        dispatch({ type: ShortGroupsActionTypes.SET_EXPANDED, payload: { id, expanding: !isExpanded } });
+        dispatch({ type: GroupRowsActionTypes.SET_EXPANDED, payload: { id, expanding: !isExpanded } });
     }
 
-    const onSelectShortGroup = (shortGroup: IShortGroup) => {
+    const onSelectShortGroup = (groupRow: IGroupRow) => {
         // Load data from server and reinitialize group
         // viewGroup(id);
-        setParentShortGroup(shortGroup);
+        setParentGroup(groupRow);
     }
 
     const Row1 =
-        <div className="d-flex justify-content-start align-items-center text-primary">
+        <div className="d-flex justify-content-start align-items-center w-100 text-primary">
             <Button
                 variant='link'
                 size="sm"
@@ -73,10 +74,11 @@ const ShortGroupRow = ({ shortGroup , dispatch, setParentShortGroup }: IShortGro
                     variant={"primary"}
                     as="li"
                 >
-                    <ShortGroupList
+                    <GroupRowList
+                        selId={selId}
                         level={level + 1}
                         groupKey={groupKey}
-                        setParentGroup={setParentShortGroup}
+                        setParentGroup={setParentGroup}
                     />
                 </ListGroup.Item>
             }
@@ -85,4 +87,4 @@ const ShortGroupRow = ({ shortGroup , dispatch, setParentShortGroup }: IShortGro
     );
 };
 
-export default ShortGroupRow;
+export default SelGroupRow;

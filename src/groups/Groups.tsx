@@ -3,7 +3,7 @@ import { Container, Row, Col, Button } from "react-bootstrap";
 
 import { useParams } from 'react-router-dom';
 
-import { Mode, ActionTypes, IGroupKey, IAnswerKey, IGroupKeyExpanded } from "./types";
+import { ActionTypes, IGroupKey, IAnswerKey, IGroupKeyExpanded, IGroup, IGroupRow, FormMode, IsGroup } from "./types";
 
 import { useGlobalContext, useGlobalState } from 'global/GlobalProvider';
 
@@ -15,10 +15,11 @@ import EditGroup from "groups/components/EditGroup";
 import ViewAnswer from "groups/components/answers/ViewAnswer";
 import EditAnswer from "groups/components/answers/EditAnswer";
 
-import { initialGroup, initialAnswer } from "groups/GroupsReducer";
+import { initialGroup, initialAnswer } from "groups/GroupReducer";
 import ModalAddAnswer from './ModalAddAnswer';
 import AddGroup from './components/AddGroup';
-import { AutoSuggestAnswers } from 'groups/AutoSuggestAnswers';
+import { AutoSuggestAnswers } from './AutoSuggestAnswers';
+import AddAnswer from './components/answers/AddAnswer';
 
 interface IProps {
     groupId_answerId?: string;
@@ -27,12 +28,18 @@ interface IProps {
 
 const Providered = ({ groupId_answerId, fromChatBotDlg }: IProps) => {
     console.log("=== Groups", groupId_answerId)
-    const { state, reloadGroupNode } = useGroupContext();
-    const { groupKeyExpanded, groupId_answerId_done, groupNodeReLoading, groupNodeLoaded, } = state;
+    const { state, openGroupNode, loadTopGroupRows: loadFirstLevelGroupRows } = useGroupContext();
+    const {
+        topGroupRows, topGroupRowsLoading, topGroupRowsLoaded,
+        groupKeyExpanded, groupId_answerId_done,
+        groupNodeOpening, groupNodeOpened,
+        activeGroup,
+        activeAnswer,
+        formMode
+    } = state;
 
-    const { setLastRouteVisited, searchAnswers, loadShortGroups } = useGlobalContext();
-    const { isDarkMode, authUser, shortGroups, shortGroupsLoaded } = useGlobalState();
-
+    const { setLastRouteVisited, searchAnswers, loadAndCacheAllGroupRows } = useGlobalContext();
+    const { isDarkMode, authUser, groupRows, shortGroupsLoaded } = useGlobalState();
 
     const [modalShow, setModalShow] = useState(false);
     const handleClose = () => {
@@ -49,17 +56,33 @@ const Providered = ({ groupId_answerId, fromChatBotDlg }: IProps) => {
         dispatch({ type: ActionTypes.SET_ANSWER_SELECTED, payload: { answerKey } })
     }
 
-    const [shortGroupKeyExpanded, setCatKeyExpanded] = useState<IGroupKeyExpanded>({
+    const [catKeyExpanded, setCatKeyExpanded] = useState<IGroupKeyExpanded>({
         partitionKey: null,
         id: null,
         answerId: groupKeyExpanded ? groupKeyExpanded.answerId : null
     })
 
+    const groupRow: IGroupRow = {
+        ...initialGroup,
+        level: 1,
+        groupRows: topGroupRows
+    }
+
+
     let tekst = '';
 
     useEffect(() => {
         (async () => {
-            if (!groupNodeReLoading) {
+            // SET_FIRST_LEVEL_GROUP_ROWS  Level:1
+            if (!topGroupRowsLoading && !topGroupRowsLoaded) {
+                await loadFirstLevelGroupRows()
+            }
+        })()
+    }, [topGroupRowsLoading, topGroupRowsLoaded, loadFirstLevelGroupRows]);
+
+    useEffect(() => {
+        (async () => {
+            if (!groupNodeOpening && topGroupRows.length > 0) {
                 if (groupId_answerId) {
                     if (groupId_answerId === 'add_answer') {
                         const sNewAnswer = localStorage.getItem('New_Answer');
@@ -71,25 +94,25 @@ const Providered = ({ groupId_answerId, fromChatBotDlg }: IProps) => {
                             return null;
                         }
                     }
-                    else if (groupId_answerId !== groupId_answerId_done) { //} && !groupNodeLoaded) {
+                    else if (groupId_answerId !== groupId_answerId_done) { //} && !groupNodeOpened) {
                         const arr = groupId_answerId.split('_');
                         const groupId = arr[0];
                         const answerId = arr[1];
                         const keyExp = { partitionKey: null, id: groupId, answerId }
                         // setCatKeyExpanded(keyExp);
-                        console.log('zovem reloadGroupNode 1111111111111111111)', { groupId_answerId }, { groupId_answerId_done })
-                        await reloadGroupNode(keyExp, fromChatBotDlg ?? 'false')
+                        console.log('zovem openGroupNode 1111111111111111111)', { groupId_answerId }, { groupId_answerId_done })
+                        await openGroupNode(keyExp, fromChatBotDlg ?? 'false')
                             .then(() => { return null; });
                     }
                 }
-                else if (groupKeyExpanded && !groupNodeLoaded) {
-                    console.log('zovem reloadGroupNode 2222222222222)', { groupKeyExpanded }, { groupNodeLoaded })
-                    await reloadGroupNode(groupKeyExpanded)
+                else if (groupKeyExpanded && !groupNodeOpened) {
+                    console.log('zovem openGroupNode 2222222222222)', { groupKeyExpanded }, { groupNodeOpened })
+                    await openGroupNode(groupKeyExpanded)
                         .then(() => { return null; });
                 }
             }
         })()
-    }, [groupKeyExpanded, groupNodeReLoading, groupNodeLoaded, reloadGroupNode, groupId_answerId, groupId_answerId_done])
+    }, [groupKeyExpanded, groupNodeOpening, groupNodeOpened, openGroupNode, groupId_answerId, groupId_answerId_done, topGroupRowsLoaded])
 
     useEffect(() => {
         setLastRouteVisited(`/groups`);
@@ -97,9 +120,10 @@ const Providered = ({ groupId_answerId, fromChatBotDlg }: IProps) => {
 
     useEffect(() => {
         if (!shortGroupsLoaded) {
-            loadShortGroups();
+            loadAndCacheAllGroupRows();
         }
-    }, [])
+    }, [shortGroupsLoaded])
+
 
     if (groupId_answerId !== 'add_answer') {
         if (/*groupKeyExpanded ||*/ (groupId_answerId && groupId_answerId !== groupId_answerId_done)) {
@@ -108,8 +132,10 @@ const Providered = ({ groupId_answerId, fromChatBotDlg }: IProps) => {
         }
     }
 
+
     console.log('===>>> Groups !!!!!!!!!!!!!!!!!')
-    if (!groupNodeLoaded || !shortGroupsLoaded)
+    //if (!groupNodeOpened)
+    if (!shortGroupsLoaded || topGroupRows.length === 0)
         return null
 
     return (
@@ -124,7 +150,7 @@ const Providered = ({ groupId_answerId, fromChatBotDlg }: IProps) => {
                                 <AutoSuggestAnswers
                                     tekst={tekst}
                                     onSelectAnswer={onSelectAnswer}
-                                    shortGroups={shortGroups}
+                                    shortGroups={groupRows}
                                     searchAnswers={searchAnswers}
                                 />
                             </div>
@@ -136,7 +162,7 @@ const Providered = ({ groupId_answerId, fromChatBotDlg }: IProps) => {
                     onClick={() => dispatch({
                         type: ActionTypes.ADD_SUB_GROUP,
                         payload: {
-                            groupKey: shortGroupKeyExpanded,
+                            groupKey: catKeyExpanded,
                             level: 1
                         }
                     })
@@ -147,35 +173,24 @@ const Providered = ({ groupId_answerId, fromChatBotDlg }: IProps) => {
                 <Row className="my-1">
                     <Col xs={12} md={5}>
                         <div>
-                            <GroupList groupKey={shortGroupKeyExpanded} level={0} title="root" />
+                            <GroupList groupRow={groupRow} level={0} title="root" isExpanded={true} />
                         </div>
                     </Col>
                     <Col xs={0} md={7}>
-                        {/* {store.mode === FORM_MODES.ADD && <Add group={group??initialGroup} />} */}
                         {/* <div class="d-none d-lg-block">hide on screens smaller than lg</div> */}
                         <div id='div-details' className="d-none d-md-block">
-                            {state.mode === Mode.AddingGroup && <AddGroup groupKey={shortGroupKeyExpanded} inLine={false} />}
-                            {state.mode === Mode.ViewingGroup && <ViewGroup inLine={false} />}
-                            {state.mode === Mode.EditingGroup && <EditGroup inLine={false} />}
-                            {/* {state.mode === FORM_MODES.ADD_ANSWER && <AddAnswer group={null} />} */}
-                            {/* TODO check if we set answerId everywhere */}
-                            {shortGroupKeyExpanded.answerId && state.mode === Mode.ViewingAnswer &&
-                                <ViewAnswer inLine={false} />
-                            }
-                            {shortGroupKeyExpanded.answerId && state.mode === Mode.EditingAnswer &&
-                                <EditAnswer answerKey={{
-                                    parentGroup: shortGroupKeyExpanded.id ?? undefined,
-                                    partitionKey: shortGroupKeyExpanded.partitionKey,
-                                    id: shortGroupKeyExpanded.answerId
-                                }}
-                                    inLine={false}
-                                />
-                            }
+                            {activeGroup && formMode === FormMode.ViewingGroup && <ViewGroup inLine={false} />}
+                            {activeGroup && formMode === FormMode.EditingGroup && <EditGroup inLine={false} />}
+                            {activeGroup && formMode === FormMode.AddingGroup && <AddGroup />}
+
+                            {activeAnswer && formMode === FormMode.ViewingAnswer && <ViewAnswer inLine={false} />}
+                            {activeAnswer && formMode === FormMode.EditingAnswer && <EditAnswer inLine={false} />}
+                            {activeAnswer && formMode === FormMode.AddingAnswer && <AddAnswer />}
                         </div>
                     </Col>
                 </Row>
             </Container>
-            {modalShow &&
+            {modalShow && activeAnswer &&
                 <ModalAddAnswer
                     show={modalShow}
                     onHide={() => { setModalShow(false) }}

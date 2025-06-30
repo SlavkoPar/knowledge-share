@@ -11,7 +11,7 @@ const VariationList = ({ groupKey, variations }: { groupKey: IGroupKey, variatio
   const { canEdit } = useGlobalState();
 
   const { state } = useGroupContext();
-  const { groups, error } = state;
+  const { topGroupRows: groups, error } = state;
 
 
   //const group = groups.find(c => c.id === parentGroup)!

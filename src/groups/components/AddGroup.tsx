@@ -4,33 +4,27 @@ import { useGroupContext } from 'groups/GroupProvider'
 import { useGlobalState } from 'global/GlobalProvider'
 
 import GroupForm from "groups/components/GroupForm";
-import InLineGroupForm from "groups/components/InLineGroupForm";
 import { FormMode, IGroup, IGroupKey } from "groups/types";
 
-const AddGroup = ({ groupKey, inLine }: { groupKey: IGroupKey, inLine: boolean }) => {
+const AddGroup = () => {
     const globalState = useGlobalState();
     const { nickName } = globalState.authUser;
     const { createGroup, state } = useGroupContext();
+    const { activeGroup } = state;
 
-    // do not use groupKey
-    const group: IGroup = state.groups.find(c => c.isExpanded)!; // .inAdding
-    console.assert(group, 'group.inAdding should have been found')
+    const [formValues] = useState<IGroup>({ ...activeGroup! });
 
-    const [formValues] = useState(group);
-
-    const submitForm = async (groupObject: IGroup) => {
-        const object: IGroup = {
-            ...groupObject,
-            partitionKey: groupKey.partitionKey?? '',  // TODO proveri
-            id: groupObject.title.split(' ')[0].toUpperCase(),
+    const submitForm = async (group: IGroup) => {
+        const cat: IGroup = {
+            ...group,
             created: {
                 time: new Date(),
                 nickName: nickName
             },
             modified: undefined
         }
-        console.log("**********object", object)
-        await createGroup(object);
+        console.log("**********object", cat)
+        await createGroup(cat);
     }
 
     return (
@@ -45,15 +39,15 @@ const AddGroup = ({ groupKey, inLine }: { groupKey: IGroupKey, inLine: boolean }
                     Create
                 </InLineGroupForm>
                 : */}
-                <GroupForm
-                    inLine={false}
-                    group={formValues}
-                    answerId={null}
-                    mode={FormMode.adding}
-                    submitForm={submitForm}
-                >
-                    Create Group
-                </GroupForm >
+            <GroupForm
+                inLine={false}
+                group={formValues}
+                answerId={null}
+                formMode={FormMode.AddingGroup}
+                submitForm={submitForm}
+            >
+                Create Group
+            </GroupForm >
             {/* } */}
         </>
     )

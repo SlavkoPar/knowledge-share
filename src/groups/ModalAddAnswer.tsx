@@ -3,7 +3,7 @@ import { Container, Row, Col, Button, Modal } from "react-bootstrap";
 
 import { useParams } from 'react-router-dom';
 
-import { Mode, ActionTypes, IAnswer, IAnswerRow } from "./types";
+import { ActionTypes, IAnswer, IAnswerRow } from "./types";
 
 import { useGlobalState } from "global/GlobalProvider";
 import { GroupProvider, useGroupContext, useGroupDispatch } from "./GroupProvider";
@@ -15,7 +15,7 @@ import ViewAnswer from "groups/components/answers/ViewAnswer";
 import EditAnswer from "groups/components/answers/EditAnswer";
 import AddAnswer from './components/answers/AddAnswer';
 
-import { initialAnswer } from "groups/GroupsReducer";
+import { initialAnswer } from "groups/GroupReducer";
 
 interface IProps {
     show: boolean,
@@ -56,9 +56,7 @@ const ModalAddAnswer = (props: IProps) => {
             </Modal.Header>
             <Modal.Body className="py-0">
                 <AddAnswer
-                    answerRow={props.newAnswerRow}
                     closeModal={props.onHide}
-                    inLine={true}
                     showCloseButton={false}
                     source={1} /*gmail*/
                     setError={(msg) => setCreateAnswerError(msg)}

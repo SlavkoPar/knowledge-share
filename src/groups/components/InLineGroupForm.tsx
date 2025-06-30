@@ -10,19 +10,19 @@ import { ActionTypes, FormMode, IGroupFormProps } from "../types";
 
 import { useGroupDispatch } from "groups/GroupProvider";
 
-const InLineGroupForm = ({ inLine, mode, group, submitForm, children }: IGroupFormProps) => {
+const InLineGroupForm = ({ inLine, formMode: mode, group, submitForm, children }: IGroupFormProps) => {
 
   // const viewing = mode === FormMode.viewing;
   // const editing = mode === FormMode.editing;
   // const adding = mode === FormMode.adding;
-  
+
   //const { _id, level } = initialValues;
 
   const dispatch = useGroupDispatch();
   //const{ authUser, isAuthenticated, variant, bg } = useGlobalState();
 
   const cancelForm = () => {
-    dispatch({ type: ActionTypes.CANCEL_GROUP_FORM })
+    dispatch({ type: ActionTypes.CANCEL_GROUP_FORM, payload: {} })
   }
 
   const formik = useFormik({
@@ -55,39 +55,39 @@ const InLineGroupForm = ({ inLine, mode, group, submitForm, children }: IGroupFo
 
   return (
 
-      <div className="d-flex justify-content-start align-items-center primary">  {/* title={_id!.toString()} */}
-        <Form onSubmit={formik.handleSubmit} ref={formRef}>
-          <Form.Group controlId="title">
-            {/* <Form.Label>Title</Form.Label> */}
-            <Form.Control
-              as="input"
-              name="title"
-              ref={titleRef}
-              onChange={formik.handleChange}
-              //onBlur={formik.handleBlur}
-              //onBlur={(e: React.FocusEvent<HTMLTextAreaElement>): void => {
-              // if (isEdit && formik.initialValues.title !== formik.values.title)
-              // formik.submitForm();
-              //}}
-              value={formik.values.title}
-              style={{ width: '100%' }}
-              placeholder="New Group"
-              size="sm"
-            />
-            <Form.Text className="text-danger">
-              {formik.touched.title && formik.errors.title ? (
-                <div className="text-danger">{formik.errors.title}</div>
-              ) : null}
-            </Form.Text>
-          </Form.Group>
-        </Form>
+    <div className="d-flex justify-content-start align-items-center primary">  {/* title={_id!.toString()} */}
+      <Form onSubmit={formik.handleSubmit} ref={formRef}>
+        <Form.Group controlId="title">
+          {/* <Form.Label>Title</Form.Label> */}
+          <Form.Control
+            as="input"
+            name="title"
+            ref={titleRef}
+            onChange={formik.handleChange}
+            //onBlur={formik.handleBlur}
+            //onBlur={(e: React.FocusEvent<HTMLTextAreaElement>): void => {
+            // if (isEdit && formik.initialValues.title !== formik.values.title)
+            // formik.submitForm();
+            //}}
+            value={formik.values.title}
+            style={{ width: '100%' }}
+            placeholder="New Group"
+            size="sm"
+          />
+          <Form.Text className="text-danger">
+            {formik.touched.title && formik.errors.title ? (
+              <div className="text-danger">{formik.errors.title}</div>
+            ) : null}
+          </Form.Text>
+        </Form.Group>
+      </Form>
 
-        <FormButtons
-          cancelForm={cancelForm}
-          handleSubmit={formik.handleSubmit}
-          title={children}
-        />
-      </div>
+      <FormButtons
+        cancelForm={cancelForm}
+        handleSubmit={formik.handleSubmit}
+        title={children}
+      />
+    </div>
   );
 };
 

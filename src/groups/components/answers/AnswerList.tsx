@@ -1,87 +1,89 @@
 import React, { forwardRef, useCallback, useEffect, useRef, useState } from "react";
-import { IGroup, IParentInfo, IAnswer, IAnswerKey, IAnswerRow } from "groups/types";
+import { GroupKey, IGroup, IGroupRow, ILoadGroupAnswers, IParentInfo, IAnswer, IAnswerKey, IAnswerRow } from "groups/types";
 import { useGroupContext } from "groups/GroupProvider";
 import useInfiniteScroll from "react-infinite-scroll-hook";
 import { List, ListItem, Loading } from "common/components/InfiniteList";
 import AnswerRow from "groups/components/answers/AnswerRow";
 
-const AnswerList = ({ title, groupKey, level }: IParentInfo) => {
+//const AnswerList = ({ title, groupRow, level }: IParentInfo) => {
+const AnswerList = ({ level, groupRow }: { level: number, groupRow: IGroupRow }) => {
+    const { state, loadGroupAnswers } = useGroupContext();
+    const { groupKeyExpanded, answerLoading, error, activeAnswer } = state;
+    const { partitionKey, id, answerId } = groupKeyExpanded
+      ? groupKeyExpanded
+      : { partitionKey: null, id: null, answerId: null };
 
-  const { state, loadGroupAnswers } = useGroupContext();
-  const { groups, groupKeyExpanded, answerLoading, error } = state;
+    const { answerRows } = groupRow;
 
-  const group: IGroup = groups.find(c => c.id === groupKey.id)!;
-  const { partitionKey, id, answerRows, numOfAnswers, hasMoreAnswers } = group;
+    let hasMoreAnswers = false;
 
-  const { answerId } = groupKeyExpanded!;
+    async function loadMore() {
+      try {
+        // const parentInfo: IParentInfo = {
+        //   groupRow,
+        //   startCursor: answerRows.length,
+        //   includeAnswerId: answerId ?? null
+        // }
 
-  console.assert(partitionKey === group.partitionKey);
-
-  console.log('^^^^^^^^^^^^^ AnswerList', answerRows)
-
-  async function loadMore() {
-    try {
-      const parentInfo: IParentInfo = {
-        groupKey,
-        startCursor: answerRows.length,
-        includeAnswerId: answerId ?? null
-      }
-      console.log('^^^^^^^^^^^^^ loadMore')
-      console.log('^^^^^^^^^^^^^', { parentInfo })
-      console.log('^^^^^^^^^^^^^ loadMore')
-      await loadGroupAnswers(parentInfo);
-    }
-    catch (error) {
-    }
-    finally {
-    }
-  }
-
-  useEffect(() => {
-    if (numOfAnswers > 0 && answerRows.length === 0) { // TODO
-      loadMore();
-    }
-  }, [numOfAnswers])
-
-  const [infiniteRef, { rootRef }] = useInfiniteScroll({
-    loading: answerLoading,
-    hasNextPage: hasMoreAnswers!,
-    onLoadMore: loadMore,
-    disabled: Boolean(error),
-    rootMargin: '0px 0px 100px 0px',
-  });
-
-
-  // if (answerLoading)
-  //   return <div> ... loading</div>
-
-  return (
-    <div
-      ref={rootRef}
-      className="ms-2" //  border border-1 border-info
-      // className="max-h-[500px] max-w-[500px] overflow-auto bg-slate-100"
-      style={{ maxHeight: '300px', overflowY: 'auto' }}
-    >
-      <List>
-        {answerRows.length === 0 &&
-          <label>No answers</label>
+        const x: ILoadGroupAnswers = {
+          groupKey: new GroupKey(groupRow).groupKey!,
+          startCursor: answerRows.length,
+          includeAnswerId: answerId ?? null
         }
-        {answerRows.map((answerRow: IAnswerRow) => {
-          return <AnswerRow
-            key={answerRow.id}
-            answerRow={answerRow}
-            groupInAdding={group!.isExpanded}  // .inAdding}
-          />
-        })}
-        {hasMoreAnswers && (
-          <ListItem ref={infiniteRef}>
-            <Loading />
-          </ListItem>
-        )}
-      </List>
-      {error && <p>Error: {error.message}</p>}
-    </div>
-  );
-};
+        console.log('^^^^^^^^^^^^^ loadMore')
+        console.log('^^^^^^^^^^^^^', { x })
+        console.log('^^^^^^^^^^^^^ loadMore')
+        await loadGroupAnswers(x);
+      }
+      catch (error) {
+      }
+      finally {
+      }
+    }
+
+    // useEffect(() => {
+    //   //if (numOfAnswers > 0 && answerRows.length === 0) { // TODO
+    //   if (answerRows.length === 0) { // TODO
+    //     loadMore();
+    //   }
+    // }, [numOfAnswers, answerRows])
+
+
+    const [infiniteRef, { rootRef }] = useInfiniteScroll({
+      loading: answerLoading,
+      hasNextPage: hasMoreAnswers!,
+      onLoadMore: loadMore,
+      disabled: Boolean(error),
+      rootMargin: '0px 0px 100px 0px',
+    });
+
+    console.log("QQQQQQQQQQQQQQQQQQQQQQQQQQQQQAnswerList", id, answerRows)
+    // if (answerLoading)
+    //   return <div> ... loading</div>
+
+    return (
+      <div
+        ref={rootRef}
+        className="ms-2" //  border border-1 border-info
+        // className="max-h-[500px] max-w-[500px] overflow-auto bg-slate-100"
+        style={{ maxHeight: '300px', overflowY: 'auto' }}
+      >
+        <List>
+          {answerRows.length === 0 &&
+            <label>No answers</label>
+          }
+          {answerRows.map((answerRow: IAnswerRow) => {
+            return <AnswerRow key={answerRow.id} answerRow={answerRow} />
+          })}
+          {hasMoreAnswers && (
+            <ListItem ref={infiniteRef}>
+              <Loading />
+            </ListItem>
+          )}
+        </List>
+        {error && <p>Error: {error.message}</p>}
+      </div>
+    );
+  };
 
 export default AnswerList;

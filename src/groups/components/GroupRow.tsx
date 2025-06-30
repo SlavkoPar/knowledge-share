@@ -1,13 +1,12 @@
-
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faRemove, faCaretRight, faCaretDown, faPlus, faFolder } from '@fortawesome/free-solid-svg-icons'
-import QPlus from 'assets/QPlus.png';
+import APlus from 'assets/APlus.png';
 
 import { ListGroup, Button, Badge } from "react-bootstrap";
 
 import { useGlobalState } from 'global/GlobalProvider'
-import { ActionTypes, IGroupInfo, IGroupKey, IGroupKeyExpanded, Mode } from "groups/types";
+import { ActionTypes, IGroupInfo, IGroupKey, IGroupKeyExpanded, IGroupRow, FormMode, IExpandInfo } from "groups/types";
 import { useGroupContext, useGroupDispatch } from 'groups/GroupProvider'
 import { useHover } from 'hooks/useHover';
 import { IGroup } from 'groups/types'
@@ -16,70 +15,118 @@ import GroupList from "groups/components/GroupList";
 import EditGroup from "groups/components/EditGroup";
 import ViewGroup from "groups/components/ViewGroup";
 import AnswerList from './answers/AnswerList';
+import AddGroup from './AddGroup';
 
-const GroupRow = ({ group, answerId }: { group: IGroup, answerId: string | null }) => {
-    const { partitionKey, id, title, level, hasSubGroups, numOfAnswers, answerRows,
-                isExpanded, isSelected } = group;
-    const [groupKey] = useState<IGroupKey>({ partitionKey, id }); // otherwise reloads
-    const [groupKeyExpanded] = useState<IGroupKeyExpanded>({ partitionKey, id, answerId }); // otherwise reloads
+const GroupRow = ({ groupRow, answerId }: { groupRow: IGroupRow, answerId: string | null }) => {
+
+    const { partitionKey, id, title, level, hasSubGroups, groupRows: subGroups,
+        numOfAnswers, answerRows, isExpanded, rootId } = groupRow;
+
+    const groupKey: IGroupKey = { partitionKey, id }
+
+    // const [groupKey] = useState<IGroupKey>({ partitionKey, id }); // otherwise reloads
+    const [catKeyExpanded] = useState<IGroupKeyExpanded>({ partitionKey, id, answerId }); // otherwise reloads
 
     const { canEdit, isDarkMode, variant, bg, authUser } = useGlobalState();
 
-    const { state, viewGroup, editGroup, deleteGroup, expandGroup, collapseGroup } = useGroupContext();
-    //const { mode, groupInViewingOrEditing } = state;
-    const { mode } = state;
+    const { state, addSubGroup, viewGroup, editGroup, deleteGroup, expandGroup, collapseGroup, addAnswer } = useGroupContext();
+    let { formMode, groupKeyExpanded, activeGroup } = state;
+    const isSelected = activeGroup !== null && (activeGroup.id === id);
+    const showForm = isSelected;
 
-    //const bold = groupInViewingOrEditing && groupInViewingOrEditing.id === id;
 
-    const dispatch = useGroupDispatch();
-
-    const alreadyAdding = mode === Mode.AddingGroup;
+    const alreadyAdding = formMode === FormMode.AddingGroup;
     // TODO proveri ovo
-    const showAnswers = (isExpanded && numOfAnswers > 0) // || answers.find(q => q.inAdding) // && !answers.find(q => q.inAdding); // We don't have answers loaded
-    
-    const del = () => {
-        group.modified = {
+    const showAnswers = isExpanded && numOfAnswers > 0 // || answers.find(q => q.inAdding) // && !answers.find(q => q.inAdding); // We don't have answers loaded
+    console.log("----------------GroupRow", id, numOfAnswers, answerRows, isExpanded)
+
+    const deleteGroupRow = () => {
+        groupRow.modified = {
             time: new Date(),
             nickName: authUser.nickName
         }
-        deleteGroup(group);
+        deleteGroup(groupRow);
     };
 
-    const expand = async () => {
+    const handleExpandClick = async () => {
         if (isExpanded)
-            await collapseGroup(groupKey);
-        else
-            await expandGroup(groupKey, answerId ?? 'null');
+            await collapseGroup(groupRow);
+        else {
+            const expandInfo: IExpandInfo = {
+                rootId: rootId!,
+                groupKey,
+                formMode: canEdit ? FormMode.EditingGroup : FormMode.ViewingGroup
+            }
+            await expandGroup(expandInfo);
+        }
     }
+
 
     const edit = async () => {
         // Load data from server and reinitialize group
-        await editGroup(groupKey, answerId ?? 'null');
+        await editGroup(groupRow, answerId ?? 'null');
     }
 
-    const onSelectGroup = async () => {
+    // const onSelectGroup = useCallback(() =>
+    //     async (): Promise<any> => {
+    //         if (canEdit)
+    //             await editGroup(groupRow, answerId ?? 'null');
+    //         else
+    //             await viewGroup(groupRow, answerId ?? 'null');
+    //     }, [])
+
+    const onSelectGroup = async (): Promise<any> => {
         if (canEdit)
-            await editGroup(groupKey, answerId ?? 'null');
+            await editGroup(groupRow, answerId ?? 'null');
         else
-            await viewGroup(groupKey, answerId ?? 'null');
+            await viewGroup(groupRow, answerId ?? 'null');
     }
 
     useEffect(() => {
-        if (!isExpanded && isSelected) {
-            onSelectGroup()
+        if (numOfAnswers > 0 && !isExpanded) { //!isExpanded && !isSelected) {
+            if (groupKeyExpanded && groupKeyExpanded.id === id) { // catKeyExpanded.id) {
+                console.log('%%%%%%%%%%%%%%%%%%%%%%%% Zovem iz GroupRow', groupKeyExpanded.id, id)
+                if (formMode !== FormMode.AddingGroup) {
+                    formMode = FormMode.None
+                }
+                const expandInfo: IExpandInfo = {
+                    rootId: rootId!,
+                    groupKey,
+                    includeAnswerId: answerId??undefined,
+                    formMode  // differs from handleExpandClick
+                }
+                expandGroup(expandInfo);
+            }
         }
-    }, [isExpanded, isSelected])
+    }, [id, isExpanded, isSelected, expandGroup, groupKeyExpanded]) // 
+
+    useEffect(() => {
+        (async () => {
+            if (isSelected) {
+                switch (formMode) {
+                    case FormMode.ViewingGroup:
+                        await viewGroup(groupRow, answerId ?? 'null');
+                        break;
+                    case FormMode.EditingAnswer:
+                        canEdit
+                            ? await editGroup(groupRow, answerId ?? 'null')
+                            : await viewGroup(groupRow, answerId ?? 'null');
+                        break;
+                }
+            }
+        })()
+    }, [isSelected]);
 
     const [hoverRef, hoverProps] = useHover();
 
     {/* <ListGroup horizontal> */ }
     const Row1 =
-        <div ref={hoverRef} className="d-flex justify-content-start align-items-center w-100 text-info group-row border">
+        <div ref={hoverRef} className="d-flex justify-content-start align-items-center w-100 text-info group-row ">
             <Button
                 variant='link'
                 size="sm"
-                className="py-0 px-1 text-info bg-light"
-                onClick={expand}
+                className="py-0 px-1  bg-light"
+                onClick={(e) => { handleExpandClick(); e.stopPropagation() }}
                 title="Expand"
                 disabled={alreadyAdding || (!hasSubGroups && numOfAnswers === 0)}
             >
@@ -88,17 +135,17 @@ const GroupRow = ({ group, answerId }: { group: IGroup, answerId: string | null 
             <Button
                 variant='link'
                 size="sm"
-                className="py-0 px-1 text-info bg-light"
-                onClick={expand}
+                className="py-0 px-1  bg-light"
+                // onClick={expand}
                 title="Expand"
-                disabled={alreadyAdding || (!hasSubGroups && numOfAnswers === 0)}
+                disabled={true} //{alreadyAdding || (!hasSubGroups && numOfAnswers === 0)}
             >
                 <FontAwesomeIcon icon={faFolder} size='sm' />
             </Button>
             <Button
                 variant='link'
                 size="sm"
-                className={`py-0 mx-0 text-decoration-none text-info bg-light ${isSelected ? 'fw-bold' : ''}`}
+                className={`py-0 mx-0 text-decoration-none bg-light  ${isSelected ? 'fw-bold' : ''}`}
                 title={id}
                 onClick={onSelectGroup}
                 disabled={alreadyAdding}
@@ -107,7 +154,7 @@ const GroupRow = ({ group, answerId }: { group: IGroup, answerId: string | null 
             </Button>
 
             <Badge pill bg="secondary" className={numOfAnswers === 0 ? 'd-none' : 'd-inline'}>
-                {numOfAnswers}Q
+                {numOfAnswers}A
                 {/* <FontAwesomeIcon icon={faThumbsUp} size='sm' /> */}
                 {/* <img width="22" height="18" src={Q} alt="Answer" /> */}
             </Badge>
@@ -126,15 +173,9 @@ const GroupRow = ({ group, answerId }: { group: IGroup, answerId: string | null 
                         className="py-0 mx-1 text-primary float-end"
                         title="Add SubGroup"
                         onClick={() => {
-                            dispatch({
-                                type: ActionTypes.ADD_SUB_GROUP,
-                                payload: {
-                                    groupKey,
-                                    level: group.level + 1
-                                }
-                            })
-                            // if (!isExpanded)
-                            //     dispatch({ type: ActionTypes.SET_EXPANDED, payload: { groupKey } });
+                            groupRow.level += 1;
+                            addSubGroup(groupRow)
+                            
                         }}
                     >
                         <FontAwesomeIcon icon={faPlus} size='lg' />
@@ -151,29 +192,22 @@ const GroupRow = ({ group, answerId }: { group: IGroup, answerId: string | null 
                         className="py-0 mx-1 text-secondary float-end"
                         title="Add Answer"
                         onClick={async () => {
-                            const groupInfo: IGroupInfo = { groupKey: {partitionKey, id: group.id}, level: group.level }
-                            if (!isExpanded) {
-                                await dispatch({ type: ActionTypes.SET_EXPANDED, payload: { groupKey } });
-                            }
-                            await dispatch({ type: ActionTypes.ADD_ANSWER, payload: { groupInfo } });
+                            const groupInfo: IGroupInfo = { groupKey: { partitionKey, id: groupRow.id }, level: groupRow.level }
+                            addAnswer(groupKey, rootId!);
                         }}
                     >
-                        <img width="22" height="18" src={QPlus} alt="Add Answer" />
+                        <img width="22" height="18" src={APlus} alt="Add Answer" />
                     </Button>
 
                     <Button variant='link' size="sm" className="py-0 mx-1 float-end"
-                        onClick={del}
+                        disabled={hasSubGroups || numOfAnswers > 0}
+                        onClick={deleteGroupRow}
                     >
                         <FontAwesomeIcon icon={faRemove} size='lg' />
                     </Button>
                 </div>
             }
         </div>
-
-    // console.log({ title, isExpanded })
-
-    // if (group.level !== 1)
-    //     return (<div>GroupRow {group.id}</div>)
 
     return (
         <>
@@ -182,32 +216,52 @@ const GroupRow = ({ group, answerId }: { group: IGroup, answerId: string | null 
                 className="py-0 px-1 w-100"
                 as="li"
             >
-                {/*inAdding && */mode === Mode.AddingGroup ? (
-                    // <AddGroup groupKey={groupKey} inLine={true} />
-                    <div />
-                )
-                    : (mode === Mode.EditingGroup || mode === Mode.ViewingGroup) ? (
-                        <>
-                            {/* <div class="d-lg-none">hide on lg and wider screens</div> */}
-                            <div id='divInLine' className="ms-0 d-md-none w-100">
-                                {mode === Mode.EditingGroup && <EditGroup inLine={false} />}
-                                {mode === Mode.ViewingGroup && <ViewGroup inLine={false} />}
-                            </div>
-                            <div className="d-none d-md-block">
-                                {Row1}
-                            </div>
-                        </>
-                    )
-                        : (
-                            Row1
-                        )
+                {/*inAdding &&*/showForm && formMode === FormMode.AddingGroup &&
+                    <>
+                        <div className="ms-0 d-md-none w-100">
+                            <AddGroup />
+                        </div>
+                        <div className="d-none d-md-block">
+                            {Row1}
+                        </div>
+                    </>
                 }
+                {showForm && formMode === FormMode.EditingGroup &&
+                    <>
+                        {/* <div class="d-lg-none">hide on lg and wider screens</div> */}
+                        <div id='divInLine' className="ms-0 d-md-none w-100">
+                            {formMode === FormMode.EditingGroup && <EditGroup inLine={false} />}
+                        </div>
+                        <div className="d-none d-md-block">
+                            {Row1}
+                        </div>
+                    </>
+                }
+
+                {showForm && formMode === FormMode.ViewingGroup &&
+                    <>
+                        {/* <div class="d-lg-none">hide on lg and wider screens</div> */}
+                        <div id='divInLine' className="ms-0 d-md-none w-100">
+                            <ViewGroup inLine={false} />
+                        </div>
+                        <div className="d-none d-md-block">
+                            {Row1}
+                        </div>
+                    </>
+                }
+
+                {!showForm &&
+                    <div className="d-none d-md-block">
+                        {Row1}
+                    </div>
+                }
+
             </ListGroup.Item>
 
-            {state.error && state.whichRowId == id && <div className="text-danger">{state.error.message}</div>}
+            {state.error && state.whichRowId === id && <div className="text-danger">{state.error.message}</div>}
 
             {/* !inAdding && */}
-            {(isExpanded) && // Row2
+            {(isExpanded) && // Row2   //  || inAdding
                 <ListGroup.Item
                     className="py-0 px-0 border-0 border-warning border-bottom-0" // border border-3 "
                     variant={"primary"}
@@ -215,11 +269,11 @@ const GroupRow = ({ group, answerId }: { group: IGroup, answerId: string | null 
                 >
                     {isExpanded &&
                         <>
-                            { hasSubGroups &&
-                                <GroupList level={level + 1} groupKey={groupKey} title={title} />
+                            {hasSubGroups &&
+                                <GroupList level={level + 1} groupRow={groupRow} title={title} isExpanded={isExpanded} />
                             }
-                            { showAnswers &&
-                                <AnswerList level={level + 1} groupKey={groupKey} title={title} />
+                            {showAnswers &&
+                                <AnswerList level={level + 1} groupRow={groupRow} />
                             }
                         </>
                     }

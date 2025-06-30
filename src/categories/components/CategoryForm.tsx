@@ -98,7 +98,7 @@ const CategoryForm = ({ inLine, formMode, category, questionId, submitForm, chil
     <div className="form-wrapper p-2 category-form" >
       <CloseButton onClick={closeForm} className="float-end" />
       <Row className='text-center text-muted'>
-        <Form.Label>Category</Form.Label>
+        <Form.Label>Category {viewing ? 'Viewing' : editing ? 'Editing' : 'Adding'}</Form.Label>
       </Row>
       <Form onSubmit={formik.handleSubmit}>
 

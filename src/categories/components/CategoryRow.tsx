@@ -19,7 +19,7 @@ import AddCategory from './AddCategory';
 
 const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, questionId: string | null }) => {
 
-    const { partitionKey, id, title, level, hasSubCategories, subCategoryRows: subCategories,
+    const { partitionKey, id, title, level, hasSubCategories, categoryRows: subCategories,
         numOfQuestions, questionRows, isExpanded, rootId } = categoryRow;
 
     const categoryKey: ICategoryKey = { partitionKey, id }
@@ -30,7 +30,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
     const { canEdit, isDarkMode, variant, bg, authUser } = useGlobalState();
 
     const { state, addSubCategory, viewCategory, editCategory, deleteCategory, expandCategory, collapseCategory, addQuestion } = useCategoryContext();
-    const { formMode, categoryKeyExpanded, activeCategory } = state;
+    let { formMode, categoryKeyExpanded, activeCategory } = state;
     const isSelected = activeCategory !== null && (activeCategory.id === id);
     const showForm = isSelected;
 
@@ -49,13 +49,13 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
     };
 
     const handleExpandClick = async () => {
-        if (isExpanded)
+        if (isExpanded) {
             await collapseCategory(categoryRow);
+        }
         else {
             const expandInfo: IExpandInfo = {
                 rootId: rootId!,
                 categoryKey,
-                includeQuestionId: null,
                 formMode: canEdit ? FormMode.EditingCategory : FormMode.ViewingCategory
             }
             await expandCategory(expandInfo);
@@ -87,11 +87,14 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
         if (numOfQuestions > 0 && !isExpanded) { //!isExpanded && !isSelected) {
             if (categoryKeyExpanded && categoryKeyExpanded.id === id) { // catKeyExpanded.id) {
                 console.log('%%%%%%%%%%%%%%%%%%%%%%%% Zovem iz CategoryRow', categoryKeyExpanded.id, id)
+                if (formMode !== FormMode.AddingCategory) {
+                    formMode = FormMode.None
+                }
                 const expandInfo: IExpandInfo = {
                     rootId: rootId!,
                     categoryKey,
-                    includeQuestionId: questionId,
-                    formMode: canEdit ? FormMode.EditingCategory : FormMode.ViewingCategory
+                    includeQuestionId: questionId??undefined,
+                    formMode // differs from handleExpandClick
                 }
                 expandCategory(expandInfo);
             }

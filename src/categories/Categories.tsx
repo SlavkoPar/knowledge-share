@@ -28,7 +28,7 @@ interface IProps {
 
 const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
     console.log("=== Categories", categoryId_questionId)
-    const { state, openCategoryNode, loadFirstLevelCategoryRows } = useCategoryContext();
+    const { state, openCategoryNode, loadTopCategoryRows: loadFirstLevelCategoryRows } = useCategoryContext();
     const {
         topCategoryRows, topCategoryRowsLoading, topCategoryRowsLoaded,
         categoryKeyExpanded, categoryId_questionId_done,
@@ -65,7 +65,7 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
     const categoryRow: ICategoryRow = {
         ...initialCategory,
         level: 1,
-        subCategoryRows: topCategoryRows
+        categoryRows: topCategoryRows
     }
 
 
@@ -171,13 +171,13 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
                     <Col xs={0} md={7}>
                         {/* <div class="d-none d-lg-block">hide on screens smaller than lg</div> */}
                         <div id='div-details' className="d-none d-md-block">
-                            { activeCategory && formMode === FormMode.ViewingCategory && <ViewCategory inLine={false} /> }
-                            { activeCategory && formMode === FormMode.EditingCategory &&  <EditCategory inLine={false} /> }
-                            { activeCategory && formMode === FormMode.AddingCategory &&  <AddCategory /> }
+                            {activeCategory && formMode === FormMode.ViewingCategory && <ViewCategory inLine={false} />}
+                            {activeCategory && formMode === FormMode.EditingCategory && <EditCategory inLine={false} />}
+                            {activeCategory && formMode === FormMode.AddingCategory && <AddCategory />}
 
-                            { activeQuestion && formMode === FormMode.ViewingQuestion && <ViewQuestion inLine={false} /> }
-                            { activeQuestion && formMode === FormMode.EditingQuestion && <EditQuestion inLine={false} /> }
-                            { activeQuestion && formMode === FormMode.AddingQuestion && <AddQuestion /> }
+                            {activeQuestion && formMode === FormMode.ViewingQuestion && <ViewQuestion inLine={false} />}
+                            {activeQuestion && formMode === FormMode.EditingQuestion && <EditQuestion inLine={false} />}
+                            {activeQuestion && formMode === FormMode.AddingQuestion && <AddQuestion />}
                         </div>
                     </Col>
                 </Row>

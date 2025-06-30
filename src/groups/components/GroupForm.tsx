@@ -1,10 +1,10 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, JSX, ChangeEvent, useCallback, useState } from "react";
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import { Form, CloseButton, Row, Stack, Dropdown } from "react-bootstrap";
 import { CreatedModifiedForm } from "common/CreateModifiedForm"
 import { FormButtons } from "common/FormButtons"
-import { FormMode, ActionTypes, IGroupFormProps, IGroup, IVariation, IGroupKey, IGroupKeyExpanded } from "groups/types";
+import { FormMode, ActionTypes, IGroupFormProps, IGroup, IVariation, IGroupKey, IGroupKeyExpanded, GroupRow } from "groups/types";
 
 import { useGroupDispatch } from "groups/GroupProvider";
 import AnswerList from "groups/components/answers/AnswerList";
@@ -12,15 +12,16 @@ import { useGlobalContext } from "global/GlobalProvider";
 import VariationList from "groups/VariationList";
 import { Select } from "common/components/Select";
 import { kindOptions } from "common/kindOptions ";
+import { debounce } from "common/utilities";
 
-const GroupForm = ({ inLine, mode, group, answerId, submitForm, children }: IGroupFormProps) => {
+const GroupForm = ({ inLine, formMode, group, answerId, submitForm, children }: IGroupFormProps) => {
 
   const { globalState } = useGlobalContext();
   const { isDarkMode, variant, bg } = globalState;
 
-  const viewing = mode === FormMode.viewing;
-  const editing = mode === FormMode.editing;
-  const adding = mode === FormMode.adding;
+  const viewing = formMode === FormMode.ViewingGroup;
+  const editing = formMode === FormMode.EditingGroup;
+  const adding = formMode === FormMode.AddingGroup;
 
   const { partitionKey, id, title, variations, answerRows, kind } = group;
   const groupKey: IGroupKey = { partitionKey, id };
@@ -41,11 +42,11 @@ const GroupForm = ({ inLine, mode, group, answerId, submitForm, children }: IGro
   const dispatch = useGroupDispatch();
 
   const closeForm = () => {
-    dispatch({ type: ActionTypes.CLOSE_GROUP_FORM })
+    dispatch({ type: ActionTypes.CLOSE_GROUP_FORM, payload: {} })
   }
 
   const cancelForm = () => {
-    dispatch({ type: ActionTypes.CANCEL_GROUP_FORM })
+    dispatch({ type: ActionTypes.CANCEL_GROUP_FORM, payload: {} })
   }
 
   const formik = useFormik({
@@ -69,6 +70,18 @@ const GroupForm = ({ inLine, mode, group, answerId, submitForm, children }: IGro
     }
   });
 
+  
+  const debouncedTitleHandler = useCallback(
+    debounce((id: string, value: string) => {
+      dispatch({ type: ActionTypes.GROUP_TITLE_CHANGED, payload: { id, value } })
+    }, 500), []);
+
+  const handleChangeTitle = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    formik.handleChange(event);
+    const value = event.target.value;
+    debouncedTitleHandler(id, value)
+  };
+
   // eslint-disable-next-line no-self-compare
   // const nameRef = useRef<HTMLAreaElement | null>(null);
   const nameRef = useRef<HTMLTextAreaElement>(null);
@@ -80,12 +93,14 @@ const GroupForm = ({ inLine, mode, group, answerId, submitForm, children }: IGro
 
   const isDisabled = false;
 
+  
+
   return (
     // data-bs-theme={`${isDarkMode ? 'dark' : 'light'}`}
     <div className="form-wrapper p-2 group-form" >
       <CloseButton onClick={closeForm} className="float-end" />
       <Row className='text-center text-muted'>
-        <Form.Label>Group</Form.Label>
+        <Form.Label>Group {viewing ? 'Viewing' : editing ? 'Editing' : 'Adding'}</Form.Label>
       </Row>
       <Form onSubmit={formik.handleSubmit}>
 
@@ -125,10 +140,16 @@ const GroupForm = ({ inLine, mode, group, answerId, submitForm, children }: IGro
           <Form.Label>Title</Form.Label>
           <Form.Control
             as="textarea"
-            placeholder="New Group"
             name="title"
+            placeholder={formik.values.title === "new Group" ? "new Group" : "group text"}
             ref={nameRef}
-            onChange={formik.handleChange}
+            onChange={handleChangeTitle}
+            // onChange={(e: any, value: any): {e: ChangeEvent<HTMLTextAreaElement>, value: string} => {
+            //         formik.handleChange(e, value);
+            //         console.log(value)
+            //       }}
+
+
             //onBlur={formik.handleBlur}
             // onBlur={(e: React.FocusEvent<HTMLTextAreaElement>): void => {
             //   if (isEdit && formik.initialValues.title !== formik.values.title)
@@ -136,7 +157,7 @@ const GroupForm = ({ inLine, mode, group, answerId, submitForm, children }: IGro
             // }}
             rows={3}
             className="text-primary w-100"
-            value={formik.values.title}
+            value={formik.values.title === "new Group" ? "" : formik.values.title}
             disabled={viewing}
           />
           <Form.Text className="text-danger">
@@ -197,7 +218,7 @@ const GroupForm = ({ inLine, mode, group, answerId, submitForm, children }: IGro
         <Form.Group>
           <Form.Label className="m-1 mb-0">Answers ({`${formik.values.numOfAnswers}`}) </Form.Label>
           {showAnswers &&
-            <AnswerList level={1} groupKey={groupKey} title={title} />
+            <AnswerList level={1} groupRow={group} />  // IGroup extends IGroupRow
           }
         </Form.Group>
 
@@ -209,7 +230,7 @@ const GroupForm = ({ inLine, mode, group, answerId, submitForm, children }: IGro
           />
         }
 
-        {(editing || adding) &&
+        {((formik.dirty && editing) || adding) &&
           <FormButtons
             cancelForm={cancelForm}
             handleSubmit={formik.handleSubmit}

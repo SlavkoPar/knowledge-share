@@ -5,10 +5,9 @@ import AssignedAnswerChatBot from "global/ChatBotPage/AssignedAnswerChatBot";
 import { AutoSuggestAnswers } from 'categories/AutoSuggestAnswers'
 import { IWhoWhen } from "global/types";
 import { IAnswer, IAnswerKey } from "groups/types";
-import { initialAnswer } from "groups/GroupsReducer";
+import { initialAnswer } from "groups/GroupReducer";
 import AddAnswer from "categories/components/questions/AddAnswer"
 import { IAssignedAnswer } from "categories/types";
-//import { initialAnswer } from "groups/GroupsReducer";
 
 interface IProps {
     questionId: number,

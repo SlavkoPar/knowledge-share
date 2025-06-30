@@ -104,7 +104,7 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
       {/* data-bs-theme={`${isDarkMode ? 'dark' : 'light'}`} */}
       {showCloseButton && <CloseButton onClick={closeForm} className="float-end" />}
       <Row className='text-center'>
-        <Form.Label>Question</Form.Label>
+        <Form.Label>Question  {viewing ? 'Viewing' : editing ? 'Editing' : 'Adding'}</Form.Label>
       </Row>
       <Form onSubmit={formik.handleSubmit}>
 

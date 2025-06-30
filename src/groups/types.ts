@@ -1,36 +1,76 @@
-import { ActionMap, IWhoWhen, IRecord, IRecordDto, Dto2WhoWhen, WhoWhen2Dto, IWhoWhenDto, IShortGroup } from 'global/types';
-
-export const Mode = {
-	UNDEFINED: undefined,
-	NULL: null,
-	AddingGroup: 'AddingGroup',
-	ViewingGroup: 'ViewingGroup',
-	EditingGroup: 'EditingGroup',
-	DeletingGroup: 'DeletingGroup',
-
-	// tags
-	AddingVariation: 'AddingVariation',
-	EditingVariation: 'EditingVariation',
-	ViewingVariation: 'ViewingVariation',
-
-	//////////////////////////////////////
-	// answers
-	AddingAnswer: 'AddingAnswer',
-	ViewingAnswer: 'ViewingAnswer',
-	EditingAnswer: 'EditingAnswer',
-	DeletingAnswer: 'DeletingAnswer',
-}
+import { ActionMap, IWhoWhen, IRecord, IRecordDto, Dto2WhoWhen, WhoWhen2Dto, IWhoWhenDto } from 'global/types';
 
 export enum FormMode {
-	viewing,
-	adding,
-	editing
-}
+	None = 'None',
 
+	AddingGroup = 'AddingGroup',
+	ViewingGroup = 'ViewingGroup',
+	EditingGroup = 'EditingGroup',
+	DeletingGroup = 'DeletingGroup',
+
+	AddingAnswer = 'AddingAnswer',
+	ViewingAnswer = 'ViewingAnswer',
+	EditingAnswer = 'EditingAnswer',
+	DeletingAnswer = 'DeletingAnswer',
+
+	AddingVariation = 'AddingVariation',
+	EditingVariation = 'EditingVariation',
+	ViewingVariation = 'ViewingVariation'
+}
 
 
 /////////////////////////////////////
+// Answer Related Filters
 
+export interface IRelatedFilter {
+	answerKey: IAnswerKey | null;
+	filter: string;
+	numOfUsages: number;
+	created: IWhoWhen | null;
+	lastUsed: IWhoWhen | null;
+}
+
+export interface IRelatedFilterDto {
+	AnswerKey: IAnswerKey | null;
+	Filter: string;
+	NumOfUsages: number;
+	Created: IWhoWhenDto | null;
+	LastUsed: IWhoWhenDto | null;
+}
+
+export interface IRelatedFilterDtoEx {
+	relatedFilterDto: IRelatedFilterDto | null;
+	msg: string;
+}
+
+
+export class RelatedFilterDto {
+	constructor(relatedFilter: IRelatedFilter) {
+		const { answerKey, filter, numOfUsages, created, lastUsed } = relatedFilter;
+		this.relatedFilterDto = {
+			AnswerKey: answerKey,
+			Filter: filter,
+			Created: created ? new WhoWhen2Dto(created).whoWhenDto! : null,
+			LastUsed: lastUsed ? new WhoWhen2Dto(lastUsed).whoWhenDto! : null,
+			NumOfUsages: numOfUsages
+		}
+	}
+	relatedFilterDto: IRelatedFilterDto;
+}
+
+export class RelatedFilter {
+	constructor(dto: IRelatedFilterDto) {
+		const { AnswerKey, Filter, Created, LastUsed, NumOfUsages } = dto;
+		this.relatedFilter = {
+			answerKey: AnswerKey,
+			filter: Filter,
+			created: Created ? new Dto2WhoWhen(Created).whoWhen! : null,
+			lastUsed: LastUsed ? new Dto2WhoWhen(LastUsed).whoWhen! : null,
+			numOfUsages: NumOfUsages
+		}
+	}
+	relatedFilter: IRelatedFilter;
+}
 
 export interface IAnswerRow extends IRecord {
 	partitionKey: string;
@@ -39,13 +79,13 @@ export interface IAnswerRow extends IRecord {
 	parentGroup: string | null;
 	groupTitle?: string;
 	isSelected?: boolean;
+	rootId: string
 }
 
 export interface IAnswer extends IAnswerRow {
 	source: number;
 	status: number;
-	link: string;
-	//GroupTitle?: string;
+	groupTitle?: string;
 }
 
 export interface IGroupKey {
@@ -57,6 +97,10 @@ export interface IGroupKeyExpanded { //extends IGroupKey {
 	partitionKey: string | null;
 	id: string | null;
 	answerId: string | null;
+}
+
+export interface ILocStorage {
+	lastGroupKeyExpanded: IGroupKeyExpanded | null
 }
 
 
@@ -76,42 +120,126 @@ export interface IVariation {
 	name: string;
 }
 
-export interface IGroup extends IRecord {
+export interface IGroupRowDto extends IRecordDto {
+	PartitionKey: string;
+	Id: string;
+	Kind: number;
+	RootId?: string;
+	ParentGroup: string | null;
+	Title: string;
+	Link: string | null;
+	Header: string;
+	Variations: string[];
+	Level: number;
+	HasSubGroups: boolean;
+	GroupRowDtos: IGroupRowDto[];
+	NumOfAnswers: number;
+	AnswerRowDtos?: IAnswerRowDto[];
+	HasMoreAnswers?: boolean;
+	IsExpanded?: boolean;
+}
+
+export interface IGroupDto extends IGroupRowDto {
+	Doc1: string;
+}
+
+export interface IGroupRow extends IRecord {
 	partitionKey: string; // | null is a valid value so you can store data with null value in indexeddb 
 	id: string;
 	kind: number;
+	rootId: string | null;
 	parentGroup: string | null; // | null is a valid value so you can store data with null value in indexeddb 
 	title: string;
 	link: string | null;
 	header: string;
 	level: number;
+	hasSubGroups: boolean;
+	groupRows: IGroupRow[];
 	variations: string[];
-	answerRows: IAnswerRow[];
 	numOfAnswers: number;
+	answerRows: IAnswerRow[];
 	hasMoreAnswers?: boolean;
 	isExpanded?: boolean;
-	isSelected?: boolean; // when group has no subGroups
-	hasSubGroups: boolean;
 	titlesUpTheTree?: string;
 }
+export interface IGroup extends IGroupRow {
+	doc1: string, // some document optionally, used in Group, but not not in GroupRow
+}
 
-// export interface IGroup extends IGroupRow {
-// }
+// IGroup rather than IGroupRow
+export const IsGroup = (obj: any): boolean => typeof obj === 'object' && obj !== null &&
+	obj.hasOwnProperty('doc1') && typeof obj.doc1 === 'string';
 
+
+export class GroupRowDto {
+	constructor(groupRow: IGroupRow) {
+		const { partitionKey, id, parentGroup, modified } = groupRow;
+		this.groupRowDto = {
+			PartitionKey: partitionKey,
+			Id: id,
+			ParentGroup: parentGroup,
+			Title: '',
+			Link: '',
+			Header: '',
+			Variations: [],
+			// TODO proveri []
+			HasSubGroups: false,
+			GroupRowDtos: [],
+			NumOfAnswers: 0,
+			AnswerRowDtos: [],
+			Level: 0,
+			Kind: 0,
+			Modified: modified ? new WhoWhen2Dto(modified).whoWhenDto! : undefined
+		}
+	}
+	groupRowDto: IGroupRowDto;
+}
+
+export class GroupRow {
+	constructor(groupRowDto: IGroupRowDto) {
+		const { PartitionKey, Id, RootId, ParentGroup, Kind, Title, Link, Header, Variations, Level,
+			HasSubGroups, GroupRowDtos,
+			NumOfAnswers, AnswerRowDtos,
+			IsExpanded } = groupRowDto;
+		this.groupRow = {
+			partitionKey: PartitionKey,
+			id: Id,
+			parentGroup: ParentGroup,
+			title: Title,
+			link: Link,
+			header: Header,
+			titlesUpTheTree: '', // traverse up the tree, until root
+			variations: Variations,
+			hasSubGroups: HasSubGroups!,
+			groupRows: GroupRowDtos.map(dto => new GroupRow({ ...dto, RootId }).groupRow),
+			numOfAnswers: NumOfAnswers,
+			answerRows: AnswerRowDtos
+				? AnswerRowDtos.map(dto => new AnswerRow({ ...dto, RootId: RootId ?? undefined }).answerRow)
+				: [],
+			level: Level,
+			kind: Kind,
+			isExpanded: IsExpanded,
+			rootId: RootId ?? null
+		}
+	}
+	groupRow: IGroupRow;
+}
 
 export class AnswerRow {
 	constructor(rowDto: IAnswerRowDto) { //, parentGroup: string) {
+		const { PartitionKey, Id, ParentGroup, Title, GroupTitle, Created, Modified, Included, RootId } = rowDto;
 		this.answerRow = {
-			partitionKey: rowDto.PartitionKey,
-			id: rowDto.Id,
-			parentGroup: rowDto.ParentGroup,
-			title: rowDto.Title,
-			groupTitle: rowDto.GroupTitle,
-			created: new Dto2WhoWhen(rowDto.Created!).whoWhen,
-			modified: rowDto.Modified
-				? new Dto2WhoWhen(rowDto.Modified).whoWhen
+			partitionKey: PartitionKey,
+			id: Id,
+			rootId: RootId!,
+			parentGroup: ParentGroup,
+			title: Title,
+			groupTitle: GroupTitle,
+			created: new Dto2WhoWhen(Created!).whoWhen,
+			modified: Modified
+				? new Dto2WhoWhen(Modified).whoWhen
 				: undefined,
-			isSelected: rowDto.Included !== undefined
+			isSelected: Included
 		}
 	}
 	answerRow: IAnswerRow
@@ -135,47 +263,61 @@ export class AnswerRowDto {
 
 
 export class GroupKey {
-	constructor(shortGroup: IShortGroup | IGroup | undefined) {
-		this.groupKey = shortGroup
+	constructor(cat: IGroupRow | IGroup | IGroupKeyExtended) {
+		this.groupKey = cat
 			? {
-				partitionKey: shortGroup.partitionKey,
-				id: shortGroup.id
+				partitionKey: cat.partitionKey,
+				id: cat.id
 			}
 			: null
 	}
 	groupKey: IGroupKey | null;
 }
 
+
+
 export class Group {
 	constructor(dto: IGroupDto) {
+		const { PartitionKey, Id, Kind, RootId, ParentGroup, Title, Link, Header, Level, Variations, NumOfAnswers,
+			HasSubGroups, GroupRowDtos, Created, Modified, AnswerRowDtos, IsExpanded, Doc1 } = dto;
+
+		const subGroupRows = GroupRowDtos
+			? GroupRowDtos.map((rowDto: IGroupRowDto) => new GroupRow(rowDto).groupRow)
+			: [];
+
+		const answerRows = AnswerRowDtos
+			? AnswerRowDtos.map((dto: IAnswerDto) => new Answer(dto).answer)
+			: [];
+
 		this.group = {
-			partitionKey: dto.PartitionKey,
-			id: dto.Id,
-			kind: dto.Kind,
-			parentGroup: dto.ParentGroup!,
-			title: dto.Title,
-			link: dto.Link,
-			header: dto.Header,
-			level: dto.Level!,
-			variations: dto.Variations ?? [],
-			numOfAnswers: dto.NumOfAnswers!,
-			hasSubGroups: dto.HasSubGroups!,
-			created: new Dto2WhoWhen(dto.Created!).whoWhen,
-			modified: dto.Modified
-				? new Dto2WhoWhen(dto.Modified).whoWhen
+			partitionKey: PartitionKey,
+			id: Id,
+			kind: Kind,
+			rootId: RootId!,
+			parentGroup: ParentGroup!,
+			title: Title,
+			link: Link,
+			header: Header,
+			level: Level!,
+			variations: Variations ?? [],
+			hasSubGroups: HasSubGroups!,
+			groupRows: subGroupRows,
+			created: new Dto2WhoWhen(Created!).whoWhen,
+			modified: Modified
+				? new Dto2WhoWhen(Modified).whoWhen
 				: undefined,
-			answerRows: dto.Answers
-				? dto.Answers.map(answerRowDto => new AnswerRow(answerRowDto/*, dto.Id*/).answerRow)
-				: []
+			numOfAnswers: NumOfAnswers!,
+			answerRows,
+			isExpanded: IsExpanded === true,
+			doc1: Doc1
 		}
 	}
 	group: IGroup;
 }
 
-
 export class GroupDto {
 	constructor(group: IGroup) {
-		const { partitionKey, id, kind, parentGroup, title, link, header, level, variations, created, modified } = group;
+		const { partitionKey, id, kind, parentGroup, title, link, header, level, variations, created, modified, doc1 } = group;
 		this.groupDto = {
 			PartitionKey: partitionKey,
 			Id: id,
@@ -183,11 +325,16 @@ export class GroupDto {
 			ParentGroup: parentGroup,
 			Title: title,
 			Link: link,
-			Header: header,
+			Header: header ?? '',
 			Level: level,
+			HasSubGroups: true,
+			GroupRowDtos: [],
+			NumOfAnswers: 0,
+			AnswerRowDtos: [],
 			Variations: variations,
 			Created: new WhoWhen2Dto(created).whoWhenDto!,
-			Modified: new WhoWhen2Dto(modified).whoWhenDto!
+			Modified: new WhoWhen2Dto(modified).whoWhenDto!,
+			Doc1: doc1
 		}
 	}
 	groupDto: IGroupDto;
@@ -197,11 +344,11 @@ export class Answer {
 	constructor(dto: IAnswerDto) { //, parentGroup: string) {
 		// TODO possible to call base class construtor
 		this.answer = {
+			rootId: '', // TODO will be set later
 			parentGroup: dto.ParentGroup,
 			partitionKey: dto.PartitionKey,
 			id: dto.Id,
 			title: dto.Title,
-			link: dto.Link,
 			groupTitle: dto.GroupTitle,
 			source: dto.Source ?? 0,
 			status: dto.Status ?? 0,
@@ -216,7 +363,7 @@ export class Answer {
 }
 
 export class AnswerKey {
-	constructor(answer: IAnswer | undefined) {
+	constructor(answer: IAnswerRow | IAnswer | undefined) {
 		this.answerKey = answer
 			? {
 				partitionKey: answer.partitionKey,
@@ -230,17 +377,16 @@ export class AnswerKey {
 
 export class AnswerDto {
 	constructor(answer: IAnswer) {
+		const { partitionKey, id, parentGroup, title, source, status, created, modified } = answer;
 		this.answerDto = {
-			PartitionKey: answer.partitionKey,
-			Id: answer.id,
-			ParentGroup: answer.parentGroup ?? 'null',  // TODO proveri
-			Title: answer.title,
-			Link: answer.link,
-			GroupTitle: "",
-			Source: answer.source,
-			Status: answer.status,
-			Created: new WhoWhen2Dto(answer.created).whoWhenDto!,
-			Modified: new WhoWhen2Dto(answer.modified).whoWhenDto!
+			PartitionKey: partitionKey,
+			Id: id,
+			ParentGroup: parentGroup ?? 'null',  // TODO proveri
+			Title: title,
+			Source: source,
+			Status: status,
+			Created: new WhoWhen2Dto(created).whoWhenDto!,
+			Modified: new WhoWhen2Dto(modified).whoWhenDto!
 		}
 	}
 	answerDto: IAnswerDto;
@@ -249,16 +395,17 @@ export class AnswerDto {
 export interface IAnswerRowDto extends IRecordDto {
 	PartitionKey: string;
 	Id: string;
+	RootId?: string,
 	ParentGroup: string;
 	Title: string;
-	GroupTitle: string;
+	GroupTitle?: string;
 	Included?: boolean;
 	Source?: number;
 	Status?: number;
 }
 
 export interface IAnswerDto extends IAnswerRowDto {
-	Link: string;
+	oldParentGroup?: string;
 }
 
 export interface IAnswerDtoEx {
@@ -277,24 +424,15 @@ export interface IAnswersMore {
 	hasMoreAnswers: boolean;
 }
 
-export interface IGroupDto extends IRecordDto {
-	PartitionKey: string;
-	Id: string;
-	Kind: number;
-	ParentGroup: string | null;
-	Title: string;
-	Link: string | null;
-	Header: string;
-	Variations: string[];
-	Level?: number;
-	NumOfAnswers?: number;
-	HasSubGroups?: boolean;
-	Answers?: IAnswerRowDto[];
-	HasMoreAnswers?: boolean;
-}
+
 
 export interface IGroupDtoEx {
 	groupDto: IGroupDto | null;
+	msg: string;
+}
+
+export interface IGroupRowDtoEx {
+	groupRowDto: IGroupRowDto | null;
 	msg: string;
 }
 
@@ -310,59 +448,80 @@ export interface IGroupInfo {
 	level: number
 }
 
+export interface IExpandInfo {
+	rootId: string;
+	groupKey: IGroupKey;
+	formMode: FormMode;
+	includeAnswerId?: string;
+	newGroupRow?: IGroupRow;
+	newAnswer?: IAnswerRow;
+}
+
 export interface IParentInfo {
 	//execute?: (method: string, endpoint: string) => Promise<any>,
 	// partitionKey: string | null,
 	// parentGroup: string | null,
-	groupKey: IGroupKey,
+	//groupKey: IGroupKey,
+	groupRow: IGroupRow,
 	startCursor?: number,
 	includeAnswerId?: string | null
 	level?: number,
 	title?: string, // to easier follow getting the list of sub-groups
 	inAdding?: boolean,
+	isExpanded?: boolean
+	//subGroups?: IGroup[]
 }
 
 export interface IGroupsState {
-	mode: string | null;
-	groups: IGroup[];
-	groupNodesUpTheTree: IGroupKeyExtended[];
+	formMode: FormMode;
+	topGroupRows: IGroupRow[];
+	topGroupRowsLoading: boolean;
+	topGroupRowsLoaded: boolean;
 	groupKeyExpanded: IGroupKeyExpanded | null;
 	groupId_answerId_done?: string;
-	groupNodeReLoading: boolean;
-	groupNodeLoaded: boolean;
-	//reloadGroupInfo: IParentGroups;
+	groupNodeOpening: boolean;
+	groupNodeOpened: boolean;
+	activeGroup: IGroup | null;
+	activeAnswer: IAnswer | null;
 	loading: boolean;
 	answerLoading: boolean,
 	error?: Error;
 	whichRowId?: string; // group.id or answer.id
-	groupInViewingOrEditing: IGroup | null;
-	answerInViewingOrEditing: IAnswer | null;
 }
 
 export interface ILocStorage {
 	lastGroupKeyExpanded: IGroupKeyExpanded | null;
 }
 
+export interface ILoadGroupAnswers {
+	groupKey: IGroupKey,
+	startCursor: number,
+	includeAnswerId: string | null
+}
 
 export interface IGroupsContext {
 	state: IGroupsState,
-	reloadGroupNode: (groupKeyExpanded: IGroupKeyExpanded, fromChatBotDlg?: string) => Promise<any>;
-	getSubGroups: (groupKey: IGroupKey) => Promise<any>,
+	openGroupNode: (groupKeyExpanded: IGroupKeyExpanded, fromChatBotDlg?: string) => Promise<any>;
+	loadTopGroupRows: () => Promise<any>,
+	addSubGroup: (groupRow: IGroupRow) => Promise<any>;
+	cancelAddGroup: () => Promise<any>;
 	createGroup: (group: IGroup) => void,
-	viewGroup: (groupKey: IGroupKey, includeAnswerId: string) => void,
-	editGroup: (groupKey: IGroupKey, includeAnswerId: string) => void,
+	viewGroup: (groupRow: IGroupRow, includeAnswerId: string) => void,
+	editGroup: (groupRow: IGroupRow, includeAnswerId: string) => void,
 	updateGroup: (group: IGroup, closeForm: boolean) => void,
-	deleteGroup: (group: IGroup) => void,
+	deleteGroup: (groupRow: IGroupRow) => void,
 	deleteGroupVariation: (groupKey: IGroupKey, name: string) => void,
-	expandGroup: (groupKey: IGroupKey, includeAnswerId: string) => void,
-	collapseGroup: (groupKey: IGroupKey) => void,
+	expandGroup: (expandInfo: IExpandInfo) => Promise<any>,
+	collapseGroup: (groupRow: IGroupRow) => void,
 	//////////////
 	// answers
-	loadGroupAnswers: (parentInfo: IParentInfo) => void,
+	loadGroupAnswers: (catParams: ILoadGroupAnswers) => void;  //(parentInfo: IParentInfo) => void,
+	addAnswer: (groupKey: IGroupKey, rootId: string) => Promise<any>;
+	cancelAddAnswer: () => Promise<any>;
 	createAnswer: (answer: IAnswer, fromModal: boolean) => Promise<any>;
-	viewAnswer: (answerKey: IAnswerKey) => void;
-	editAnswer: (answerKey: IAnswerKey) => void;
-	updateAnswer: (answer: IAnswer, groupChanged: boolean) => Promise<any>;
+	viewAnswer: (answerRow: IAnswerRow) => void;
+	editAnswer: (answerRow: IAnswerRow) => void;
+	updateAnswer: (rootId: string, oldParentGroup: string, answer: IAnswer, groupChanged: boolean) => Promise<any>;
 	deleteAnswer: (answerRow: IAnswerRow) => void;
 }
 
@@ -370,14 +529,13 @@ export interface IGroupFormProps {
 	inLine: boolean;
 	group: IGroup;
 	answerId: string | null;
-	mode: FormMode;
+	formMode: FormMode;
 	submitForm: (group: IGroup) => void,
 	children: string
 }
 
 export interface IAnswerFormProps {
 	answer: IAnswer;
-	mode: FormMode;
 	closeModal?: () => void;
 	submitForm: (answer: IAnswer) => void,
 	showCloseButton: boolean;
@@ -385,36 +543,48 @@ export interface IAnswerFormProps {
 	children: string
 }
 
+
+/////////////////////////////////////////////////
+// 
+
+
 export enum ActionTypes {
+	SET_TOP_GROUP_ROWS = 'SET_TOP_GROUP_ROWS',
+	SET_GROUP_NODE_OPENED = "SET_GROUP_NODE_OPENED",
 	SET_LOADING = 'SET_LOADING',
+	SET_TOP_GROUP_ROWS_LOADING = 'SET_TOP_GROUP_ROWS_LOADING',
 	SET_GROUP_LOADING = 'SET_GROUP_LOADING',
 	SET_GROUP_ANSWERS_LOADING = 'SET_GROUP_ANSWERS_LOADING',
 	SET_SUB_GROUPS = 'SET_SUB_GROUPS',
-	CLEAN_SUB_TREE = 'CLEAN_SUB_TREE',
-	CLEAN_TREE = 'CLEAN_TREE',
 	SET_ERROR = 'SET_ERROR',
 	ADD_SUB_GROUP = 'ADD_SUB_GROUP',
+	GROUP_TITLE_CHANGED = 'GROUP_TITLE_CHANGED',
+	CANCEL_ADD_SUB_GROUP = 'CANCEL_ADD_SUB_GROUP',
 	SET_GROUP = 'SET_GROUP',
-	SET_ADDED_GROUP = 'SET_ADDED_GROUP',
-	VIEW_GROUP = 'VIEW_GROUP',
-	EDIT_GROUP = 'EDIT_GROUP',
-	DELETE = 'DELETE',
+	SET_GROUP_ROW = 'SET_GROUP_ROW',
+	SET_GROUP_ROW_EXPANDED = 'SET_GROUP_ROW_EXPANDED',
+	SET_GROUP_ROW_COLLAPSED = 'SET_GROUP_ROW_COLLAPSED',
+	SET_GROUP_ADDED = 'SET_GROUP_ADDED',
+	SET_GROUP_TO_VIEW = 'SET_GROUP_TO_VIEW',
+	SET_GROUP_TO_EDIT = 'SET_GROUP_TO_EDIT',
+	SET_GROUP_UPDATED = 'SET_GROUP_UPDATED',
+	DELETE_GROUP = 'DELETE_GROUP',
 	RESET_GROUP_ANSWER_DONE = 'RESET_GROUP_ANSWER_DONE',
 
 	CLOSE_GROUP_FORM = 'CLOSE_GROUP_FORM',
 	CANCEL_GROUP_FORM = 'CANCEL_GROUP_FORM',
-	SET_EXPANDED = 'SET_EXPANDED',
-	SET_COLLAPSED = 'SET_COLLAPSED',
 
-	GROUP_NODE_RE_LOADING = "GROUP_NODE_RE_LOADING",
-	SET_GROUP_NODES_UP_THE_TREE = "SET_GROUP_NODES_UP_THE_TREE",
+	GROUP_NODE_OPENING = "GROUP_NODE_OPENING",
+	FORCE_OPEN_GROUP_NODE = "FORCE_OPEN_GROUP_NODE",
 
 	// answers
 	LOAD_GROUP_ANSWERS = 'LOAD_GROUP_ANSWERS',
 	ADD_ANSWER = 'ADD_ANSWER',
-	SET_VIEWING_EDITING_ANSWER = 'SET_VIEWING_EDITING_ANSWER',
-	VIEW_ANSWER = 'VIEW_ANSWER',
-	EDIT_ANSWER = 'EDIT_ANSWER',
+	ANSWER_TITLE_CHANGED = 'ANSWER_TITLE_CHANGED',
+
+	CANCEL_ADD_ANSWER = 'CANCEL_ADD_ANSWER',
+	SET_ANSWER_TO_VIEW = 'SET_ANSWER_TO_VIEW',
+	SET_ANSWER_TO_EDIT = 'SET_ANSWER_TO_EDIT',
 
 	SET_ANSWER_SELECTED = 'SET_ANSWER_SELECTED',
 	SET_ANSWER = 'SET_ANSWER',
@@ -426,121 +596,231 @@ export enum ActionTypes {
 	CANCEL_ANSWER_FORM = 'CANCEL_ANSWER_FORM'
 }
 
+/*
+//export const actionsThatModifyFirstLevelGroupRow = [
+export const actionsThatModifyTreeView = [
+	// ActionTypes.SET_FIRST_LEVEL_GROUP_ROWS keep commented
+	// ActionTypes.SET_GROUP_NODE_OPENED,
+	ActionTypes.DELETE_GROUP,
+	ActionTypes.SET_GROUP_ROW_EXPANDED,
+	ActionTypes.SET_GROUP_ROW_COLLAPSED,
+	ActionTypes.SET_GROUP_UPDATED,
+	//ActionTypes.SET_GROUP_TO_VIEW,
+	//ActionTypes.SET_GROUP_TO_EDIT,
+	// ActionTypes.SET_ANSWER_TO_VIEW,
+	// ActionTypes.SET_ANSWER_TO_EDIT,
+	ActionTypes.CLOSE_GROUP_FORM,
+	ActionTypes.CANCEL_GROUP_FORM,
+	ActionTypes.ADD_ANSWER
+]
+	*/
+
+export const actionTypesStoringToLocalStorage = [
+	// ActionTypes.SET_GROUP_NODE_OPENED
+	ActionTypes.SET_GROUP_ROW_EXPANDED,
+	ActionTypes.SET_GROUP_ROW_COLLAPSED,
+	ActionTypes.SET_GROUP_TO_VIEW,
+	ActionTypes.SET_GROUP_TO_EDIT,
+	ActionTypes.SET_ANSWER_TO_VIEW,
+	ActionTypes.SET_ANSWER_TO_EDIT,
+	ActionTypes.FORCE_OPEN_GROUP_NODE
+];
+
+
 export type GroupsPayload = {
-	[ActionTypes.SET_LOADING]: undefined;
+
+
+	[ActionTypes.SET_TOP_GROUP_ROWS_LOADING]: {
+		groupRow?: IGroupRow;
+	}
+
+	[ActionTypes.SET_LOADING]: {
+		groupRow?: IGroupRow;
+	}
 
 	[ActionTypes.SET_GROUP_LOADING]: {
+		groupRow?: IGroupRow;
 		id: string;
 		loading: boolean;
 	}
 
 	[ActionTypes.SET_GROUP_ANSWERS_LOADING]: {
+		groupRow?: IGroupRow;
 		answerLoading: boolean;
 	}
 
-	[ActionTypes.GROUP_NODE_RE_LOADING]: undefined;
+	[ActionTypes.GROUP_NODE_OPENING]: {
+		groupRow?: IGroupRow;
+		//groupKeyExpanded: IGroupKeyExpanded
+	};
 
-	[ActionTypes.SET_GROUP_NODES_UP_THE_TREE]: {
-		groupNodesUpTheTree: IGroupKeyExtended[]; /// we could have used Id only
-		groupKeyExpanded: IGroupKeyExpanded;
+	[ActionTypes.SET_GROUP_NODE_OPENED]: {
+		// groupNodesUpTheTree: IGroupKeyExtended[]; /// we could have used Id only
+		groupRow: IGroupRow;
+		// groupKeyExpanded: IGroupKeyExpanded;
+		answerId: string | null,
 		fromChatBotDlg: boolean;
 	};
 
+
+	[ActionTypes.SET_TOP_GROUP_ROWS]: {
+		groupRow?: IGroupRow;
+		topGroupRows: IGroupRow[];
+	};
+
 	[ActionTypes.SET_SUB_GROUPS]: {
-		subGroups: IGroup[];
+		groupRow?: IGroupRow;
+		id: string | null;
+		groupRows: IGroupRow[];
 	};
 
 	[ActionTypes.ADD_SUB_GROUP]: {
+		groupRow?: IGroupRow;
+		rootId: string,
 		groupKey: IGroupKey,
 		level: number
 	}
 
-	[ActionTypes.VIEW_GROUP]: {
-		group: IGroup;
-	};
+	[ActionTypes.GROUP_TITLE_CHANGED]: {
+		groupRow?: IGroupRow;
+		id: string;
+		value: string;
+	}
 
-	[ActionTypes.EDIT_GROUP]: {
-		group: IGroup;
-	};
+	[ActionTypes.ANSWER_TITLE_CHANGED]: {
+		groupRow?: IGroupRow;
+		groupId: string;
+		id: string;
+		value: string;
+	}
+
+
+
+	[ActionTypes.CANCEL_ADD_SUB_GROUP]: {
+		groupRow?: IGroupRow;
+	}
+
 
 	[ActionTypes.SET_GROUP]: {
-		group: IGroup;
+		groupRow: IGroup;
 	};
 
-	[ActionTypes.SET_ADDED_GROUP]: {
-		group: IGroup;
+
+	[ActionTypes.SET_GROUP_TO_VIEW]: {
+		groupRow: IGroupRow; // IGroup extends IGroupRow
 	};
 
-	[ActionTypes.DELETE]: {
+	[ActionTypes.SET_GROUP_TO_EDIT]: {
+		groupRow: IGroupRow; // IGroup extends IGroupRow
+	};
+
+	[ActionTypes.SET_GROUP_UPDATED]: {
+		groupRow: IGroupRow; // IGroup extends IGroupRow
+	};
+
+
+	[ActionTypes.SET_GROUP_ROW_EXPANDED]: {
+		groupRow: IGroupRow;
+		formMode: FormMode;
+	};
+
+	[ActionTypes.SET_GROUP_ROW_COLLAPSED]: {
+		groupRow: IGroupRow;
+	};
+
+	[ActionTypes.SET_GROUP_ADDED]: {
+		groupRow?: IGroupRow;
+		//group: IGroup;
+	};
+
+	[ActionTypes.DELETE_GROUP]: {
+		groupRow?: IGroupRow;
 		id: string;
 	};
 
-	[ActionTypes.CLEAN_SUB_TREE]: {
-		groupKey: IGroupKey | null;
+
+	[ActionTypes.CLOSE_GROUP_FORM]: {
+		groupRow?: IGroupRow;
 	};
 
-	[ActionTypes.CLEAN_TREE]: undefined;
+	[ActionTypes.CANCEL_GROUP_FORM]: {
+		groupRow?: IGroupRow;
+	};
 
-	[ActionTypes.CLOSE_GROUP_FORM]: undefined;
-
-	[ActionTypes.CANCEL_GROUP_FORM]: undefined;
-
-	[ActionTypes.SET_EXPANDED]: {
-		groupKey: IGroupKey;
-	}
-
-	[ActionTypes.SET_COLLAPSED]: {
-		groupKey: IGroupKey;
-	}
 
 	[ActionTypes.SET_ERROR]: {
+		groupRow?: IGroupRow;
 		error: Error;
 		whichRowId?: string;
 	};
 
-	[ActionTypes.RESET_GROUP_ANSWER_DONE]: undefined;
+	[ActionTypes.RESET_GROUP_ANSWER_DONE]: {
+		groupRow?: IGroupRow
+	};
+
+	[ActionTypes.FORCE_OPEN_GROUP_NODE]: {
+		groupRow?: IGroupRow,
+		groupKeyExpanded: IGroupKeyExpanded
+	};
+
 
 
 	/////////////
 	// answers
 	[ActionTypes.LOAD_GROUP_ANSWERS]: {
-		id: string | null,
-		answerRows: IAnswerRow[],
-		hasMoreAnswers: boolean
+		groupRow: IGroupRow
 	};
 
 	[ActionTypes.ADD_ANSWER]: {
+		groupRow?: IGroupRow;
 		groupInfo: IGroupInfo;
 	}
 
-	[ActionTypes.SET_VIEWING_EDITING_ANSWER]: undefined;
+	[ActionTypes.CANCEL_ADD_ANSWER]: {
+		groupRow?: IGroupRow;
+	}
 
-	[ActionTypes.VIEW_ANSWER]: {
+
+	[ActionTypes.SET_ANSWER_TO_VIEW]: {
+		groupRow?: IGroupRow;
 		answer: IAnswer;
 	};
 
-	[ActionTypes.EDIT_ANSWER]: {
+	[ActionTypes.SET_ANSWER_TO_EDIT]: {
+		groupRow?: IGroupRow;
 		answer: IAnswer;
 	};
 
 	[ActionTypes.SET_ANSWER_SELECTED]: {
+		groupRow?: IGroupRow;
 		answerKey: IAnswerKey;
 	};
 
 	[ActionTypes.SET_ANSWER]: {
+		groupRow?: IGroupRow;
+		formMode: FormMode;
+		answer: IAnswer;
+	};
+
+	[ActionTypes.SET_ANSWER_AFTER_ASSIGN_ANSWER]: {
+		groupRow?: IGroupRow;
 		answer: IAnswer
 	};
 
 
+
 	[ActionTypes.DELETE_ANSWER]: {
+		groupRow?: IGroupRow;
 		answer: IAnswer
 	};
 
 	[ActionTypes.CLOSE_ANSWER_FORM]: {
+		groupRow?: IGroupRow;
 		answer: IAnswer;
 	};
 
 	[ActionTypes.CANCEL_ANSWER_FORM]: {
+		groupRow?: IGroupRow;
 		answer: IAnswer;
 	};
 };

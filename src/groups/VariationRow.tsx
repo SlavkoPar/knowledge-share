@@ -5,7 +5,7 @@ import { faEdit, faRemove, faThumbsUp, faPlus, faReply } from '@fortawesome/free
 import { ListGroup, Button, Badge } from "react-bootstrap";
 
 import { useGlobalState } from 'global/GlobalProvider'
-import { ActionTypes, IGroupInfo, IGroupKey, Mode } from "groups/types";
+import { ActionTypes, IGroupInfo, IGroupKey, FormMode } from "groups/types";
 import { useGroupContext, useGroupDispatch } from 'groups/GroupProvider'
 import { useHover } from 'hooks/useHover';
 import { IVariation } from 'groups/types'
@@ -99,7 +99,7 @@ const VariationRow = ({ groupKey, tag, groupInAdding }: { groupKey: IGroupKey, t
                     title="Add Tag"
                     onClick={() => {
                         console.log('click q')
-                        const groupInfo: IGroupInfo = { groupKey: {partitionKey, id}, level }
+                        const groupInfo: IGroupInfo = { groupKey: { partitionKey, id }, level }
                         //dispatch({ type: ActionTypes.ADD_ANSWER, payload: { groupInfo } })
                     }}
                 >
@@ -112,13 +112,13 @@ const VariationRow = ({ groupKey, tag, groupInAdding }: { groupKey: IGroupKey, t
     return (
 
         <div className="py-1 px-1">
-            {inAdding && groupInAdding && state.mode === Mode.AddingVariation
+            {inAdding && groupInAdding && state.formMode === FormMode.AddingVariation
                 ? (
                     // <AddTag tag={tag} inLine={true} showCloseButton={true} />
                     <span>add tag</span>
                 )
-                : ((inEditing && state.mode === Mode.EditingVariation) ||
-                    (inViewing && state.mode === Mode.ViewingVariation)) ? (
+                : ((inEditing && state.formMode === FormMode.EditingVariation) ||
+                    (inViewing && state.formMode === FormMode.ViewingVariation)) ? (
                     <>
                         {/* <div class="d-lg-none">hide on lg and wider screens</div> */}
                         <div id='div-tag' className="ms-0 d-md-none w-100">

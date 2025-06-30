@@ -1,6 +1,6 @@
 // Define the Global State
 import { ICategory, ICategoryKey, ICategoryRow, ICategoryRowDto, IQuestion, IQuestionEx, IQuestionKey, IQuestionRow } from 'categories/types';
-import { IGroup, IGroupKey, IAnswerRow, IAnswer, IAnswerKey } from 'groups/types';
+import { IGroup, IGroupKey, IAnswerRow, IAnswer, IAnswerKey, IGroupRow } from 'groups/types';
 //import { IOption } from 'common/types';
 import { IDBPDatabase } from 'idb';
 
@@ -111,18 +111,19 @@ export enum ROLES {
 }
 
 
-export interface IShortGroup {
-	partitionKey: string,
-	id: string;
-	parentGroup: string | null;
-	header: string;
-	title: string;
-	titlesUpTheTree: string; // traverse up the tree, until root
-	hasSubGroups: boolean;
-	level: number;
-	kind: number;
-	isExpanded: boolean;
-}
+// export interface IShortGroup {
+// 	partitionKey: string,
+// 	id: string;
+// 	parentGroup: string | null;
+// 	header: string;
+// 	title: string;
+// 	titlesUpTheTree: string; // traverse up the tree, until root
+// 	hasSubGroups: boolean;
+// 	level: number;
+// 	kind: number;
+// 	isExpanded: boolean;
+// }
+
 
 export interface IGlobalState {
 	isAuthenticated: boolean | null;
@@ -138,7 +139,7 @@ export interface IGlobalState {
 	error?: Error;
 	categoryRows: Map<string, ICategoryRow>;
 	categoryRowsLoaded?: number;
-	shortGroups: Map<string, IShortGroup>;
+	groupRows: Map<string, IGroupRow>;
 	shortGroupsLoaded?: number;
 	nodesReLoaded: boolean; // categoryNodeLoaded || groupNodeLoaded  ( to prevent showing of ChatBotDlg)
 	lastRouteVisited: string
@@ -167,14 +168,15 @@ export interface IGlobalContext {
 	setLastRouteVisited: (lastRouteVisited: string) => void;
 	health: () => void;
 	loadAndCacheAllCategoryRows: () => Promise<boolean>;
-	getCat: (categoryId: string) => Promise<ICategoryRow|undefined>;
+	getCat: (categoryId: string) => Promise<ICategoryRow | undefined>;
 	getSubCats: (categoryId: string | null) => Promise<any>;
 	getCatsByKind: (kind: number) => Promise<ICategoryRow[]>;
 	searchQuestions: (filter: string, count: number) => Promise<IQuestionRow[]>;
 	getQuestion: (questionKey: IQuestionKey) => Promise<IQuestionEx>;
-	loadShortGroups: () => Promise<boolean>;
-	getSubShortGroups: (categoryId: string | null) => Promise<any>;
-	getGroupsByKind: (kind: number) => Promise<IShortGroup[]>;
+	loadAndCacheAllGroupRows: () => Promise<boolean>;
+	getGroupRows: (categoryId: string | null) => Promise<any>;
+	globalGetGroupRow: (groupRowId: string) => Promise<IGroupRow | undefined>;
+	getGroupRowsByKind: (kind: number) => Promise<IGroupRow[]>;
 	searchAnswers: (filter: string, count: number) => Promise<IAnswerRow[]>;
 	getAnswer: (answerKey: IAnswerKey) => Promise<IAnswer | null>;
 	addHistory: (history: IHistory) => Promise<void>;
@@ -192,7 +194,7 @@ export enum GlobalActionTypes {
 	DARK_MODE = "DARK_MODE",
 	LIGHT_MODE = "LIGHT_MODE",
 	SET_ALL_CATEGORY_ROWS = 'SET_ALL_CATEGORY_ROWS',
-	SET_ALL_SHORT_GROUPS = 'SET_ALL_SHORT_GROUPS',
+	SET_ALL_GROUP_ROWS = 'SET_ALL_GROUP_ROWS',
 	SET_NODES_RELOADED = 'SET_NODES_RELOADED',
 	SET_QUESTION_AFTER_ASSIGN_ANSWER = 'SET_QUESTION_AFTER_ASSIGN_ANSWER',
 	SET_LAST_ROUTE_VISITED = 'SET_LAST_ROUTE_VISITED'
@@ -260,8 +262,8 @@ export type GlobalPayload = {
 		categoryRows: Map<string, ICategoryRow>
 	};
 
-	[GlobalActionTypes.SET_ALL_SHORT_GROUPS]: {
-		shortGroups: Map<string, IShortGroup>
+	[GlobalActionTypes.SET_ALL_GROUP_ROWS]: {
+		groupRows: Map<string, IGroupRow>
 	};
 
 	[GlobalActionTypes.SET_NODES_RELOADED]: undefined;
@@ -285,11 +287,11 @@ export interface IShortGroupsState {
 	error?: Error;
 }
 
-export interface IShortGroupInfo {
-	groupKey: IGroupKey | null,
-	level: number,
-	setParentGroup: (group: IShortGroup) => void;
-}
+// export interface IShortGroupInfo {
+// 	groupKey: IGroupKey | null,
+// 	level: number,
+// 	setParentGroup: (group: IShortGroup) => void;
+// }
 
 
 export enum ShortGroupsActionTypes {

@@ -1,5 +1,5 @@
 import { ActionMap, IWhoWhen, IRecord, IRecordDto, Dto2WhoWhen, WhoWhen2Dto, IWhoWhenDto } from 'global/types';
-import { IAnswer, IAnswerKey } from 'groups/types';
+import { IAnswerKey } from 'groups/types';
 
 export enum FormMode {
 	None = 'None',
@@ -164,7 +164,7 @@ export interface ICategoryRow extends IRecord {
 	header: string;
 	level: number;
 	hasSubCategories: boolean;
-	subCategoryRows: ICategoryRow[];
+	categoryRows: ICategoryRow[];
 	variations: string[];
 	numOfQuestions: number;
 	questionRows: IQuestionRow[];
@@ -200,7 +200,7 @@ export class CategoryRowDto {
 			Level: 0,
 			Kind: 0,
 			Modified: modified ? new WhoWhen2Dto(modified).whoWhenDto! : undefined
-			}
+		}
 	}
 	categoryRowDto: ICategoryRowDto;
 }
@@ -208,7 +208,7 @@ export class CategoryRowDto {
 export class CategoryRow {
 	constructor(categoryRowDto: ICategoryRowDto) {
 		const { PartitionKey, Id, RootId, ParentCategory, Kind, Title, Link, Header, Variations, Level,
-			HasSubCategories, SubCategoryRowDtos: SubCategories,
+			HasSubCategories, SubCategoryRowDtos,
 			NumOfQuestions, QuestionRowDtos,
 			IsExpanded } = categoryRowDto;
 		this.categoryRow = {
@@ -221,7 +221,7 @@ export class CategoryRow {
 			titlesUpTheTree: '', // traverse up the tree, until root
 			variations: Variations,
 			hasSubCategories: HasSubCategories!,
-			subCategoryRows: SubCategories.map(dto => new CategoryRow({...dto, RootId}).categoryRow),
+			categoryRows: SubCategoryRowDtos.map(dto => new CategoryRow({ ...dto, RootId }).categoryRow),
 			numOfQuestions: NumOfQuestions,
 			questionRows: QuestionRowDtos
 				? QuestionRowDtos.map(dto => new QuestionRow({ ...dto, RootId: RootId ?? undefined }).questionRow)
@@ -293,7 +293,7 @@ export class Category {
 		const { PartitionKey, Id, Kind, RootId, ParentCategory, Title, Link, Header, Level, Variations, NumOfQuestions,
 			HasSubCategories, SubCategoryRowDtos, Created, Modified, QuestionRowDtos, IsExpanded, Doc1 } = dto;
 
-		const subCategoryRows = SubCategoryRowDtos
+		const categoryRows = SubCategoryRowDtos
 			? SubCategoryRowDtos.map((rowDto: ICategoryRowDto) => new CategoryRow(rowDto).categoryRow)
 			: [];
 
@@ -313,7 +313,7 @@ export class Category {
 			level: Level!,
 			variations: Variations ?? [],
 			hasSubCategories: HasSubCategories!,
-			subCategoryRows,
+			categoryRows,
 			created: new Dto2WhoWhen(Created!).whoWhen,
 			modified: Modified
 				? new Dto2WhoWhen(Modified).whoWhen
@@ -482,11 +482,12 @@ export interface ICategoryInfo {
 export interface IExpandInfo {
 	rootId: string;
 	categoryKey: ICategoryKey;
-	includeQuestionId: string | null;
-	formMode?: FormMode;
+	formMode: FormMode;
+	includeQuestionId?: string;
 	newCategoryRow?: ICategoryRow;
 	newQuestion?: IQuestionRow;
 }
+
 
 export interface IParentInfo {
 	//execute?: (method: string, endpoint: string) => Promise<any>,
@@ -533,7 +534,7 @@ export interface ILoadCategoryQuestions {
 export interface ICategoriesContext {
 	state: ICategoriesState,
 	openCategoryNode: (categoryKeyExpanded: ICategoryKeyExpanded, fromChatBotDlg?: string) => Promise<any>;
-	loadFirstLevelCategoryRows: () => Promise<any>,
+	loadTopCategoryRows: () => Promise<any>,
 	addSubCategory: (categoryRow: ICategoryRow) => Promise<any>;
 	cancelAddCategory: () => Promise<any>;
 	createCategory: (category: ICategory) => void,
@@ -756,7 +757,7 @@ export type CategoriesPayload = {
 	[ActionTypes.SET_SUB_CATEGORIES]: {
 		categoryRow?: ICategoryRow;
 		id: string | null;
-		subCategoryRows: ICategoryRow[];
+		categoryRows: ICategoryRow[];
 	};
 
 	[ActionTypes.ADD_SUB_CATEGORY]: {

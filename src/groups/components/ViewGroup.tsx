@@ -7,17 +7,14 @@ import GroupForm from "groups/components/GroupForm";
 
 const ViewGroup = ({ inLine }: { inLine: boolean }) => {
     const { state } = useGroupContext();
-    const { groups, groupInViewingOrEditing, groupKeyExpanded } = state;
-    const { id } = groupInViewingOrEditing!;
-    const group = groups.find(c => c.id === id);
+    const { activeGroup, groupKeyExpanded } = state;
     const { answerId } = groupKeyExpanded!;
-
     return (
         <GroupForm
             inLine={inLine}
-            group={group!}
+            group={{ ...activeGroup! }}
             answerId={answerId}
-            mode={FormMode.viewing}
+            formMode={FormMode.ViewingGroup}
             submitForm={() => { }}
         >
             View Group

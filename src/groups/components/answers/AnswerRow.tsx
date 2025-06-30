@@ -1,11 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faRemove, faThumbsUp, faPlus, faReply } from '@fortawesome/free-solid-svg-icons'
 
 import { ListGroup, Button, Badge } from "react-bootstrap";
 
 import { useGlobalState } from 'global/GlobalProvider'
-import { ActionTypes, IGroupInfo, IAnswerKey, IAnswerRow, Mode } from "groups/types";
+import { ActionTypes, FormMode, IGroupInfo, IGroupKey, IAnswerKey, IAnswerRow } from "groups/types";
 import { useGroupContext, useGroupDispatch } from 'groups/GroupProvider'
 import { useHover } from 'hooks/useHover';
 import { IAnswer } from 'groups/types'
@@ -13,32 +13,28 @@ import { IAnswer } from 'groups/types'
 import AddAnswer from "groups/components/answers/AddAnswer";
 import EditAnswer from "groups/components/answers/EditAnswer";
 import ViewAnswer from "groups/components/answers/ViewAnswer";
-import Q from 'assets/Q.png';
-import QPlus from 'assets/QPlus.png';
+import A from 'assets/A.png';
+import APlus from 'assets/APlus.png';
 
 import { IWhoWhen } from 'global/types';
-import { initialAnswer } from 'groups/GroupsReducer';
+import { initialAnswer } from 'groups/GroupReducer';
 
 
 //const AnswerRow = ({ answer, groupInAdding }: { ref: React.ForwardedRef<HTMLLIElement>, answer: IAnswer, groupInAdding: boolean | undefined }) => {
-const AnswerRow = ({ answerRow, groupInAdding }: { answerRow: IAnswerRow, groupInAdding: boolean | undefined }) => {
-    const { id, partitionKey, parentGroup, title, isSelected } = answerRow;
+const AnswerRow = ({ answerRow }: { answerRow: IAnswerRow }) => {
+    const { id, partitionKey, parentGroup, title, isSelected, rootId } = answerRow;
     const answerKey: IAnswerKey = { partitionKey, id, parentGroup: parentGroup ?? undefined };
+    const groupKey: IGroupKey = { partitionKey, id: parentGroup }
 
     const { canEdit, isDarkMode, variant, bg, authUser } = useGlobalState();
-    const { state, viewAnswer, editAnswer, deleteAnswer } = useGroupContext();
-    const dispatch = useGroupDispatch();
+    const { state, viewAnswer, addAnswer, editAnswer, deleteAnswer } = useGroupContext();
 
-    const { answerInViewingOrEditing, groupKeyExpanded } = state;
-    const { answerId } = groupKeyExpanded ?? { answerId: null };
+    const { activeAnswer, formMode, groupKeyExpanded } = state;
+    
+    const showForm = activeAnswer !== null && activeAnswer.id === id;
 
-    //const { answerKey } = answerInViewingOrEditing;
-    //const bold = answerInViewingOrEditing && answerInViewingOrEditing.id === id;
-    //const bold = groupKeyExpanded && groupKeyExpanded.id === id;
-    //const bold = included; // id === answerId;
-    console.log("------------------------ AnswerRow", { id, answerId })
-
-    const alreadyAdding = state.mode === Mode.AddingAnswer;
+    //const [alreadyAdding] = useState(formMode === FormMode.AddingAnswer);
+    const alreadyAdding = formMode === FormMode.AddingAnswer;
 
     const del = () => {
         answerRow.modified = {
@@ -50,20 +46,29 @@ const AnswerRow = ({ answerRow, groupInAdding }: { answerRow: IAnswerRow, groupI
 
     const edit = async (Id: string) => {
         // Load data from server and reinitialize answer
-        await editAnswer(answerKey);
+        await editAnswer(answerRow);
     }
 
     const onSelectAnswer = async (id: string) => {
         if (canEdit)
-            await editAnswer(answerKey);
+            await editAnswer(answerRow);
         else
-            await viewAnswer(answerKey);
+            await viewAnswer(answerRow);
     }
 
     useEffect(() => {
         (async () => {
             if (isSelected) {
-                onSelectAnswer(id)
+                switch (formMode) {
+                    case FormMode.ViewingAnswer:
+                        await viewAnswer(answerRow);
+                        break;
+                    case FormMode.EditingAnswer:
+                        canEdit
+                            ? await editAnswer(answerRow)
+                            : await viewAnswer(answerRow);
+                        break;
+                }
             }
         })()
     }, [isSelected]);
@@ -71,25 +76,25 @@ const AnswerRow = ({ answerRow, groupInAdding }: { answerRow: IAnswerRow, groupI
     const [hoverRef, hoverProps] = useHover();
 
     const Row1 =
-        <div ref={hoverRef} className="d-flex justify-content-start align-items-center w-100 text-white bg-info position-relative answer-row">
+        <div ref={hoverRef} className="d-flex justify-content-start align-items-center w-100 text-primary answer-row position-relative answer-row">
             <Button
                 variant='link'
                 size="sm"
-                className="d-flex align-items-center px-1 text-white"
+                className="d-flex align-items-center px-1 text-secondary"
             >
-                <img width="22" height="18" src={Q} alt="Answer" />
+                <img width="22" height="18" src={A} alt="Answer" />
             </Button>
             <Button
                 variant='link'
                 size="sm"
-                className={`p-0 mx-0 text-decoration-none text-white ${isSelected ? 'fw-bold' : ''}`}
+                className={`p-0 mx-0 text-decoration-none text-secondary ${showForm ? 'fw-bold' : ''}`}
                 title={`id:${id!.toString()}`}
                 onClick={() => onSelectAnswer(id!)}
                 disabled={alreadyAdding}
             >
                 {title}
             </Button>
-            
+           
 
             {/* {canEdit && !alreadyAdding && hoverProps.isHovered &&
                 <Button variant='link' size="sm" className="ms-1 py-0 px-1 text-secondary"
@@ -114,10 +119,10 @@ const AnswerRow = ({ answerRow, groupInAdding }: { answerRow: IAnswerRow, groupI
                         title="Add Answer"
                         onClick={() => {
                             const groupInfo: IGroupInfo = { groupKey: { partitionKey, id: parentGroup }, level: 0 }
-                            dispatch({ type: ActionTypes.ADD_ANSWER, payload: { groupInfo } })
+                            addAnswer(groupKey, rootId!);
                         }}
                     >
-                        <img width="22" height="18" src={QPlus} alt="Add Answer" />
+                        <img width="22" height="18" src={APlus} alt="Add Answer" />
                     </Button>
                 </div>
             }
@@ -131,31 +136,49 @@ const AnswerRow = ({ answerRow, groupInAdding }: { answerRow: IAnswerRow, groupI
             className="py-0 px-1 w-100"
             as="li"
         >
-            {/*inAdding &&*/ groupInAdding && state.mode === Mode.AddingAnswer ? (
-                <AddAnswer
-                    //answer={{ ...initialAnswer, ...answerRow}} 
-                    answerRow={answerRow}
-                    inLine={true}
-                    showCloseButton={true}
-                    source={0} />
-            )
-                : (state.mode === Mode.EditingAnswer || state.mode === Mode.ViewingAnswer) ? (
-                    <>
-                        {/* <div class="d-lg-none">hide on lg and wider screens</div> */}
-                        <div id='div-answer' className="ms-0 d-md-none w-100">
-                            {state.mode === Mode.EditingAnswer && <EditAnswer answerKey={answerKey} inLine={true} />}
-                            {state.mode === Mode.ViewingAnswer && <ViewAnswer inLine={true} />}
-                        </div>
-                        <div className="d-none d-md-block">
-                            {Row1}
-                        </div>
-                    </>
-                )
-                    : (
-                        Row1
-                    )
+            {showForm && formMode === FormMode.AddingAnswer &&
+                <>
+                    <div id='div-answer' className="ms-0 d-md-none w-100">
+                        <AddAnswer
+                            showCloseButton={true}
+                            source={0} />
+                    </div>
+                    <div className="d-none d-md-block">
+                        {Row1}
+                    </div>
+                </>
             }
-            {/* </div> */}
+
+            {showForm && formMode === FormMode.EditingAnswer &&
+                <>
+                    {/* <div class="d-lg-none">hide on lg and wider screens</div> */}
+                    <div id='div-answer' className="ms-0 d-md-none w-100">
+                        <EditAnswer inLine={true} />
+                    </div>
+                    <div className="d-none d-md-block">
+                        {Row1}
+                    </div>
+                </>
+            }
+
+            {showForm && formMode === FormMode.ViewingAnswer &&
+                <>
+                    {/* <div class="d-lg-none">hide on lg and wider screens</div> */}
+                    <div id='div-answer' className="ms-0 d-md-none w-100">
+                        <ViewAnswer inLine={true} />
+                    </div>
+                    <div className="d-none d-md-block">
+                        {Row1}
+                    </div>
+                </>
+            }
+
+            {!showForm &&
+                <div className="d-none d-md-block">
+                    {Row1}
+                </div>
+            }
+
         </ListGroup.Item>
     );
 };
