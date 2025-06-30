@@ -1,17 +1,18 @@
 {
   "files": {
-    "main.css": "/knowledge-share/static/css/main.8330996a.css",
-    "main.js": "/knowledge-share/static/js/main.bdac9b09.js",
+    "main.css": "/knowledge-share/static/css/main.35390eb6.css",
+    "main.js": "/knowledge-share/static/js/main.ee04b2cc.js",
     "static/media/QuestionForm.png": "/knowledge-share/static/media/QuestionForm.5286a182127dd64e7904.png",
     "static/media/Q.png": "/knowledge-share/static/media/Q.4209512a2ea1935c338f.png",
     "static/media/QPlus.png": "/knowledge-share/static/media/QPlus.a9d1719c7a50e21d3475.png",
     "static/media/A.png": "/knowledge-share/static/media/A.69d84f9a4d04ea1e54d4.png",
+    "static/media/APlus.png": "/knowledge-share/static/media/APlus.4175ba6e7cd5b00fff39.png",
     "index.html": "/knowledge-share/index.html",
-    "main.8330996a.css.map": "/knowledge-share/static/css/main.8330996a.css.map",
-    "main.bdac9b09.js.map": "/knowledge-share/static/js/main.bdac9b09.js.map"
+    "main.35390eb6.css.map": "/knowledge-share/static/css/main.35390eb6.css.map",
+    "main.ee04b2cc.js.map": "/knowledge-share/static/js/main.ee04b2cc.js.map"
   },
   "entrypoints": [
-    "static/css/main.8330996a.css",
-    "static/js/main.bdac9b09.js"
+    "static/css/main.35390eb6.css",
+    "static/js/main.ee04b2cc.js"
   ]
 }
