@@ -140,7 +140,7 @@ export interface IGlobalState {
 	categoryRows: Map<string, ICategoryRow>;
 	categoryRowsLoaded?: number;
 	groupRows: Map<string, IGroupRow>;
-	shortGroupsLoaded?: number;
+	groupRowsLoaded?: number;
 	nodesReLoaded: boolean; // categoryNodeLoaded || groupNodeLoaded  ( to prevent showing of ChatBotDlg)
 	lastRouteVisited: string
 }

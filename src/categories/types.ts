@@ -684,7 +684,7 @@ export enum ActionTypes {
 
 /*
 //export const actionsThatModifyFirstLevelCategoryRow = [
-export const actionsThatModifyTreeView = [
+export const actionsThatModifyTree = [
 	// ActionTypes.SET_FIRST_LEVEL_CATEGORY_ROWS keep commented
 	// ActionTypes.SET_CATEGORY_NODE_OPENED,
 	ActionTypes.DELETE_CATEGORY,
@@ -701,7 +701,9 @@ export const actionsThatModifyTreeView = [
 ]
 	*/
 
-export const actionTypesStoringToLocalStorage = [
+
+
+export const actionStoringToLocalStorage = [
 	// ActionTypes.SET_CATEGORY_NODE_OPENED
 	ActionTypes.SET_CATEGORY_ROW_EXPANDED,
 	ActionTypes.SET_CATEGORY_ROW_COLLAPSED,
@@ -737,14 +739,15 @@ export type CategoriesPayload = {
 
 	[ActionTypes.CATEGORY_NODE_OPENING]: {
 		categoryRow?: ICategoryRow;
+		fromChatBotDlg: boolean;
 		//categoryKeyExpanded: ICategoryKeyExpanded
 	};
 
 	[ActionTypes.SET_CATEGORY_NODE_OPENED]: {
 		// categoryNodesUpTheTree: ICategoryKeyExtended[]; /// we could have used Id only
 		categoryRow: ICategoryRow;
-		// categoryKeyExpanded: ICategoryKeyExpanded;
-		questionId: string | null,
+		categoryKeyExpanded: ICategoryKeyExpanded;
+		//questionId: string | null,
 		fromChatBotDlg: boolean;
 	};
 

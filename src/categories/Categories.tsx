@@ -28,7 +28,7 @@ interface IProps {
 
 const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
     console.log("=== Categories", categoryId_questionId)
-    const { state, openCategoryNode, loadTopCategoryRows: loadFirstLevelCategoryRows } = useCategoryContext();
+    const { state, openCategoryNode, loadTopCategoryRows } = useCategoryContext();
     const {
         topCategoryRows, topCategoryRowsLoading, topCategoryRowsLoaded,
         categoryKeyExpanded, categoryId_questionId_done,
@@ -75,10 +75,10 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
         (async () => {
             // SET_FIRST_LEVEL_CATEGORY_ROWS  Level:1
             if (!topCategoryRowsLoading && !topCategoryRowsLoaded) {
-                await loadFirstLevelCategoryRows()
+                await loadTopCategoryRows()
             }
         })()
-    }, [topCategoryRowsLoading, topCategoryRowsLoaded, loadFirstLevelCategoryRows]);
+    }, [topCategoryRowsLoading, topCategoryRowsLoaded, loadTopCategoryRows]);
 
     useEffect(() => {
         (async () => {
@@ -98,7 +98,7 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
                         const arr = categoryId_questionId.split('_');
                         const categoryId = arr[0];
                         const questionId = arr[1];
-                        const keyExp = { partitionKey: null, id: categoryId, questionId }
+                        const keyExp = { partitionKey: categoryId, id: categoryId, questionId: questionId === 'null' ? null : questionId }
                         // setCatKeyExpanded(keyExp);
                         console.log('zovem openCategoryNode 1111111111111111111)', { categoryId_questionId }, { categoryId_questionId_done })
                         await openCategoryNode(keyExp, fromChatBotDlg ?? 'false')
@@ -164,7 +164,7 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
                 </Button>
                 <Row className="my-1">
                     <Col xs={12} md={5}>
-                        <div>
+                        <div className="border border-5 rounded-3 border-warning">
                             <CategoryList categoryRow={categoryRow} level={0} title="root" isExpanded={true} />
                         </div>
                     </Col>

@@ -26,7 +26,7 @@ const initGlobalState: IGlobalState = {
     categoryRows: new Map<string, ICategoryRow>(),
     categoryRowsLoaded: undefined,
     groupRows: new Map<string, IGroupRow>(),
-    shortGroupsLoaded: undefined,
+    groupRowsLoaded: undefined,
     nodesReLoaded: false,
     lastRouteVisited: '/categories'
 }
@@ -198,7 +198,7 @@ const reducer: Reducer<IGlobalState, GlobalActions> = (state, action) => {
             return {
                 ...state,
                 groupRows: shortGroups,
-                shortGroupsLoaded: Date.now()
+                groupRowsLoaded: Date.now()
             };
         }
 

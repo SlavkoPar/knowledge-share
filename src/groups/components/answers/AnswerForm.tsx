@@ -33,7 +33,7 @@ const AnswerForm = ({ answer, submitForm, children, showCloseButton, source = 0,
 
   const isDisabled = viewing;
 
-  const { partitionKey, parentGroup, title, id } = answer;
+  const { partitionKey, parentGroup, title, link, id } = answer;
   const answerKey = { parentGroup: parentGroup ?? undefined, partitionKey, id };
   const groupKey: IGroupKey = { partitionKey, id: parentGroup };
 
@@ -81,17 +81,17 @@ const AnswerForm = ({ answer, submitForm, children, showCloseButton, source = 0,
     }
   });
 
-   const debouncedTitleHandler = useCallback(
-      debounce((groupId: string, id: string, value: string) => {
-        dispatch({ type: ActionTypes.ANSWER_TITLE_CHANGED, payload: { groupId, id, value } })
-      }, 500), []);
-  
-    const handleChangeTitle = (event: ChangeEvent<HTMLTextAreaElement>) => {
-      formik.handleChange(event);
-      const value = event.target.value;
-      debouncedTitleHandler(formik.values.parentGroup!, id, value)
-    };
-  
+  const debouncedTitleHandler = useCallback(
+    debounce((groupId: string, id: string, value: string) => {
+      dispatch({ type: ActionTypes.ANSWER_TITLE_CHANGED, payload: { groupId, id, value } })
+    }, 500), []);
+
+  const handleChangeTitle = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    formik.handleChange(event);
+    const value = event.target.value;
+    debouncedTitleHandler(formik.values.parentGroup!, id, value)
+  };
+
 
   const setParentGroup = (cat: IGroupRow) => {
     formik.setFieldValue('parentGroup', cat.id);
@@ -156,7 +156,7 @@ const AnswerForm = ({ answer, submitForm, children, showCloseButton, source = 0,
           <Form.Control
             as="textarea"
             name="title"
-            placeholder={formik.values.title === "new Answer" ? "new Answer" :  "answer text"}
+            placeholder={formik.values.title === "new Answer" ? "new Answer" : "answer text"}
             ref={nameRef}
             onChange={handleChangeTitle}
             // onBlur={formik.handleBlur}
@@ -172,6 +172,29 @@ const AnswerForm = ({ answer, submitForm, children, showCloseButton, source = 0,
           <Form.Text className="text-danger">
             {formik.touched.title && formik.errors.title ? (
               <div className="text-danger">{formik.errors.title}</div>
+            ) : null}
+          </Form.Text>
+        </Form.Group>
+
+        <Form.Group controlId="title">
+          <Form.Label>Link</Form.Label>
+          <Form.Control
+            as="input"
+            placeholder="/answers/..."
+            name="link"
+            onChange={formik.handleChange}
+            //onBlur={formik.handleBlur}
+            // onBlur={(e: React.FocusEvent<HTMLTextAreaElement>): void => {
+            //   if (isEdit && formik.initialValues.title !== formik.values.title)
+            //     formik.submitForm();
+            // }}
+            className="text-primary w-100"
+            value={formik.values.link ?? ''}
+            disabled={viewing}
+          />
+          <Form.Text className="text-danger">
+            {formik.touched.link && formik.errors.link ? (
+              <div className="text-danger">{formik.errors.link}</div>
             ) : null}
           </Form.Text>
         </Form.Group>
@@ -233,7 +256,7 @@ const AnswerForm = ({ answer, submitForm, children, showCloseButton, source = 0,
             />
           </>
         }
-        { ((formik.dirty && editing) || adding) && 
+        {((formik.dirty && editing) || adding) &&
           <FormButtons
             cancelForm={cancelForm}
             handleSubmit={formik.handleSubmit}

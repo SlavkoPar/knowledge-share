@@ -1,5 +1,5 @@
 import { Reducer } from 'react'
-import { ActionTypes, ICategoriesState, ICategory, IQuestion, CategoriesActions, ILocStorage, ICategoryKey, ICategoryKeyExtended, IQuestionRow, Question, IQuestionRowDto, IQuestionKey, CategoryKey, QuestionKey, ICategoryDto, QuestionRow, ICategoryRow, CategoryRow, actionTypesStoringToLocalStorage, ICategoryRowDto, FormMode, IsCategory } from "categories/types";
+import { ActionTypes, ICategoriesState, ICategory, IQuestion, CategoriesActions, ILocStorage, ICategoryKey, ICategoryKeyExtended, IQuestionRow, Question, IQuestionRowDto, IQuestionKey, CategoryKey, QuestionKey, ICategoryDto, QuestionRow, ICategoryRow, CategoryRow, actionStoringToLocalStorage, ICategoryRowDto, FormMode, IsCategory } from "categories/types";
 
 export const initialQuestion: IQuestion = {
   partitionKey: '',
@@ -120,16 +120,21 @@ export const CategoryReducer: Reducer<ICategoriesState, CategoriesActions> = (st
   //
   // - firstLevelCategoryRow BBB
   // - ...
+  const innerReducerModifiedTree = [
+    ActionTypes.SET_TOP_CATEGORY_ROWS,
+    ActionTypes.CATEGORY_NODE_OPENING,
+    ActionTypes.SET_CATEGORY_NODE_OPENED
+  ]
 
   const { categoryRow } = action.payload;
   const isCategory = IsCategory(categoryRow); // ICategory rather than ICategoryRow
   // const modifyTree = categoryRow && !isCategory;
-  const modifyTree = categoryRow; // let us modify tree and rest of state in single action
+  // let us modify tree and rest of state in single action
+  const modifyTree = categoryRow !== undefined && !innerReducerModifiedTree.includes(action.type); 
 
   const { topCategoryRows } = state;
 
   let newTopCategoryRows: ICategoryRow[];
-
 
   const newState = innerReducer(state, action);
   // return {
@@ -137,7 +142,7 @@ export const CategoryReducer: Reducer<ICategoriesState, CategoriesActions> = (st
   //   ...
   // }
 
-  // Action that modify TreeView
+  // Action that modify Tree
   // Actually part topCategoryRows of state
   if (modifyTree) {
     const { rootId, id } = categoryRow!;
@@ -184,7 +189,7 @@ export const CategoryReducer: Reducer<ICategoriesState, CategoriesActions> = (st
   //   newState.topCategoryRows = newTopCategoryRows;
   // }
 
-  if (actionTypesStoringToLocalStorage.includes(action.type)) {
+  if (actionStoringToLocalStorage.includes(action.type)) {
     const { categoryKeyExpanded } = newState;
     const locStorage: ILocStorage = {
       lastCategoryKeyExpanded: categoryKeyExpanded
@@ -225,29 +230,30 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
 
 
     case ActionTypes.CATEGORY_NODE_OPENING: {
-      //const { categoryKeyExpanded } = action.payload;
+      const { fromChatBotDlg } = action.payload;
+      const { categoryKeyExpanded, activeCategory, activeQuestion } = state;
       return {
         ...state,
         categoryNodeOpening: true,
-        categoryNodeOpened: false
-        //topCategoryRows: [],
-        //categoryKeyExpanded
+        categoryNodeOpened: false,
+        categoryKeyExpanded: fromChatBotDlg ? null : { ...categoryKeyExpanded! },
+        activeCategory: fromChatBotDlg ? null : activeCategory,
+        activeQuestion: fromChatBotDlg ? null : activeQuestion
       }
     }
 
     case ActionTypes.SET_CATEGORY_NODE_OPENED: {
-      const { categoryRow, questionId, fromChatBotDlg } = action.payload; // categoryKeyExpanded, 
-      const { id } = categoryRow; //categoryKeyExpanded;
-      console.log('====== >>>>>>> CategoriesReducer ActionTypes.SET_CATEGORY_NODE_OPENED payload ', action.payload)
-      const topCategoryRows: ICategoryRow[] = fromChatBotDlg
-        ? []
-        : state.topCategoryRows.map(c => c.id === categoryRow.id
-          ? { ...categoryRow }
-          : { ...c }
-        )
+      const { categoryRow, categoryKeyExpanded, fromChatBotDlg } = action.payload;
+      const { id, questionId } = categoryKeyExpanded; //;
+      const { topCategoryRows } = state;
+      const topCatRows: ICategoryRow[] = topCategoryRows.map(c => c.id === categoryRow.id
+        ? { ...categoryRow }
+        : { ...c }
+      )
       return {
         ...state,
-        topCategoryRows,
+        topCategoryRows: topCatRows,
+        categoryKeyExpanded,
         categoryId_questionId_done: `${id}_${questionId}`,
         categoryNodeOpening: false,
         categoryNodeOpened: true,
@@ -421,8 +427,8 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
     }
 
     case ActionTypes.SET_CATEGORY_ADDED:
-    case ActionTypes.SET_CATEGORY_TO_EDIT:   // doesn't modify TreeView
-    case ActionTypes.SET_CATEGORY_UPDATED: { // modifies TreeView
+    case ActionTypes.SET_CATEGORY_TO_EDIT:   // doesn't modify Tree
+    case ActionTypes.SET_CATEGORY_UPDATED: { // modifies Tree
       const { categoryRow } = action.payload; // ICategory extends ICategoryRow
       console.assert(IsCategory(categoryRow))
       // TODO what about instanceof?

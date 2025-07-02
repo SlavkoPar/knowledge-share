@@ -107,13 +107,13 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
   }
   // }, [dispatch]);
 
-  const loadFirstLevelCategoryRows = useCallback(async () => {
+  const loadTopCategoryRows = useCallback(async () => {
     return new Promise(async (resolve) => {
       const { categoryKeyExpanded } = state;
       try {
         dispatch({ type: ActionTypes.SET_LOADING, payload: {} });
         const url = `${protectedResources.KnowledgeAPI.endpointCategoryRow}/null/null`;
-        console.log('CategoryProvider loadFirstLevelCategoryRows url:', url)
+        console.log('CategoryProvider loadTopCategoryRows url:', url)
         console.time();
         await Execute("GET", url)
           .then((dtos: ICategoryRowDto[]) => {
@@ -141,12 +141,10 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
     async (catKeyExp: ICategoryKeyExpanded, fromChatBotDlg: string = 'false'): Promise<any> => {
       return new Promise(async (resolve) => {
         try {
-          console.log('---CategoryProvider.openCategoryNode categoryKeyExpanded:', catKeyExp)
           let { id, partitionKey } = catKeyExp;
           console.assert(id);
           if (id && partitionKey === '') {
             const categoryRow: ICategoryRow | undefined = categoryRows.get(id);
-            console.log("rrrrrrrrrrrrrrrrropenCategoryNode", id, categoryRow)
             if (categoryRow) {
               catKeyExp.partitionKey = categoryRow.partitionKey;
               partitionKey = categoryRow.partitionKey;
@@ -156,11 +154,10 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
               //return
             }
           }
-          dispatch({ type: ActionTypes.CATEGORY_NODE_OPENING, payload: {} })
+          dispatch({ type: ActionTypes.CATEGORY_NODE_OPENING, payload: { fromChatBotDlg: fromChatBotDlg === 'true'} })
           // ---------------------------------------------------------------------------
           console.time();
           const url = `${protectedResources.KnowledgeAPI.endpointCategoryRow}/${partitionKey}/${id}/true`;
-          console.log('calling CatController.GetCatsUpTheTree', url)
           await Execute("GET", url)
             .then(async (categoryRowDtoEx: ICategoryRowDtoEx) => {
               //dispatch({ type: ActionTypes.CLEAN_SUB_TREE, payload: { categoryKey: categoryKey! } });
@@ -170,9 +167,9 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
                 const categoryRow = new CategoryRow(categoryRowDto).categoryRow; // deep clone dto
                 dispatch({
                   type: ActionTypes.SET_CATEGORY_NODE_OPENED, payload: {
-                    // categoryKeyExpanded: catKeyExp,
+                    categoryKeyExpanded: catKeyExp,
                     categoryRow,
-                    questionId: catKeyExp.questionId,
+                    //questionId: catKeyExp.questionId,
                     fromChatBotDlg: fromChatBotDlg === 'true'
                   }
                 })
@@ -974,7 +971,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
 
 
   const contextValue: ICategoriesContext = {
-    state, openCategoryNode, loadTopCategoryRows: loadFirstLevelCategoryRows,
+    state, openCategoryNode, loadTopCategoryRows,
     addSubCategory, cancelAddCategory, createCategory,
     viewCategory, editCategory, updateCategory, deleteCategory, deleteCategoryVariation,
     expandCategory, collapseCategory,

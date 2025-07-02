@@ -1,3 +1,4 @@
+import { link } from 'fs';
 import { ActionMap, IWhoWhen, IRecord, IRecordDto, Dto2WhoWhen, WhoWhen2Dto, IWhoWhenDto } from 'global/types';
 
 export enum FormMode {
@@ -76,6 +77,7 @@ export interface IAnswerRow extends IRecord {
 	partitionKey: string;
 	id: string;
 	title: string;
+	link?: string;
 	parentGroup: string | null;
 	groupTitle?: string;
 	isSelected?: boolean;
@@ -227,13 +229,14 @@ export class GroupRow {
 
 export class AnswerRow {
 	constructor(rowDto: IAnswerRowDto) { //, parentGroup: string) {
-		const { PartitionKey, Id, ParentGroup, Title, GroupTitle, Created, Modified, Included, RootId } = rowDto;
+		const { PartitionKey, Id, ParentGroup, Title, Link, GroupTitle, Created, Modified, Included, RootId } = rowDto;
 		this.answerRow = {
 			partitionKey: PartitionKey,
 			id: Id,
 			rootId: RootId!,
 			parentGroup: ParentGroup,
 			title: Title,
+			link: Link,
 			groupTitle: GroupTitle,
 			created: new Dto2WhoWhen(Created!).whoWhen,
 			modified: Modified
@@ -251,7 +254,8 @@ export class AnswerRowDto {
 			PartitionKey: row.partitionKey,
 			Id: row.id,
 			ParentGroup: row.parentGroup ?? '',
-			Title: '',
+			Title: row.title,
+			Link: row.link??'',
 			GroupTitle: '',
 			Created: new WhoWhen2Dto(row.created!).whoWhenDto!,
 			Modified: new WhoWhen2Dto(row.modified).whoWhenDto!,
@@ -349,6 +353,7 @@ export class Answer {
 			partitionKey: dto.PartitionKey,
 			id: dto.Id,
 			title: dto.Title,
+			link: dto.Link,
 			groupTitle: dto.GroupTitle,
 			source: dto.Source ?? 0,
 			status: dto.Status ?? 0,
@@ -377,12 +382,13 @@ export class AnswerKey {
 
 export class AnswerDto {
 	constructor(answer: IAnswer) {
-		const { partitionKey, id, parentGroup, title, source, status, created, modified } = answer;
+		const { partitionKey, id, parentGroup, title, link, source, status, created, modified } = answer;
 		this.answerDto = {
 			PartitionKey: partitionKey,
 			Id: id,
 			ParentGroup: parentGroup ?? 'null',  // TODO proveri
 			Title: title,
+			Link: link??'',
 			Source: source,
 			Status: status,
 			Created: new WhoWhen2Dto(created).whoWhenDto!,
@@ -398,6 +404,7 @@ export interface IAnswerRowDto extends IRecordDto {
 	RootId?: string,
 	ParentGroup: string;
 	Title: string;
+	Link: string;
 	GroupTitle?: string;
 	Included?: boolean;
 	Source?: number;

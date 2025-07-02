@@ -245,7 +245,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
 
 
   const getGroupRows = useCallback(async (groupId: string | null) => {
-    const { shortGroupsLoaded } = globalState;
+    const { groupRowsLoaded: shortGroupsLoaded } = globalState;
     if (!shortGroupsLoaded) {
       await loadAndCacheAllGroupRows();
     }

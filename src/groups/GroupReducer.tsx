@@ -8,6 +8,7 @@ export const initialAnswer: IAnswer = {
   parentGroup: '',
   groupTitle: '',
   title: '',
+  link: '',
   source: 0,
   status: 0,
   isSelected: false

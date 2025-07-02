@@ -349,7 +349,7 @@ const ChatBotDlg = ({ show, onHide }: IProps) => {
                                                     <Button
                                                         size="sm"
                                                         variant='link'
-                                                        className='border py-0 text-decoration-none small'
+                                                        className='border py-0 text-decoration-underline small'
                                                         onClick={() => NavigLink(link)}
                                                     >
                                                         {/* <FontAwesomeIcon icon={faFolder} size='sm' />&nbsp; */}
@@ -416,7 +416,7 @@ const ChatBotDlg = ({ show, onHide }: IProps) => {
                                     href={link!}
                                     rel="noopener noreferrer"
                                     target="_blank"
-                                    className="text-light text-decoration-none"
+                                    className="text-light text-decoration-underline"
                                 >
                                     {txt}
                                 </a>

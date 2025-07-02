@@ -23,8 +23,8 @@ import ChatBotDlg from 'ChatBotDlg';
 function App() {
   console.log('-----------> App')
 
-  const { getUser, OpenDB, setLastRouteVisited } = useGlobalContext();
-  const { dbp, authUser, isAuthenticated, everLoggedIn, categoryRowsLoaded: catsLoaded, shortGroupsLoaded, lastRouteVisited, nodesReLoaded } = useGlobalState()
+  //const { getUser, OpenDB, setLastRouteVisited } = useGlobalContext();
+  const { dbp, authUser, isAuthenticated, everLoggedIn, categoryRowsLoaded, groupRowsLoaded, lastRouteVisited, nodesReLoaded } = useGlobalState()
   const { nickName, role } = authUser;
 
   const formInitialValues = {
@@ -65,8 +65,8 @@ function App() {
 
   const searchParams = new URLSearchParams(location.search);
 
-  const showChatBotDlg = (locationPathname.startsWith('/categories') && catsLoaded) ||
-    (locationPathname.startsWith('/groups') && shortGroupsLoaded);
+  const showChatBotDlg = (locationPathname.startsWith('/categories') && categoryRowsLoaded) ||
+    (locationPathname.startsWith('/groups') && groupRowsLoaded);
   useEffect(() => {
     (async () => {
       const isAuthRoute = locationPathname.startsWith('/invitation') ||
@@ -102,7 +102,7 @@ function App() {
     navigate(lastRouteVisited);
   }, [])
 
-  if (!isAuthenticated || !catsLoaded) // || !shortGroupsLoaded)
+  if (!isAuthenticated || !categoryRowsLoaded) // || !groupRowsLoaded)
     return <div>App loading</div>
 
   return (
@@ -133,11 +133,16 @@ function App() {
           </div>
         </Col>
       </Row>
-      {/* {<ModalChatBot show={modalChatBotShow} onHide={()=>{ setModalChatBotShow(false) }} />} */}
-      {nodesReLoaded &&
+      {/* {<ModalChatBot show={modalChatBotShow} onHide={() => { setModalChatBotShow(false) }} />} */}
+      {categoryRowsLoaded && //nodesReLoaded &&
         <>
           <ChatBotDlg show={modalChatBotShow} onHide={() => { setModalChatBotShow(false) }} />
-          <Button onClick={() => setModalChatBotShow(!modalChatBotShow)} className="border rounded-5 me-1 mb-1 buddy-fixed">
+          <Button onClick={(e) => {
+            setModalChatBotShow(!modalChatBotShow);
+            e.stopPropagation();
+          }}
+            className="border rounded-5 me-1 mb-1 buddy-fixed"
+          >
             <b>Welcome,</b><br /> I am Stamena,<br /> and You are not.
             <br />I am here to help You!
           </Button>

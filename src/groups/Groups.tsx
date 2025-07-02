@@ -28,7 +28,7 @@ interface IProps {
 
 const Providered = ({ groupId_answerId, fromChatBotDlg }: IProps) => {
     console.log("=== Groups", groupId_answerId)
-    const { state, openGroupNode, loadTopGroupRows: loadFirstLevelGroupRows } = useGroupContext();
+    const { state, openGroupNode, loadTopGroupRows } = useGroupContext();
     const {
         topGroupRows, topGroupRowsLoading, topGroupRowsLoaded,
         groupKeyExpanded, groupId_answerId_done,
@@ -39,7 +39,7 @@ const Providered = ({ groupId_answerId, fromChatBotDlg }: IProps) => {
     } = state;
 
     const { setLastRouteVisited, searchAnswers, loadAndCacheAllGroupRows } = useGlobalContext();
-    const { isDarkMode, authUser, groupRows, shortGroupsLoaded } = useGlobalState();
+    const { isDarkMode, authUser, groupRows, groupRowsLoaded: shortGroupsLoaded } = useGlobalState();
 
     const [modalShow, setModalShow] = useState(false);
     const handleClose = () => {
@@ -75,10 +75,10 @@ const Providered = ({ groupId_answerId, fromChatBotDlg }: IProps) => {
         (async () => {
             // SET_FIRST_LEVEL_GROUP_ROWS  Level:1
             if (!topGroupRowsLoading && !topGroupRowsLoaded) {
-                await loadFirstLevelGroupRows()
+                await loadTopGroupRows()
             }
         })()
-    }, [topGroupRowsLoading, topGroupRowsLoaded, loadFirstLevelGroupRows]);
+    }, [topGroupRowsLoading, topGroupRowsLoaded, loadTopGroupRows]);
 
     useEffect(() => {
         (async () => {
@@ -171,8 +171,8 @@ const Providered = ({ groupId_answerId, fromChatBotDlg }: IProps) => {
                     Add Group
                 </Button>
                 <Row className="my-1">
-                    <Col xs={12} md={5}>
-                        <div>
+                    <Col xs={12} md={5} >
+                        <div className="border border-5 rounded-3 border-info">
                             <GroupList groupRow={groupRow} level={0} title="root" isExpanded={true} />
                         </div>
                     </Col>
