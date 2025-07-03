@@ -20,7 +20,7 @@ interface IProps {
 const AssignedAnswers = ({ questionKey, questionTitle, assignedAnswers, isDisabled }: IProps) => {
 
     const { globalState, searchAnswers, loadAndCacheAllGroupRows } = useGlobalContext();
-    const { authUser, isDarkMode, variant, groupRows: shortGroups, groupRowsLoaded: shortGroupsLoaded } = globalState;
+    const { authUser, isDarkMode, variant, groupRows, groupRowsLoaded } = globalState;
 
     //const [assignedAnswers2, setAssignAnswers2] = useState<IAssignedAnswer[]>([]);
 
@@ -67,7 +67,7 @@ const AssignedAnswers = ({ questionKey, questionTitle, assignedAnswers, isDisabl
     }
 
     const handleNewAnswer = () => {
-        if (!shortGroupsLoaded) {
+        if (!groupRowsLoaded) {
             loadAndCacheAllGroupRows();
         }
         setShowAssign(true);
@@ -164,7 +164,7 @@ const AssignedAnswers = ({ questionKey, questionTitle, assignedAnswers, isDisabl
                                 ? []
                                 : assignedAnswers.map((a: IAssignedAnswer) => a.answerKey.id)
                         }
-                        shortGroups={shortGroups}
+                        groupRows={groupRows}
                         onSelectAnswer={onSelectAnswer}
                         searchAnswers={searchAnswers}
                     />

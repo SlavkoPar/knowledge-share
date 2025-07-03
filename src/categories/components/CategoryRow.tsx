@@ -30,7 +30,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
     const { canEdit, isDarkMode, variant, bg, authUser } = useGlobalState();
 
     const { state, addSubCategory, viewCategory, editCategory, deleteCategory, expandCategory, collapseCategory, addQuestion } = useCategoryContext();
-    let { formMode, categoryKeyExpanded, activeCategory } = state;
+    let { formMode, keyExpanded: categoryKeyExpanded, activeCategory } = state;
     const isSelected = activeCategory !== null && (activeCategory.id === id);
     const showForm = isSelected;
 
@@ -93,7 +93,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
                 const expandInfo: IExpandInfo = {
                     rootId: rootId!,
                     categoryKey,
-                    includeQuestionId: questionId??undefined,
+                    includeQuestionId: questionId ?? undefined,
                     formMode // differs from handleExpandClick
                 }
                 expandCategory(expandInfo);
@@ -122,7 +122,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
 
     {/* <ListGroup horizontal> */ }
     const Row1 =
-        <div ref={hoverRef} className="d-flex justify-content-start align-items-center w-100 text-primary category-row ">
+        <div ref={hoverRef} className={`d-flex justify-content-start align-items-center w-100 text-primary category-row${isSelected?'-selected':''}`}>
             <Button
                 variant='link'
                 size="sm"
@@ -146,7 +146,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
             <Button
                 variant='link'
                 size="sm"
-                className={`py-0 mx-0 text-decoration-none bg-light  ${isSelected ? 'fw-bold' : ''}`}
+                className={`py-0 mx-0  category-row-title  ${isSelected ? 'fw-bold' : ''}`}
                 title={id}
                 onClick={onSelectCategory}
                 disabled={alreadyAdding}

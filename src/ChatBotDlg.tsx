@@ -509,7 +509,7 @@ const ChatBotDlg = ({ show, onHide }: IProps) => {
         return <div className="dark">
             <label className="text-warning">Please enter the Question</label>
             <div className="text-start">
-                <div className="questions border">
+                <div className="questions">
                     {isDisabled &&
                         <div>
                             {txt}

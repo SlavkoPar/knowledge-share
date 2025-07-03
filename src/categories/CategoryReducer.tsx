@@ -40,14 +40,14 @@ export const initialCategory: ICategory = {
 export const initialState: ICategoriesState = {
   formMode: FormMode.None,
 
-  topCategoryRows: [],
-  topCategoryRowsLoading: false,
-  topCategoryRowsLoaded: false,
+  topRows: [],
+  topRowsLoading: false,
+  topRowsLoaded: false,
 
-  categoryNodeOpening: false,
-  categoryNodeOpened: false,
+  nodeOpening: false,
+  nodeOpened: false,
 
-  categoryKeyExpanded: {
+  keyExpanded: {
     partitionKey: "REMOTECTRLS",
     id: "REMOTECTRLS",
     questionId: "qqqqqq111"
@@ -87,8 +87,8 @@ if ('localStorage' in window) {
     const categoryNodeOpened = lastCategoryKeyExpanded ? false : true;
     initialCategoriesState = {
       ...initialCategoriesState,
-      categoryKeyExpanded: { ...lastCategoryKeyExpanded },
-      categoryNodeOpened
+      keyExpanded: { ...lastCategoryKeyExpanded },
+      nodeOpened: categoryNodeOpened
     }
     console.log('initialCategoriesState nakon citanja iz memorije', initialCategoriesState);
   }
@@ -121,18 +121,18 @@ export const CategoryReducer: Reducer<ICategoriesState, CategoriesActions> = (st
   // - firstLevelCategoryRow BBB
   // - ...
   const innerReducerModifiedTree = [
-    ActionTypes.SET_TOP_CATEGORY_ROWS,
-    ActionTypes.CATEGORY_NODE_OPENING,
-    ActionTypes.SET_CATEGORY_NODE_OPENED
+    ActionTypes.SET_TOP_ROWS,
+    ActionTypes.NODE_OPENING,
+    ActionTypes.SET_NODE_OPENED
   ]
 
   const { categoryRow } = action.payload;
   const isCategory = IsCategory(categoryRow); // ICategory rather than ICategoryRow
   // const modifyTree = categoryRow && !isCategory;
   // let us modify tree and rest of state in single action
-  const modifyTree = categoryRow !== undefined && !innerReducerModifiedTree.includes(action.type); 
+  const modifyTree = categoryRow !== undefined && !innerReducerModifiedTree.includes(action.type);
 
-  const { topCategoryRows } = state;
+  const { topRows: topCategoryRows } = state;
 
   let newTopCategoryRows: ICategoryRow[];
 
@@ -164,7 +164,7 @@ export const CategoryReducer: Reducer<ICategoriesState, CategoriesActions> = (st
         : new DeepClone(c).categoryRow
       );
     }
-    newState.topCategoryRows = newTopCategoryRows;
+    newState.topRows = newTopCategoryRows;
   }
   else {
     // just clone to enable time-travel debugging
@@ -190,7 +190,7 @@ export const CategoryReducer: Reducer<ICategoriesState, CategoriesActions> = (st
   // }
 
   if (actionStoringToLocalStorage.includes(action.type)) {
-    const { categoryKeyExpanded } = newState;
+    const { keyExpanded: categoryKeyExpanded } = newState;
     const locStorage: ILocStorage = {
       lastCategoryKeyExpanded: categoryKeyExpanded
     }
@@ -202,11 +202,11 @@ export const CategoryReducer: Reducer<ICategoriesState, CategoriesActions> = (st
 const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICategoriesState => {
   switch (action.type) {
 
-    case ActionTypes.SET_TOP_CATEGORY_ROWS_LOADING:
+    case ActionTypes.SET_TOP_ROWS_LOADING:
       return {
         ...state,
-        topCategoryRowsLoading: true,
-        topCategoryRowsLoaded: false,
+        topRowsLoading: true,
+        topRowsLoaded: false,
       }
 
     case ActionTypes.SET_LOADING:
@@ -217,59 +217,59 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
 
     //////////////////////////////////////////////////
     // CategoryRows Level: 1
-    case ActionTypes.SET_TOP_CATEGORY_ROWS: {
+    case ActionTypes.SET_TOP_ROWS: {
       const { topCategoryRows } = action.payload;
       console.log('=> CategoriesReducer ActionTypes.SET_FIRST_LEVEL_CATEGORY_ROWS', { topCategoryRows })
       return {
         ...state,
-        topCategoryRows,
-        topCategoryRowsLoading: false,
-        topCategoryRowsLoaded: true,
+        topRows: topCategoryRows,
+        topRowsLoading: false,
+        topRowsLoaded: true,
       };
     }
 
 
-    case ActionTypes.CATEGORY_NODE_OPENING: {
+    case ActionTypes.NODE_OPENING: {
       const { fromChatBotDlg } = action.payload;
-      const { categoryKeyExpanded, activeCategory, activeQuestion } = state;
+      const { keyExpanded: categoryKeyExpanded, activeCategory, activeQuestion } = state;
       return {
         ...state,
-        categoryNodeOpening: true,
-        categoryNodeOpened: false,
-        categoryKeyExpanded: fromChatBotDlg ? null : { ...categoryKeyExpanded! },
+        nodeOpening: true,
+        nodeOpened: false,
+        keyExpanded: fromChatBotDlg ? null : { ...categoryKeyExpanded! },
         activeCategory: fromChatBotDlg ? null : activeCategory,
         activeQuestion: fromChatBotDlg ? null : activeQuestion
       }
     }
 
-    case ActionTypes.SET_CATEGORY_NODE_OPENED: {
-      const { categoryRow, categoryKeyExpanded, fromChatBotDlg } = action.payload;
-      const { id, questionId } = categoryKeyExpanded; //;
-      const { topCategoryRows } = state;
+    case ActionTypes.SET_NODE_OPENED: {
+      const { categoryRow, keyExpanded, fromChatBotDlg } = action.payload;
+      const { id, questionId } = keyExpanded; //;
+      const { topRows: topCategoryRows } = state;
       const topCatRows: ICategoryRow[] = topCategoryRows.map(c => c.id === categoryRow.id
         ? { ...categoryRow }
         : { ...c }
       )
       return {
         ...state,
-        topCategoryRows: topCatRows,
-        categoryKeyExpanded,
+        topRows: topCatRows,
+        keyExpanded,
         categoryId_questionId_done: `${id}_${questionId}`,
-        categoryNodeOpening: false,
-        categoryNodeOpened: true,
+        nodeOpening: false,
+        nodeOpened: true,
         //mode: Mode.NULL // reset previosly selected form
       };
     }
 
-    case ActionTypes.FORCE_OPEN_CATEGORY_NODE:
-      const { categoryKeyExpanded } = action.payload;
+    case ActionTypes.FORCE_OPEN_NODE:
+      const { keyExpanded } = action.payload;
       return {
         ...state,
-        categoryNodeOpening: false,
-        categoryNodeOpened: false,
-        topCategoryRows: [],
-        topCategoryRowsLoaded: false,
-        categoryKeyExpanded
+        nodeOpening: false,
+        nodeOpened: false,
+        topRows: [],
+        topRowsLoaded: false,
+        keyExpanded
       }
 
     case ActionTypes.SET_CATEGORY_LOADING:
@@ -296,7 +296,7 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
 
     case ActionTypes.SET_SUB_CATEGORIES: {
       const { id, categoryRows } = action.payload;
-      const { topCategoryRows } = state;
+      const { topRows: topCategoryRows } = state;
       categoryRows.forEach((categoryRow: ICategoryRow) => {
         const { id, hasSubCategories, numOfQuestions } = categoryRow;
       })
@@ -359,7 +359,7 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
         ...state,
         // keep mode
         loading: false,
-        categoryKeyExpanded: { ...categoryKey, questionId: null },
+        keyExpanded: { ...categoryKey, questionId: null },
         activeCategory: categoryRow,
         activeQuestion: null
       }
@@ -373,7 +373,7 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
       // const { questionId } = categoryKeyExpanded!;
 
       const { partitionKey: rowPartitionkey, id: rowId } = categoryRow;
-      const { partitionKey, id, questionId } = state.categoryKeyExpanded!;
+      const { partitionKey, id, questionId } = state.keyExpanded!;
       const categoryKeyExpanded = {
         partitionKey, id,
         questionId: rowPartitionkey === partitionKey && rowId === id
@@ -387,7 +387,7 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
         ...state,
         // keep mode
         loading: false,
-        categoryKeyExpanded,
+        keyExpanded: categoryKeyExpanded,
         activeCategory: null,
         activeQuestion: null,
         formMode
@@ -402,7 +402,7 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
         ...state,
         // keep mode
         loading: false,
-        categoryKeyExpanded: null, //{ ...categoryKey, questionId: null },
+        keyExpanded: null, //{ ...categoryKey, questionId: null },
         activeCategory: null,
         activeQuestion: null
       }
@@ -420,7 +420,7 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
         ...state,
         formMode: FormMode.ViewingCategory,
         loading: false,
-        categoryKeyExpanded: state.categoryKeyExpanded ? { ...state.categoryKeyExpanded, questionId: null } : null,
+        keyExpanded: state.keyExpanded ? { ...state.keyExpanded, questionId: null } : null,
         activeCategory,
         activeQuestion: null
       };
@@ -544,7 +544,7 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
 
     case ActionTypes.CATEGORY_TITLE_CHANGED: {
       const { value, id } = action.payload;
-      const { topCategoryRows } = state;
+      const { topRows: topCategoryRows } = state;
       const categoryRow: ICategoryRow | undefined = findCategory(topCategoryRows, id);
       if (categoryRow) {
         categoryRow.title = value;
@@ -556,7 +556,7 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
 
     case ActionTypes.QUESTION_TITLE_CHANGED: {
       const { categoryId, id, value } = action.payload;
-      const { topCategoryRows } = state;
+      const { topRows: topCategoryRows } = state;
       const categoryRow: ICategoryRow | undefined = findCategory(topCategoryRows, categoryId);
       if (categoryRow) {
         categoryRow.questionRows.find(q => q.id === id)!.title = value;
@@ -629,11 +629,11 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
     case ActionTypes.SET_QUESTION_TO_VIEW: {
       const { question } = action.payload;
       const { partitionKey, id, parentCategory } = question;
-      const { categoryKeyExpanded } = state;
+      const { keyExpanded: categoryKeyExpanded } = state;
       return {
         ...state,
         formMode: FormMode.ViewingQuestion,
-        categoryKeyExpanded: categoryKeyExpanded
+        keyExpanded: categoryKeyExpanded
           ? { ...categoryKeyExpanded, questionId: categoryKeyExpanded.id === parentCategory ? id : null }
           : null,
         activeQuestion: question,
@@ -644,7 +644,7 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
     case ActionTypes.SET_QUESTION_TO_EDIT: {
       const { question } = action.payload;
       const { partitionKey, id, parentCategory } = question;
-      const { categoryKeyExpanded } = state;
+      const { keyExpanded: categoryKeyExpanded } = state;
       return {
         ...state,
         // categoryKeyExpanded: categoryKeyExpanded

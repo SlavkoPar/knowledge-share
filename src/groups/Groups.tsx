@@ -30,9 +30,9 @@ const Providered = ({ groupId_answerId, fromChatBotDlg }: IProps) => {
     console.log("=== Groups", groupId_answerId)
     const { state, openGroupNode, loadTopGroupRows } = useGroupContext();
     const {
-        topGroupRows, topGroupRowsLoading, topGroupRowsLoaded,
-        groupKeyExpanded, groupId_answerId_done,
-        groupNodeOpening, groupNodeOpened,
+        topRows: topGroupRows, topRowsLoading: topGroupRowsLoading, topRowsLoaded: topGroupRowsLoaded,
+        keyExpanded: groupKeyExpanded, groupId_answerId_done,
+        nodeOpening: groupNodeOpening, nodeOpened: groupNodeOpened,
         activeGroup,
         activeAnswer,
         formMode, loading } = state;
@@ -149,7 +149,7 @@ const Providered = ({ groupId_answerId, fromChatBotDlg }: IProps) => {
                                 <AutoSuggestAnswers
                                     tekst={tekst}
                                     onSelectAnswer={onSelectAnswer}
-                                    shortGroups={groupRows}
+                                    groupRows={groupRows}
                                     searchAnswers={searchAnswers}
                                 />
                             </div>

@@ -7,7 +7,7 @@ import { useGroupContext } from "groups/GroupProvider";
 const GroupList = ({ title, groupRow, level, isExpanded }: IParentInfo) => {
 
     const { state } = useGroupContext();
-    const { groupKeyExpanded } = state;
+    const { keyExpanded: groupKeyExpanded } = state;
 
     const { partitionKey, id, answerId } = groupKeyExpanded
         ? groupKeyExpanded

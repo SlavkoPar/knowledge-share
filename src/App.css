@@ -185,72 +185,24 @@ input[type=number] {
 }
 */
 
-.kkknowledge-row {
+/* .kkknowledge-row {
   flex-wrap: nowrap !important;
   overflow-x: hidden !important;
-}
-
-/* .category-row { */
-  /* rgb(13, 110, 253) */
-   /* background-color: rgb(239, 217, 253); */
-   /* color:#aaa */
-/* } */
-
-.question-row {
-   /* background-color: rgb(239, 217, 253); */
-   color:#aaa
-}
+} */
 
 
-
-
-.warning {
+/* .warning {
   background-color: antiquewhite
-}
+} */
 
 .created-modified {
   font-size: 13px !important;
 }
 
-.category-form {
-  background-color: rgb(207, 226, 255)
-  /* background-color: rgb(239, 217, 253);  */
-}
-
-.category-form label {
-  color: rgba(33, 37, 41, 0.75);
-  font-size: 14px;
-}
-
-.question-form {
-  background-color: rgb(239, 217, 253);
-}
-
-.question-form label {
-  color: darkolivegreen;
-  font-size: 14px;
-}
-
-.answer-row {
-   background-color: rgb(13, 202, 240);
-   color: #aaa;
-}
-
-.answer form-label {
+/* .answer form-label {
   color: white;
   margin-bottom: 3;
-}
-
-
-.answer-form {
-  background-color: rgb(107, 222, 245);
-}
-
-.answer-form label {
-  color: darkolivegreen;
-  font-size: 14px;
-}
-
+} */
 
 .dropdown-menu.show {
   width: 30vw !important;

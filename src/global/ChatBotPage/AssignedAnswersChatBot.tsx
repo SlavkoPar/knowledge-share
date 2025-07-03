@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Button, ListGroup, Modal } from "react-bootstrap";
 import { useGlobalContext } from "global/GlobalProvider";
 import AssignedAnswerChatBot from "global/ChatBotPage/AssignedAnswerChatBot";
-import { AutoSuggestAnswers } from 'categories/AutoSuggestAnswers'
+import { AutoSuggestAnswers } from 'groups/AutoSuggestAnswers'
 import { IWhoWhen } from "global/types";
 import { IAnswer, IAnswerKey } from "groups/types";
 import { initialAnswer } from "groups/GroupReducer";

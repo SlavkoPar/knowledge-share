@@ -109,7 +109,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
 
   const loadTopCategoryRows = useCallback(async () => {
     return new Promise(async (resolve) => {
-      const { categoryKeyExpanded } = state;
+      const { keyExpanded: categoryKeyExpanded } = state;
       try {
         dispatch({ type: ActionTypes.SET_LOADING, payload: {} });
         const url = `${protectedResources.KnowledgeAPI.endpointCategoryRow}/null/null`;
@@ -125,7 +125,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
               dto.RootId = dto.Id;
               return new CategoryRow(dto).categoryRow;
             })
-            dispatch({ type: ActionTypes.SET_TOP_CATEGORY_ROWS, payload: { topCategoryRows } });
+            dispatch({ type: ActionTypes.SET_TOP_ROWS, payload: { topCategoryRows } });
             resolve(topCategoryRows);
           });
       }
@@ -154,7 +154,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
               //return
             }
           }
-          dispatch({ type: ActionTypes.CATEGORY_NODE_OPENING, payload: { fromChatBotDlg: fromChatBotDlg === 'true'} })
+          dispatch({ type: ActionTypes.NODE_OPENING, payload: { fromChatBotDlg: fromChatBotDlg === 'true' } })
           // ---------------------------------------------------------------------------
           console.time();
           const url = `${protectedResources.KnowledgeAPI.endpointCategoryRow}/${partitionKey}/${id}/true`;
@@ -166,8 +166,8 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
               if (categoryRowDto) {
                 const categoryRow = new CategoryRow(categoryRowDto).categoryRow; // deep clone dto
                 dispatch({
-                  type: ActionTypes.SET_CATEGORY_NODE_OPENED, payload: {
-                    categoryKeyExpanded: catKeyExp,
+                  type: ActionTypes.SET_NODE_OPENED, payload: {
+                    keyExpanded: catKeyExp,
                     categoryRow,
                     //questionId: catKeyExp.questionId,
                     fromChatBotDlg: fromChatBotDlg === 'true'
@@ -245,7 +245,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
   const expandCategory = useCallback(
     async ({ rootId, categoryKey, includeQuestionId, newCategoryRow, newQuestion, formMode }: IExpandInfo): Promise<any> => {
       try {
-        const { categoryKeyExpanded } = state;
+        const { keyExpanded: categoryKeyExpanded } = state;
         const { questionId } = categoryKeyExpanded!;
 
         const categoryRow: ICategoryRow | Error = await getCategoryRow(rootId, categoryKey, true, includeQuestionId); // to reload Category
@@ -332,7 +332,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
             categoryRows: [newCategoryRow, ...categoryRows],
           }
           dispatch({ type: ActionTypes.SET_CATEGORY_ROW_EXPANDED, payload: { categoryRow: categoryRow2, formMode: FormMode.AddingCategory } });
-          dispatch({ type: ActionTypes.SET_CATEGORY, payload: { categoryRow: { ...newCategoryRow, doc1: '' }} });
+          dispatch({ type: ActionTypes.SET_CATEGORY, payload: { categoryRow: { ...newCategoryRow, doc1: '' } } });
         }
         else {
           const row: ICategoryRow | null = await expandCategory(expandInfo);
@@ -437,6 +437,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
 
 
   const editCategory = useCallback(async (categoryRow: ICategoryRow, includeQuestionId: string | null) => {
+    const { rootId, partitionKey, parentCategory } = categoryRow;
     if (formMode === FormMode.AddingQuestion) {
       await cancelAddQuestion();
     }
@@ -449,10 +450,25 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
     if (category instanceof Error)
       dispatch({ type: ActionTypes.SET_ERROR, payload: { error: category } });
     else {
-      category.rootId = categoryRow.rootId;
-      dispatch({ type: ActionTypes.SET_CATEGORY_TO_EDIT, payload: { categoryRow: category } });
+      if (parentCategory === null) { // topRow
+        category.rootId = categoryRow.rootId;
+        dispatch({ type: ActionTypes.SET_CATEGORY_TO_EDIT, payload: { categoryRow: category } });
+      }
+      else {
+        const parentGroupKey = { partitionKey: parentCategory, id: parentCategory }
+        // get acurate info from server (children will be collapsed)
+        const expandInfo: IExpandInfo = {
+          rootId: rootId!,
+          categoryKey: parentGroupKey,
+          formMode: FormMode.EditingCategory
+        }
+        await expandCategory(expandInfo).then(() => {
+          category.rootId = categoryRow.rootId;
+          dispatch({ type: ActionTypes.SET_CATEGORY_TO_EDIT, payload: { categoryRow: category } });
+        })
+      }
     }
-  }, [dispatch, formMode]);
+    }, [dispatch, formMode]);
 
 
   const updateCategory = useCallback(
@@ -759,12 +775,12 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
                 // nema koristi
                 // dispatch({ type: ActionTypes.SET_QUESTION, payload: { question: questionRet } })
                 const { partitionKey, parentCategory, id } = questionRet;
-                const categoryKeyExpanded: ICategoryKeyExpanded = {
+                const keyExpanded: ICategoryKeyExpanded = {
                   partitionKey,
                   id: parentCategory,
                   questionId: id // keep the same question
                 }
-                dispatch({ type: ActionTypes.FORCE_OPEN_CATEGORY_NODE, payload: { categoryKeyExpanded } })
+                dispatch({ type: ActionTypes.FORCE_OPEN_NODE, payload: { keyExpanded } })
               }
               else {
                 const parentCategoryKey: ICategoryKey = { partitionKey: parentCategory, id: parentCategory };

@@ -30,9 +30,9 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
     console.log("=== Categories", categoryId_questionId)
     const { state, openCategoryNode, loadTopCategoryRows } = useCategoryContext();
     const {
-        topCategoryRows, topCategoryRowsLoading, topCategoryRowsLoaded,
-        categoryKeyExpanded, categoryId_questionId_done,
-        categoryNodeOpening, categoryNodeOpened,
+        topRows: topCategoryRows, topRowsLoading: topCategoryRowsLoading, topRowsLoaded: topCategoryRowsLoaded,
+        keyExpanded: categoryKeyExpanded, categoryId_questionId_done,
+        nodeOpening: categoryNodeOpening, nodeOpened: categoryNodeOpened,
         activeCategory,
         activeQuestion,
         formMode,
@@ -165,7 +165,7 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
                 </Button>
                 <Row className="my-1">
                     <Col xs={12} md={5}>
-                        <div className="border border-5 rounded-3 border-warning">
+                        <div className="categories-border">
                             <CategoryList categoryRow={categoryRow} level={0} title="root" isExpanded={true} />
                         </div>
                     </Col>

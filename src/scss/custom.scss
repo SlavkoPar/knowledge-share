@@ -6,3 +6,88 @@
 
 /* import bootstrap to set changes */
 @import '~bootstrap/scss/bootstrap';
+
+////////////////////////////
+/// Category -> Questions
+
+.categories-border {
+  border: 3x solid $blue-200;
+  border-radius: 3px;
+}
+
+.category-row {
+  background-color: $blue-100;
+  color: #fff;
+}
+
+.category-row-selected {
+  background-color: $blue-200;
+  color: #fff;
+}
+
+.category-row-title {
+  background-color: $blue-100;
+  color: $blue-700;
+  text-decoration: none;
+}
+
+.category-form {
+  background-color: $blue-200;
+  color: #ddd;
+}
+
+.category-form label {
+  color: rgba(33, 37, 41, 0.75);
+  font-size: 14px;
+}
+
+
+.question-row {
+  background-color: $yellow-300;
+  color: #fff;
+}
+
+.question-row-selected {
+  background-color: $yellow-500;
+  color: #fff;
+}
+
+.question-row-title {
+  background-color: $yellow-200;
+  color: $blue-700;
+  text-decoration: none;
+}
+
+
+.question-form {
+  background-color: $yellow-500;
+  color: #ddd;
+}
+
+.question-form label {
+  color: $yellow-800;
+  font-size: 14px;
+}
+
+////////////////////////////
+/// Group -> Answers
+
+// .group-row {
+//    background-color: $cyan-100; 
+//    color:#aaa 
+// }
+
+.answer-row {
+  background-color: $cyan-500;
+  color: #fff;
+  // color: $dark;
+}
+
+.answer-form {
+  background-color: rgb(107, 222, 245);
+}
+
+.answer-form label {
+  color: darkolivegreen;
+  font-size: 14px;
+}

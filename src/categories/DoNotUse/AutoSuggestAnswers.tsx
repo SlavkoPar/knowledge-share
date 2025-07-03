@@ -44,7 +44,7 @@ export class AutoSuggestAnswers extends React.Component<{
 	tekst: string | undefined,
 	onSelectGroupAnswer: (answerKey: IAnswerKey) => void,
 	alreadyAssigned?: string[],
-	shortGroups: Map<string, IGroupRow>,
+	groupRows: Map<string, IGroupRow>,
 	searchAnswers: (filter: string, count: number) => Promise<IAnswerRow[]>
 
 }, any> {
@@ -52,7 +52,7 @@ export class AutoSuggestAnswers extends React.Component<{
 	alreadyAssigned: string[];
 	state: any;
 	isMob: boolean;
-	shortGroups: Map<string, IGroupRow>;
+	groupRows: Map<string, IGroupRow>;
 	searchAnswers: (filter: string, count: number) => Promise<IAnswerRow[]>;
 	debouncedLoadSuggestions: (value: string) => void;
 	//inputAutosuggest: React.RefObject<HTMLInputElement>;
@@ -68,7 +68,7 @@ export class AutoSuggestAnswers extends React.Component<{
 		};
 		//this.inputAutosuggest = createRef<HTMLInputElement>();
 		this.alreadyAssigned = props.alreadyAssigned ?? [];
-		this.shortGroups = props.shortGroups;
+		this.groupRows = props.groupRows;
 		this.searchAnswers = props.searchAnswers;
 		this.isMob = isMobile;
 		this.loadSuggestions = this.loadSuggestions.bind(this);
@@ -147,7 +147,7 @@ export class AutoSuggestAnswers extends React.Component<{
 	private satisfyingGroups = (searchWords: string[]): IShortGroupIdTitle[] => {
 		const arr: IShortGroupIdTitle[] = [];
 		searchWords.filter(w => w.length >= 3).forEach(w => {
-			this.shortGroups.forEach(async group => {
+			this.groupRows.forEach(async group => {
 				//const parentGroup = group.groupKey.id;
 				const parentGroup = group.parentGroup;
 				let j = 0;
@@ -223,7 +223,7 @@ export class AutoSuggestAnswers extends React.Component<{
 			// 
 			let groupSections: IGroupSection[] = [];
 			groupAnswers.forEach((shortAnswers, id) => {
-				const group = this.shortGroups.get(id!);
+				const group = this.groupRows.get(id!);
 				console.log('GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG', group)
 				const { title, titlesUpTheTree/*, variations*/ } = group!;
 				const groupSection: IGroupSection = {

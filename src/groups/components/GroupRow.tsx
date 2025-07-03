@@ -30,7 +30,7 @@ const GroupRow = ({ groupRow, answerId }: { groupRow: IGroupRow, answerId: strin
     const { canEdit, isDarkMode, variant, bg, authUser } = useGlobalState();
 
     const { state, addSubGroup, viewGroup, editGroup, deleteGroup, expandGroup, collapseGroup, addAnswer } = useGroupContext();
-    let { formMode, groupKeyExpanded, activeGroup } = state;
+    let { formMode, keyExpanded: groupKeyExpanded, activeGroup } = state;
     const isSelected = activeGroup !== null && (activeGroup.id === id);
     const showForm = isSelected;
 
@@ -92,7 +92,7 @@ const GroupRow = ({ groupRow, answerId }: { groupRow: IGroupRow, answerId: strin
                 const expandInfo: IExpandInfo = {
                     rootId: rootId!,
                     groupKey,
-                    includeAnswerId: answerId??undefined,
+                    includeAnswerId: answerId ?? undefined,
                     formMode  // differs from handleExpandClick
                 }
                 expandGroup(expandInfo);
@@ -154,7 +154,7 @@ const GroupRow = ({ groupRow, answerId }: { groupRow: IGroupRow, answerId: strin
             </Button>
 
             <Badge pill bg="secondary" className={numOfAnswers === 0 ? 'd-none' : 'd-inline'}>
-                {numOfAnswers}A
+                {numOfAnswers}a
                 {/* <FontAwesomeIcon icon={faThumbsUp} size='sm' /> */}
                 {/* <img width="22" height="18" src={Q} alt="Answer" /> */}
             </Badge>
@@ -175,7 +175,7 @@ const GroupRow = ({ groupRow, answerId }: { groupRow: IGroupRow, answerId: strin
                         onClick={() => {
                             groupRow.level += 1;
                             addSubGroup(groupRow)
-                            
+
                         }}
                     >
                         <FontAwesomeIcon icon={faPlus} size='lg' />

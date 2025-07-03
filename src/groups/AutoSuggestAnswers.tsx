@@ -44,14 +44,14 @@ export class AutoSuggestAnswers extends React.Component<{
 	tekst: string | undefined,
 	onSelectAnswer: (answerKey: IAnswerKey, underFilter: string) => void,
 	alreadyAssigned?: string[],
-	shortGroups: Map<string, IGroupRow>,
+	groupRows: Map<string, IGroupRow>,
 	searchAnswers: (filter: string, count: number) => Promise<IAnswerRow[]>
 }, any> {
 	// region Fields
 	alreadyAssigned: string[];
 	state: any;
 	isMob: boolean;
-	shortGroups: Map<string, IGroupRow>;
+	groupRows: Map<string, IGroupRow>;
 	searchAnswers: (filter: string, count: number) => Promise<IAnswerRow[]>;
 	debouncedLoadSuggestions: (value: string) => void;
 	//inputAutosuggest: React.RefObject<HTMLInputElement>;
@@ -67,7 +67,7 @@ export class AutoSuggestAnswers extends React.Component<{
 		};
 		//this.inputAutosuggest = createRef<HTMLInputElement>();
 		this.alreadyAssigned = props.alreadyAssigned ?? [];
-		this.shortGroups = props.shortGroups;
+		this.groupRows = props.groupRows;
 		this.searchAnswers = props.searchAnswers;
 		this.isMob = isMobile;
 		this.loadSuggestions = this.loadSuggestions.bind(this);
@@ -144,7 +144,7 @@ export class AutoSuggestAnswers extends React.Component<{
 	private satisfyingGroups = (searchWords: string[]): IGroupIdTitle[] => {
 		const arr: IGroupIdTitle[] = [];
 		searchWords.filter(w => w.length >= 3).forEach(w => {
-			this.shortGroups.forEach(async group => {
+			this.groupRows.forEach(async group => {
 				const parentGroup = group.id;
 				let j = 0;
 				// cat.words.forEach(catw => {
@@ -274,7 +274,7 @@ export class AutoSuggestAnswers extends React.Component<{
 					answerRows: []
 				};
 				if (id !== null) {
-					const group = this.shortGroups.get(id);
+					const group = this.groupRows.get(id);
 					if (group) {
 						const { title, titlesUpTheTree/*, variations*/ } = group!;
 						groupSection.groupTitle = title;
@@ -316,7 +316,7 @@ export class AutoSuggestAnswers extends React.Component<{
 					}
 					else {
 					*/
-						groupSection.answerRows.push(quest);
+					groupSection.answerRows.push(quest);
 					/*}*/
 				});
 				groupSections.push(groupSection);

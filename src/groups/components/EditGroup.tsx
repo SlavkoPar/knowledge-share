@@ -11,8 +11,8 @@ const EditGroup = ({ inLine }: { inLine: boolean }) => {
 
     const { state, updateGroup } = useGroupContext();
 
-    const { activeGroup, groupKeyExpanded } = state;
-    const answerId  = groupKeyExpanded ? groupKeyExpanded.id : null;;
+    const { activeGroup, keyExpanded: groupKeyExpanded } = state;
+    const answerId = groupKeyExpanded ? groupKeyExpanded.id : null;;
 
     const submitForm = async (groupObject: IGroup) => {
         const object: IGroup = {

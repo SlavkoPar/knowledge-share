@@ -6,6 +6,7 @@ import { Navigation } from 'Navigation'
 import { useGlobalContext, useGlobalDispatch, useGlobalState } from 'global/GlobalProvider'
 
 import './App.css';
+import './AutoSuggest.css';
 
 import Categories from "categories/Categories"
 import Groups from "groups/Groups"

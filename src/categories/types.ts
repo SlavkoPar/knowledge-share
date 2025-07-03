@@ -506,13 +506,13 @@ export interface IParentInfo {
 
 export interface ICategoriesState {
 	formMode: FormMode;
-	topCategoryRows: ICategoryRow[];
-	topCategoryRowsLoading: boolean;
-	topCategoryRowsLoaded: boolean;
-	categoryKeyExpanded: ICategoryKeyExpanded | null;
+	topRows: ICategoryRow[];
+	topRowsLoading: boolean;
+	topRowsLoaded: boolean;
+	keyExpanded: ICategoryKeyExpanded | null;
 	categoryId_questionId_done?: string;
-	categoryNodeOpening: boolean;
-	categoryNodeOpened: boolean;
+	nodeOpening: boolean;
+	nodeOpened: boolean;
 	activeCategory: ICategory | null;
 	activeQuestion: IQuestion | null;
 	loading: boolean;
@@ -533,7 +533,7 @@ export interface ILoadCategoryQuestions {
 
 export interface ICategoriesContext {
 	state: ICategoriesState,
-	openCategoryNode: (categoryKeyExpanded: ICategoryKeyExpanded, fromChatBotDlg?: string) => Promise<any>;
+	openCategoryNode: (keyExpanded: ICategoryKeyExpanded, fromChatBotDlg?: string) => Promise<any>;
 	loadTopCategoryRows: () => Promise<any>,
 	addSubCategory: (categoryRow: ICategoryRow) => Promise<any>;
 	cancelAddCategory: () => Promise<any>;
@@ -635,10 +635,10 @@ export class AssignedAnswer {
 
 
 export enum ActionTypes {
-	SET_TOP_CATEGORY_ROWS = 'SET_TOP_CATEGORY_ROWS',
-	SET_CATEGORY_NODE_OPENED = "SET_CATEGORY_NODE_OPENED",
+	SET_TOP_ROWS = 'SET_TOP_ROWS',
+	SET_NODE_OPENED = "SET_NODE_OPENED",
 	SET_LOADING = 'SET_LOADING',
-	SET_TOP_CATEGORY_ROWS_LOADING = 'SET_TOP_CATEGORY_ROWS_LOADING',
+	SET_TOP_ROWS_LOADING = 'SET_TOP_ROWS_LOADING',
 	SET_CATEGORY_LOADING = 'SET_CATEGORY_LOADING',
 	SET_CATEGORY_QUESTIONS_LOADING = 'SET_CATEGORY_QUESTIONS_LOADING',
 	SET_SUB_CATEGORIES = 'SET_SUB_CATEGORIES',
@@ -660,8 +660,8 @@ export enum ActionTypes {
 	CLOSE_CATEGORY_FORM = 'CLOSE_CATEGORY_FORM',
 	CANCEL_CATEGORY_FORM = 'CANCEL_CATEGORY_FORM',
 
-	CATEGORY_NODE_OPENING = "CATEGORY_NODE_OPENING",
-	FORCE_OPEN_CATEGORY_NODE = "FORCE_OPEN_CATEGORY_NODE",
+	NODE_OPENING = "NODE_OPENING",
+	FORCE_OPEN_NODE = "FORCE_OPEN_NODE",
 
 	// questions
 	LOAD_CATEGORY_QUESTIONS = 'LOAD_CATEGORY_QUESTIONS',
@@ -711,14 +711,13 @@ export const actionStoringToLocalStorage = [
 	ActionTypes.SET_CATEGORY_TO_EDIT,
 	ActionTypes.SET_QUESTION_TO_VIEW,
 	ActionTypes.SET_QUESTION_TO_EDIT,
-	ActionTypes.FORCE_OPEN_CATEGORY_NODE
+	ActionTypes.FORCE_OPEN_NODE
 ];
 
 
 export type CategoriesPayload = {
 
-
-	[ActionTypes.SET_TOP_CATEGORY_ROWS_LOADING]: {
+	[ActionTypes.SET_TOP_ROWS_LOADING]: {
 		categoryRow?: ICategoryRow;
 	}
 
@@ -737,22 +736,22 @@ export type CategoriesPayload = {
 		questionLoading: boolean;
 	}
 
-	[ActionTypes.CATEGORY_NODE_OPENING]: {
+	[ActionTypes.NODE_OPENING]: {
 		categoryRow?: ICategoryRow;
 		fromChatBotDlg: boolean;
 		//categoryKeyExpanded: ICategoryKeyExpanded
 	};
 
-	[ActionTypes.SET_CATEGORY_NODE_OPENED]: {
+	[ActionTypes.SET_NODE_OPENED]: {
 		// categoryNodesUpTheTree: ICategoryKeyExtended[]; /// we could have used Id only
 		categoryRow: ICategoryRow;
-		categoryKeyExpanded: ICategoryKeyExpanded;
+		keyExpanded: ICategoryKeyExpanded;
 		//questionId: string | null,
 		fromChatBotDlg: boolean;
 	};
 
 
-	[ActionTypes.SET_TOP_CATEGORY_ROWS]: {
+	[ActionTypes.SET_TOP_ROWS]: {
 		categoryRow?: ICategoryRow;
 		topCategoryRows: ICategoryRow[];
 	};
@@ -847,9 +846,9 @@ export type CategoriesPayload = {
 		categoryRow?: ICategoryRow
 	};
 
-	[ActionTypes.FORCE_OPEN_CATEGORY_NODE]: {
+	[ActionTypes.FORCE_OPEN_NODE]: {
 		categoryRow?: ICategoryRow,
-		categoryKeyExpanded: ICategoryKeyExpanded
+		keyExpanded: ICategoryKeyExpanded
 	};
 
 

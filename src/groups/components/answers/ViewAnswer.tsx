@@ -5,7 +5,7 @@ import AnswerForm from "groups/components/answers/AnswerForm";
 
 const ViewAnswer = ({ inLine }: { inLine: boolean }) => {
     const { state } = useGroupContext();
-    const { answerLoading, topGroupRows: groups, activeAnswer } = state;
+    const { answerLoading, topRows: groups, activeAnswer } = state;
     //const { partitionKey, id, parentGroup } = activeAnswer!;
 
     const [answer, setAnswer] = useState<IAnswer | null>(null);

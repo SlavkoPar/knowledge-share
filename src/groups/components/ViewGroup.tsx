@@ -7,7 +7,7 @@ import GroupForm from "groups/components/GroupForm";
 
 const ViewGroup = ({ inLine }: { inLine: boolean }) => {
     const { state } = useGroupContext();
-    const { activeGroup, groupKeyExpanded } = state;
+    const { activeGroup, keyExpanded: groupKeyExpanded } = state;
     const { answerId } = groupKeyExpanded!;
     return (
         <GroupForm

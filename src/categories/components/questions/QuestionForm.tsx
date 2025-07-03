@@ -100,7 +100,7 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
   }
 
   return (
-    <div className="form-wrapper px-3 py-1 my-0 my-1 w-100 bg-warning question-form" >
+    <div className="form-wrapper px-3 py-1 my-0 my-1 w-100 question-form" >
       {/* data-bs-theme={`${isDarkMode ? 'dark' : 'light'}`} */}
       {showCloseButton && <CloseButton onClick={closeForm} className="float-end" />}
       <Row className='text-center'>
@@ -226,7 +226,7 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
         </Row>
 
         {(viewing || editing) &&
-          <>
+          <div className="my-1">
             <AssignedAnswers
               questionKey={questionKey}
               questionTitle={title}
@@ -245,7 +245,7 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
               modified={question.modified}
               classes="text-primary"
             />
-          </>
+          </div>
         }
         { ((formik.dirty && editing) || adding) && 
           <FormButtons

@@ -108,7 +108,7 @@ export const GroupProvider: React.FC<Props> = ({ children }) => {
 
   const loadFirstLevelGroupRows = useCallback(async () => {
     return new Promise(async (resolve) => {
-      const { groupKeyExpanded } = state;
+      const { keyExpanded: groupKeyExpanded } = state;
       try {
         dispatch({ type: ActionTypes.SET_LOADING, payload: {} });
         const url = `${protectedResources.KnowledgeAPI.endpointGroupRow}/null/null`;
@@ -124,7 +124,7 @@ export const GroupProvider: React.FC<Props> = ({ children }) => {
               dto.RootId = dto.Id;
               return new GroupRow(dto).groupRow;
             })
-            dispatch({ type: ActionTypes.SET_TOP_GROUP_ROWS, payload: { topGroupRows } });
+            dispatch({ type: ActionTypes.SET_TOP_ROWS, payload: { topGroupRows } });
             resolve(topGroupRows);
           });
       }
@@ -137,18 +137,18 @@ export const GroupProvider: React.FC<Props> = ({ children }) => {
 
 
   const openGroupNode = useCallback(
-    async (catKeyExp: IGroupKeyExpanded, fromChatBotDlg: string = 'false'): Promise<any> => {
+    async (groupKeyExp: IGroupKeyExpanded, fromChatBotDlg: string = 'false'): Promise<any> => {
       return new Promise(async (resolve) => {
         try {
           dispatch({ type: ActionTypes.SET_LOADING, payload: {} });
-          console.log('---GroupProvider.openGroupNode groupKeyExpanded:', catKeyExp)
-          let { id, partitionKey } = catKeyExp;
+          console.log('---GroupProvider.openGroupNode groupKeyExpanded:', groupKeyExp)
+          let { id, partitionKey } = groupKeyExp;
           console.assert(id);
           if (id && partitionKey === '') {
             const groupRow: IGroupRow | undefined = groupRows.get(id);
             console.log("rrrrrrrrrrrrrrrrropenGroupNode", id, groupRow)
             if (groupRow) {
-              catKeyExp.partitionKey = groupRow.partitionKey;
+              groupKeyExp.partitionKey = groupRow.partitionKey;
               partitionKey = groupRow.partitionKey;
             }
             else {
@@ -169,10 +169,10 @@ export const GroupProvider: React.FC<Props> = ({ children }) => {
               if (groupRowDto) {
                 const groupRow = new GroupRow(groupRowDto).groupRow; // deep clone dto
                 dispatch({
-                  type: ActionTypes.SET_GROUP_NODE_OPENED, payload: {
-                    // groupKeyExpanded: catKeyExp,
+                  type: ActionTypes.SET_NODE_OPENED, payload: {
+                    keyExpanded: groupKeyExp,
                     groupRow,
-                    answerId: catKeyExp.answerId,
+                    answerId: groupKeyExp.answerId,
                     fromChatBotDlg: fromChatBotDlg === 'true'
                   }
                 })
@@ -248,7 +248,7 @@ export const GroupProvider: React.FC<Props> = ({ children }) => {
   const expandGroup = useCallback(
     async ({ rootId, groupKey, formMode, includeAnswerId, newGroupRow, newAnswer }: IExpandInfo): Promise<any> => {
       try {
-        const { groupKeyExpanded } = state;
+        const { keyExpanded: groupKeyExpanded } = state;
         const { answerId } = groupKeyExpanded!;
         const groupRow: IGroupRow | Error = await getGroupRow(rootId, groupKey, true, includeAnswerId ?? null); // to reload Group
         if (groupRow instanceof Error) {
@@ -373,7 +373,7 @@ export const GroupProvider: React.FC<Props> = ({ children }) => {
   const createGroup = useCallback(
     async (group: IGroup) => {
       const { partitionKey, id, parentGroup, variations, title, kind, modified, rootId } = group;
-      dispatch({ type: ActionTypes.SET_GROUP_LOADING, payload: { id, loading: false } });
+      dispatch({ type: ActionTypes.SET_LOADING, payload: {} });
       try {
         const groupDto = new GroupDto(group).groupDto;
         console.log("groupDto", { groupDto })
@@ -444,17 +444,23 @@ export const GroupProvider: React.FC<Props> = ({ children }) => {
       dispatch({ type: ActionTypes.SET_ERROR, payload: { error: group } });
     }
     else {
-      const parentGroupKey = { partitionKey: parentGroup, id: parentGroup }
-      // get acurate info from server (children will be collapsed)
-      const expandInfo: IExpandInfo = {
-        rootId: rootId!,
-        groupKey: parentGroupKey,
-        formMode: FormMode.EditingGroup
+      if (parentGroup === null) { // topRow
+          group.rootId = groupRow.rootId;
+          dispatch({ type: ActionTypes.SET_GROUP_TO_EDIT, payload: { groupRow: group } });
       }
-      await expandGroup(expandInfo).then(() => {
-        group.rootId = groupRow.rootId;
-        dispatch({ type: ActionTypes.SET_GROUP_TO_EDIT, payload: { groupRow: group } });
-      })
+      else {
+        const parentGroupKey = { partitionKey: parentGroup, id: parentGroup }
+        // get acurate info from server (children will be collapsed)
+        const expandInfo: IExpandInfo = {
+          rootId: rootId!,
+          groupKey: parentGroupKey,
+          formMode: FormMode.EditingGroup
+        }
+        await expandGroup(expandInfo).then(() => {
+          group.rootId = groupRow.rootId;
+          dispatch({ type: ActionTypes.SET_GROUP_TO_EDIT, payload: { groupRow: group } });
+        })
+      }
     }
   }, [dispatch, formMode]);
 
@@ -462,7 +468,7 @@ export const GroupProvider: React.FC<Props> = ({ children }) => {
   const updateGroup = useCallback(
     async (group: IGroup, closeForm: boolean) => {
       const { partitionKey, id, variations, title, kind, modified, rootId } = group;
-      dispatch({ type: ActionTypes.SET_GROUP_LOADING, payload: { id, loading: false } });
+      dispatch({ type: ActionTypes.SET_LOADING, payload: {} });
       try {
         const groupDto = new GroupDto(group).groupDto;
         const url = protectedResources.KnowledgeAPI.endpointGroup;
@@ -500,7 +506,7 @@ export const GroupProvider: React.FC<Props> = ({ children }) => {
 
 
   const deleteGroup = useCallback(async (groupRow: IGroupRow) => {
-    //dispatch({ type: ActionTypes.SET_GROUP_LOADING, payload: { id, loading: false } });
+    dispatch({ type: ActionTypes.SET_LOADING, payload: {} });
     try {
       const { partitionKey, id, parentGroup, rootId } = groupRow;
       const parentGroupKey: IGroupKey = { partitionKey: parentGroup, id: parentGroup };
@@ -694,7 +700,7 @@ export const GroupProvider: React.FC<Props> = ({ children }) => {
     async (answer: IAnswer) => {
       const { partitionKey, id, title, modified, parentGroup, rootId } = answer;
       // TODO
-      dispatch({ type: ActionTypes.SET_GROUP_LOADING, payload: { id: parentGroup!, loading: false } });
+      dispatch({ type: ActionTypes.SET_LOADING, payload: {} });
       try {
         answer.created!.nickName = nickName;
         const answerDto = new AnswerDto(answer).answerDto;
@@ -738,7 +744,7 @@ export const GroupProvider: React.FC<Props> = ({ children }) => {
   const updateAnswer = useCallback(
     async (rootId: string, oldParentGroup: string, newAnswer: IAnswer, groupChanged: boolean) => {
       const { partitionKey, id, title, modified, parentGroup } = newAnswer;
-      // dispatch({ type: ActionTypes.SET_GROUP_LOADING, payload: { id: parentGroup!, loading: false } });
+      dispatch({ type: ActionTypes.SET_LOADING, payload: {} });
       try {
         newAnswer.modified!.nickName = nickName;
         const answerDto = new AnswerDto(newAnswer).answerDto;
@@ -759,12 +765,12 @@ export const GroupProvider: React.FC<Props> = ({ children }) => {
                 // nema koristi
                 // dispatch({ type: ActionTypes.SET_ANSWER, payload: { answer: answerRet } })
                 const { partitionKey, parentGroup, id } = answerRet;
-                const groupKeyExpanded: IGroupKeyExpanded = {
+                const keyExpanded: IGroupKeyExpanded = {
                   partitionKey,
                   id: parentGroup,
                   answerId: id // keep the same answer
                 }
-                dispatch({ type: ActionTypes.FORCE_OPEN_GROUP_NODE, payload: { groupKeyExpanded } })
+                dispatch({ type: ActionTypes.FORCE_OPEN_GROUP_NODE, payload: { keyExpanded } })
               }
               else {
                 const parentGroupKey: IGroupKey = { partitionKey: parentGroup, id: parentGroup };
@@ -794,7 +800,7 @@ export const GroupProvider: React.FC<Props> = ({ children }) => {
   const deleteAnswer = useCallback(
     async (answerRow: IAnswerRow) => {
       const { partitionKey, id, title, modified, parentGroup, rootId } = answerRow;
-      dispatch({ type: ActionTypes.SET_GROUP_LOADING, payload: { id: parentGroup!, loading: false } });
+      dispatch({ type: ActionTypes.SET_LOADING, payload: {} });
       try {
         const answerDto = new AnswerRowDto(answerRow).answerRowDto;
         const url = `${protectedResources.KnowledgeAPI.endpointAnswer}`;

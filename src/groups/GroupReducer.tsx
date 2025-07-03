@@ -37,14 +37,14 @@ export const initialGroup: IGroup = {
 export const initialState: IGroupsState = {
   formMode: FormMode.None,
 
-  topGroupRows: [],
-  topGroupRowsLoading: false,
-  topGroupRowsLoaded: false,
+  topRows: [],
+  topRowsLoading: false,
+  topRowsLoaded: false,
 
-  groupNodeOpening: false,
-  groupNodeOpened: false,
+  nodeOpening: false,
+  nodeOpened: false,
 
-  groupKeyExpanded: {
+  keyExpanded: {
     partitionKey: "REMOTECTRLS",
     id: "REMOTECTRLS",
     answerId: null //"aaaaaa111"
@@ -84,8 +84,8 @@ if ('localStorage' in window) {
     const groupNodeOpened = lastGroupKeyExpanded ? false : true;
     initialGroupsState = {
       ...initialGroupsState,
-      groupKeyExpanded: { ...lastGroupKeyExpanded },
-      groupNodeOpened
+      keyExpanded: { ...lastGroupKeyExpanded },
+      nodeOpened: groupNodeOpened
     }
     console.log('initialGroupsState nakon citanja iz memorije', initialGroupsState);
   }
@@ -117,43 +117,49 @@ export const GroupReducer: Reducer<IGroupsState, GroupsActions> = (state, action
   //
   // - firstLevelGroupRow BBB
   // - ...
+  const innerReducerModifiedTree = [
+    ActionTypes.SET_TOP_ROWS,
+    ActionTypes.GROUP_NODE_OPENING,
+    ActionTypes.SET_NODE_OPENED
+  ]
 
   const { groupRow } = action.payload;
   const isGroup = IsGroup(groupRow); // IGroup rather than IGroupRow
   // const modifyTree = groupRow && !isGroup;
-  const modifyTree = groupRow; // let us modify tree and rest of state in single action
-  const { topGroupRows } = state;
+  // let us modify tree and rest of state in single action
+  const modifyTree = groupRow !== undefined && !innerReducerModifiedTree.includes(action.type);
+  const { topRows } = state;
   let newTopGroupRows: IGroupRow[];
 
   const newState = innerReducer(state, action);
   // return {
-  //   ...state, // shallow copy, sjebace topGroupRows
+  //   ...state, // shallow copy, sjebace topRows
   //   ...
   // }
 
   // Actions that modify TreeView
-  // Actually part topGroupRows of state
+  // Actually part topRows of state
   if (modifyTree) {
     const { rootId, id } = groupRow!;
     if (id === rootId) {
-      // actually topGroupRows is from previous state
-      newTopGroupRows = topGroupRows.map(c => c.id === rootId
+      // actually topRows is from previous state
+      newTopGroupRows = topRows.map(c => c.id === rootId
         ? new DeepClone(groupRow!).groupRow
         : new DeepClone(c).groupRow
       );
     }
     else {
-      // actually topGroupRows is from previous state
-      const topRow: IGroupRow = topGroupRows.find(c => c.id === rootId)!;
+      // actually topRows is from previous state
+      const topRow: IGroupRow = topRows.find(c => c.id === rootId)!;
       DeepClone.idToSet = id;
       DeepClone.newGroupRow = groupRow!;
       const newTopRow = new DeepClone(topRow).groupRow;
-      newTopGroupRows = topGroupRows.map(c => c.id === rootId
+      newTopGroupRows = topRows.map(c => c.id === rootId
         ? newTopRow
         : new DeepClone(c).groupRow
       );
     }
-    newState.topGroupRows = newTopGroupRows;
+    newState.topRows = newTopGroupRows;
   }
   else {
     // just clone to enable time-travel debugging
@@ -179,7 +185,7 @@ export const GroupReducer: Reducer<IGroupsState, GroupsActions> = (state, action
   // }
 
   if (actionTypesStoringToLocalStorage.includes(action.type)) {
-    const { groupKeyExpanded } = newState;
+    const { keyExpanded: groupKeyExpanded } = newState;
     const locStorage: ILocStorage = {
       lastGroupKeyExpanded: groupKeyExpanded
     }
@@ -191,11 +197,11 @@ export const GroupReducer: Reducer<IGroupsState, GroupsActions> = (state, action
 const innerReducer = (state: IGroupsState, action: GroupsActions): IGroupsState => {
   switch (action.type) {
 
-    case ActionTypes.SET_TOP_GROUP_ROWS_LOADING:
+    case ActionTypes.SET_TOP_ROWS_LOADING:
       return {
         ...state,
-        topGroupRowsLoading: true,
-        topGroupRowsLoaded: false,
+        topRowsLoading: true,
+        topRowsLoaded: false
       }
 
     case ActionTypes.SET_LOADING:
@@ -206,14 +212,14 @@ const innerReducer = (state: IGroupsState, action: GroupsActions): IGroupsState 
 
     //////////////////////////////////////////////////
     // GroupRows Level: 1
-    case ActionTypes.SET_TOP_GROUP_ROWS: {
+    case ActionTypes.SET_TOP_ROWS: {
       const { topGroupRows } = action.payload;
       console.log('=> GroupsReducer ActionTypes.SET_FIRST_LEVEL_GROUP_ROWS', { topGroupRows })
       return {
         ...state,
-        topGroupRows,
-        topGroupRowsLoading: false,
-        topGroupRowsLoaded: true,
+        topRows: topGroupRows,
+        topRowsLoading: false,
+        topRowsLoaded: true,
         loading: false
       };
     }
@@ -223,50 +229,64 @@ const innerReducer = (state: IGroupsState, action: GroupsActions): IGroupsState 
       //const { groupKeyExpanded } = action.payload;
       return {
         ...state,
-        groupNodeOpening: true,
-        groupNodeOpened: false
+        nodeOpening: true,
+        nodeOpened: false
         //topGroupRows: [],
         //groupKeyExpanded
       }
     }
 
-    case ActionTypes.SET_GROUP_NODE_OPENED: {
+    case ActionTypes.SET_NODE_OPENED: {
+      const { groupRow, keyExpanded, fromChatBotDlg } = action.payload;
+      const { id, answerId } = keyExpanded; //;
+      const { topRows: topGroupRows } = state;
+      const topGrpRows: IGroupRow[] = topGroupRows.map(c => c.id === groupRow.id
+        ? { ...groupRow }
+        : { ...c }
+      )
+      return {
+        ...state,
+        topRows: topGrpRows,
+        keyExpanded,
+        groupId_answerId_done: `${id}_${answerId}`,
+        nodeOpening: false,
+        nodeOpened: true,
+        loading: false
+        //mode: Mode.NULL // reset previosly selected form
+      };
+    }
+
+
+    case ActionTypes.SET_NODE_OPENED: {
       const { groupRow, answerId, fromChatBotDlg } = action.payload; // groupKeyExpanded, 
       const { id } = groupRow; //groupKeyExpanded;
       console.log('====== >>>>>>> GroupsReducer ActionTypes.SET_GROUP_NODE_OPENED payload ', action.payload)
       const topGroupRows: IGroupRow[] = fromChatBotDlg
         ? []
-        : state.topGroupRows.map(c => c.id === groupRow.id
+        : state.topRows.map(c => c.id === groupRow.id
           ? { ...groupRow }
           : { ...c }
         )
       return {
         ...state,
-        topGroupRows,
+        topRows: topGroupRows,
         groupId_answerId_done: `${id}_${answerId}`,
-        groupNodeOpening: false,
-        groupNodeOpened: true,
+        nodeOpening: false,
+        nodeOpened: true,
         loading: false
         //mode: Mode.NULL // reset previosly selected form
       };
     }
 
     case ActionTypes.FORCE_OPEN_GROUP_NODE:
-      const { groupKeyExpanded } = action.payload;
+      const { keyExpanded } = action.payload;
       return {
         ...state,
-        groupNodeOpening: false,
-        groupNodeOpened: false,
-        topGroupRows: [],
-        topGroupRowsLoaded: false,
-        groupKeyExpanded
-      }
-
-    case ActionTypes.SET_GROUP_LOADING:
-      const { id, loading } = action.payload; // group doesn't contain inAdding 
-      return {
-        ...state,
-        loading
+        nodeOpening: false,
+        nodeOpened: false,
+        topRows: [],
+        topRowsLoaded: false,
+        keyExpanded
       }
 
     case ActionTypes.SET_GROUP_ANSWERS_LOADING:
@@ -348,7 +368,7 @@ const innerReducer = (state: IGroupsState, action: GroupsActions): IGroupsState 
         ...state,
         // keep mode
         loading: false,
-        groupKeyExpanded: { ...groupKey, answerId: null },
+        keyExpanded: { ...groupKey, answerId: null },
         formMode: FormMode.AddingGroup,
         activeGroup: groupRow,
         activeAnswer: null
@@ -358,9 +378,9 @@ const innerReducer = (state: IGroupsState, action: GroupsActions): IGroupsState 
     case ActionTypes.SET_GROUP_ROW_EXPANDED: {
       const { groupRow, formMode } = action.payload; // group doesn't contain  inAdding 
       const { partitionKey: rowPartitionkey, id: rowId } = groupRow;
-      const { partitionKey, id, answerId } = state.groupKeyExpanded!;
+      const { partitionKey, id, answerId } = state.keyExpanded!;
       const groupKeyExpanded = {
-        partitionKey: rowPartitionkey, 
+        partitionKey: rowPartitionkey,
         id: rowId,
         answerId: rowPartitionkey === partitionKey && rowId === id
           ? answerId
@@ -372,7 +392,7 @@ const innerReducer = (state: IGroupsState, action: GroupsActions): IGroupsState 
         ...state,
         // keep mode
         loading: false,
-        groupKeyExpanded,
+        keyExpanded: groupKeyExpanded,
         activeGroup: null,
         activeAnswer: null,
         formMode
@@ -387,7 +407,7 @@ const innerReducer = (state: IGroupsState, action: GroupsActions): IGroupsState 
         ...state,
         // keep mode
         loading: false,
-        groupKeyExpanded: null, //{ ...groupKey, answerId: null },
+        keyExpanded: null, //{ ...groupKey, answerId: null },
         activeGroup: null,
         activeAnswer: null
       }
@@ -405,7 +425,7 @@ const innerReducer = (state: IGroupsState, action: GroupsActions): IGroupsState 
         ...state,
         formMode: FormMode.ViewingGroup,
         loading: false,
-        groupKeyExpanded: state.groupKeyExpanded ? { ...state.groupKeyExpanded, answerId: null } : null,
+        keyExpanded: state.keyExpanded ? { ...state.keyExpanded, answerId: null } : null,
         activeGroup,
         activeAnswer: null
       };
@@ -424,7 +444,7 @@ const innerReducer = (state: IGroupsState, action: GroupsActions): IGroupsState 
         ...state,
         formMode: FormMode.EditingGroup,
         loading: false,
-        groupKeyExpanded: null, // otherwise group will expand
+        keyExpanded: null, // otherwise group will expand
         activeGroup,
         activeAnswer: null
       };
@@ -529,7 +549,7 @@ const innerReducer = (state: IGroupsState, action: GroupsActions): IGroupsState 
 
     case ActionTypes.GROUP_TITLE_CHANGED: {
       const { value, id } = action.payload;
-      const { topGroupRows } = state;
+      const { topRows: topGroupRows } = state;
       const groupRow: IGroupRow | undefined = findGroup(topGroupRows, id);
       if (groupRow) {
         groupRow.title = value;
@@ -541,7 +561,7 @@ const innerReducer = (state: IGroupsState, action: GroupsActions): IGroupsState 
 
     case ActionTypes.ANSWER_TITLE_CHANGED: {
       const { groupId, id, value } = action.payload;
-      const { topGroupRows } = state;
+      const { topRows: topGroupRows } = state;
       const groupRow: IGroupRow | undefined = findGroup(topGroupRows, groupId);
       if (groupRow) {
         groupRow.answerRows.find(q => q.id === id)!.title = value;
@@ -614,12 +634,12 @@ const innerReducer = (state: IGroupsState, action: GroupsActions): IGroupsState 
     case ActionTypes.SET_ANSWER_TO_VIEW: {
       const { answer } = action.payload;
       const { partitionKey, id, parentGroup } = answer;
-      const { groupKeyExpanded } = state;
+      const { keyExpanded: groupKeyExpanded } = state;
       return {
         ...state,
         formMode: FormMode.ViewingAnswer,
         loading: false,
-        groupKeyExpanded: groupKeyExpanded
+        keyExpanded: groupKeyExpanded
           ? { ...groupKeyExpanded, answerId: groupKeyExpanded.id === parentGroup ? id : null }
           : null,
         activeAnswer: answer
@@ -629,7 +649,7 @@ const innerReducer = (state: IGroupsState, action: GroupsActions): IGroupsState 
     case ActionTypes.SET_ANSWER_TO_EDIT: {
       const { answer } = action.payload;
       const { partitionKey, id, parentGroup } = answer;
-      const { groupKeyExpanded } = state;
+      const { keyExpanded: groupKeyExpanded } = state;
       return {
         ...state,
         loading: false,

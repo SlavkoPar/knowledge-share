@@ -29,8 +29,8 @@ const AnswerRow = ({ answerRow }: { answerRow: IAnswerRow }) => {
     const { canEdit, isDarkMode, variant, bg, authUser } = useGlobalState();
     const { state, viewAnswer, addAnswer, editAnswer, deleteAnswer } = useGroupContext();
 
-    const { activeAnswer, formMode, groupKeyExpanded } = state;
-    
+    const { activeAnswer, formMode, keyExpanded: groupKeyExpanded } = state;
+
     const showForm = activeAnswer !== null && activeAnswer.id === id;
 
     //const [alreadyAdding] = useState(formMode === FormMode.AddingAnswer);
@@ -94,7 +94,7 @@ const AnswerRow = ({ answerRow }: { answerRow: IAnswerRow }) => {
             >
                 {title}
             </Button>
-           
+
 
             {/* {canEdit && !alreadyAdding && hoverProps.isHovered &&
                 <Button variant='link' size="sm" className="ms-1 py-0 px-1 text-secondary"

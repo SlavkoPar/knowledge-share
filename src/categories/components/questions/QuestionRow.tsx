@@ -29,8 +29,8 @@ const QuestionRow = ({ questionRow }: { questionRow: IQuestionRow }) => {
     const { canEdit, isDarkMode, variant, bg, authUser } = useGlobalState();
     const { state, viewQuestion, addQuestion, editQuestion, deleteQuestion } = useCategoryContext();
 
-    const { activeQuestion, formMode, categoryKeyExpanded } = state;
-    
+    const { activeQuestion, formMode, keyExpanded: categoryKeyExpanded } = state;
+
     const showForm = activeQuestion !== null && activeQuestion.id === id;
 
     //const [alreadyAdding] = useState(formMode === FormMode.AddingQuestion);
@@ -76,7 +76,7 @@ const QuestionRow = ({ questionRow }: { questionRow: IQuestionRow }) => {
     const [hoverRef, hoverProps] = useHover();
 
     const Row1 =
-        <div ref={hoverRef} className="d-flex justify-content-start align-items-center w-100 text-primary bg-warning position-relative question-row">
+        <div ref={hoverRef} className={`d-flex justify-content-start align-items-center w-100 position-relative question-row${showForm?'-selected':''}`}>
             <Button
                 variant='link'
                 size="sm"
@@ -87,7 +87,7 @@ const QuestionRow = ({ questionRow }: { questionRow: IQuestionRow }) => {
             <Button
                 variant='link'
                 size="sm"
-                className={`p-0 mx-0 text-decoration-none text-secondary ${showForm ? 'fw-bold' : ''}`}
+                className={`p-0 px-1 mx-0 question-row-title ${showForm ? 'fw-bold' : ''}`}
                 title={`id:${id!.toString()}`}
                 onClick={() => onSelectQuestion(id!)}
                 disabled={alreadyAdding}
@@ -136,7 +136,7 @@ const QuestionRow = ({ questionRow }: { questionRow: IQuestionRow }) => {
         // border border-3 border-danger"
         // <div className="py-0 px-0 w-100 list-group-item border">
         <ListGroup.Item
-            variant={"primary"}
+            // variant={"primary"}
             className="py-0 px-1 w-100"
             as="li"
         >

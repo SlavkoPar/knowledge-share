@@ -11,7 +11,7 @@ const EditCategory = ({ inLine }: { inLine: boolean }) => {
 
     const { state, updateCategory } = useCategoryContext();
 
-    const { activeCategory, categoryKeyExpanded } = state;
+    const { activeCategory, keyExpanded: categoryKeyExpanded } = state;
     const { questionId } = categoryKeyExpanded!;
 
     const submitForm = async (categoryObject: ICategory) => {

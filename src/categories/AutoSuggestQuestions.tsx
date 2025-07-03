@@ -355,9 +355,9 @@ export class AutoSuggestQuestions extends React.Component<{
 		return (
 			<span className="d-inline-block text-truncate" style={{ textAlign: 'left' }}>
 				{parts.map((part, index) => {
-					const className = part.highlight ? 'react-autosuggest__suggestion-match' : undefined;
+					const cls = part.highlight ? 'react-autosuggest__suggestion-match' : undefined;
 					return (
-						<span key={index}>
+						<span key={index} className={`${cls??''}`}>
 							{part.text}
 						</span>
 					);

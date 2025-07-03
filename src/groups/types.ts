@@ -255,7 +255,7 @@ export class AnswerRowDto {
 			Id: row.id,
 			ParentGroup: row.parentGroup ?? '',
 			Title: row.title,
-			Link: row.link??'',
+			Link: row.link ?? '',
 			GroupTitle: '',
 			Created: new WhoWhen2Dto(row.created!).whoWhenDto!,
 			Modified: new WhoWhen2Dto(row.modified).whoWhenDto!,
@@ -388,7 +388,7 @@ export class AnswerDto {
 			Id: id,
 			ParentGroup: parentGroup ?? 'null',  // TODO proveri
 			Title: title,
-			Link: link??'',
+			Link: link ?? '',
 			Source: source,
 			Status: status,
 			Created: new WhoWhen2Dto(created).whoWhenDto!,
@@ -481,13 +481,13 @@ export interface IParentInfo {
 
 export interface IGroupsState {
 	formMode: FormMode;
-	topGroupRows: IGroupRow[];
-	topGroupRowsLoading: boolean;
-	topGroupRowsLoaded: boolean;
-	groupKeyExpanded: IGroupKeyExpanded | null;
+	topRows: IGroupRow[];
+	topRowsLoading: boolean;
+	topRowsLoaded: boolean;
+	keyExpanded: IGroupKeyExpanded | null;
 	groupId_answerId_done?: string;
-	groupNodeOpening: boolean;
-	groupNodeOpened: boolean;
+	nodeOpening: boolean;
+	nodeOpened: boolean;
 	activeGroup: IGroup | null;
 	activeAnswer: IAnswer | null;
 	loading: boolean;
@@ -508,7 +508,7 @@ export interface ILoadGroupAnswers {
 
 export interface IGroupsContext {
 	state: IGroupsState,
-	openGroupNode: (groupKeyExpanded: IGroupKeyExpanded, fromChatBotDlg?: string) => Promise<any>;
+	openGroupNode: (keyExpanded: IGroupKeyExpanded, fromChatBotDlg?: string) => Promise<any>;
 	loadTopGroupRows: () => Promise<any>,
 	addSubGroup: (groupRow: IGroupRow) => Promise<any>;
 	cancelAddGroup: () => Promise<any>;
@@ -550,17 +550,13 @@ export interface IAnswerFormProps {
 	children: string
 }
 
-
 /////////////////////////////////////////////////
 // 
-
-
 export enum ActionTypes {
-	SET_TOP_GROUP_ROWS = 'SET_TOP_GROUP_ROWS',
-	SET_GROUP_NODE_OPENED = "SET_GROUP_NODE_OPENED",
+	SET_TOP_ROWS = 'SET_TOP_ROWS',
+	SET_NODE_OPENED = "SET_NODE_OPENED",
 	SET_LOADING = 'SET_LOADING',
-	SET_TOP_GROUP_ROWS_LOADING = 'SET_TOP_GROUP_ROWS_LOADING',
-	SET_GROUP_LOADING = 'SET_GROUP_LOADING',
+	SET_TOP_ROWS_LOADING = 'SET_TOP_ROWS_LOADING',
 	SET_GROUP_ANSWERS_LOADING = 'SET_GROUP_ANSWERS_LOADING',
 	SET_SUB_GROUPS = 'SET_SUB_GROUPS',
 	SET_ERROR = 'SET_ERROR',
@@ -637,7 +633,7 @@ export const actionTypesStoringToLocalStorage = [
 export type GroupsPayload = {
 
 
-	[ActionTypes.SET_TOP_GROUP_ROWS_LOADING]: {
+	[ActionTypes.SET_TOP_ROWS_LOADING]: {
 		groupRow?: IGroupRow;
 	}
 
@@ -645,11 +641,6 @@ export type GroupsPayload = {
 		groupRow?: IGroupRow;
 	}
 
-	[ActionTypes.SET_GROUP_LOADING]: {
-		groupRow?: IGroupRow;
-		id: string;
-		loading: boolean;
-	}
 
 	[ActionTypes.SET_GROUP_ANSWERS_LOADING]: {
 		groupRow?: IGroupRow;
@@ -658,19 +649,19 @@ export type GroupsPayload = {
 
 	[ActionTypes.GROUP_NODE_OPENING]: {
 		groupRow?: IGroupRow;
-		//groupKeyExpanded: IGroupKeyExpanded
+		//keyExpanded: IGroupKeyExpanded
 	};
 
-	[ActionTypes.SET_GROUP_NODE_OPENED]: {
+	[ActionTypes.SET_NODE_OPENED]: {
 		// groupNodesUpTheTree: IGroupKeyExtended[]; /// we could have used Id only
 		groupRow: IGroupRow;
-		// groupKeyExpanded: IGroupKeyExpanded;
+		keyExpanded: IGroupKeyExpanded;
 		answerId: string | null,
 		fromChatBotDlg: boolean;
 	};
 
 
-	[ActionTypes.SET_TOP_GROUP_ROWS]: {
+	[ActionTypes.SET_TOP_ROWS]: {
 		groupRow?: IGroupRow;
 		topGroupRows: IGroupRow[];
 	};
@@ -767,7 +758,7 @@ export type GroupsPayload = {
 
 	[ActionTypes.FORCE_OPEN_GROUP_NODE]: {
 		groupRow?: IGroupRow,
-		groupKeyExpanded: IGroupKeyExpanded
+		keyExpanded: IGroupKeyExpanded
 	};
 
 
