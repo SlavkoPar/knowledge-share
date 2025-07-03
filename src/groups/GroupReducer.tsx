@@ -214,6 +214,7 @@ const innerReducer = (state: IGroupsState, action: GroupsActions): IGroupsState 
         topGroupRows,
         topGroupRowsLoading: false,
         topGroupRowsLoaded: true,
+        loading: false
       };
     }
 
@@ -245,6 +246,7 @@ const innerReducer = (state: IGroupsState, action: GroupsActions): IGroupsState 
         groupId_answerId_done: `${id}_${answerId}`,
         groupNodeOpening: false,
         groupNodeOpened: true,
+        loading: false
         //mode: Mode.NULL // reset previosly selected form
       };
     }

@@ -874,6 +874,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
 
   const viewQuestion = useCallback(async (questionRow: IQuestionRow) => {
     const questionKey = new QuestionKey(questionRow).questionKey;
+    dispatch({ type: ActionTypes.SET_LOADING, payload: {} });
     const questionEx: IQuestionEx = await getQuestion(questionKey!);
     if (formMode === FormMode.AddingQuestion) {
       await cancelAddQuestion();
@@ -900,7 +901,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
     else if (formMode === FormMode.AddingCategory) {
       await cancelAddCategory();
     }
-    //dispatch({ type: ActionTypes.SET_VIEWING_EDITING_QUESTION });
+    dispatch({ type: ActionTypes.SET_LOADING, payload: {} });
     const questionEx: IQuestionEx = await getQuestion(questionKey!);
     const { question, msg } = questionEx;
     if (question) {

@@ -140,6 +140,7 @@ export const GroupProvider: React.FC<Props> = ({ children }) => {
     async (catKeyExp: IGroupKeyExpanded, fromChatBotDlg: string = 'false'): Promise<any> => {
       return new Promise(async (resolve) => {
         try {
+          dispatch({ type: ActionTypes.SET_LOADING, payload: {} });
           console.log('---GroupProvider.openGroupNode groupKeyExpanded:', catKeyExp)
           let { id, partitionKey } = catKeyExp;
           console.assert(id);
@@ -416,8 +417,7 @@ export const GroupProvider: React.FC<Props> = ({ children }) => {
     else if (formMode === FormMode.AddingGroup) {
       await cancelAddGroup();
     }
-
-    dispatch({ type: ActionTypes.SET_LOADING, payload: { groupRow } });
+    dispatch({ type: ActionTypes.SET_LOADING, payload: {} });
     const groupKey = new GroupKey(groupRow).groupKey!;
     const group: IGroup = await getGroup(groupKey, includeAnswerId);
     if (group instanceof Error)

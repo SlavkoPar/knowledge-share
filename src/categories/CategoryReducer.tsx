@@ -633,11 +633,11 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
       return {
         ...state,
         formMode: FormMode.ViewingQuestion,
-        loading: false,
         categoryKeyExpanded: categoryKeyExpanded
           ? { ...categoryKeyExpanded, questionId: categoryKeyExpanded.id === parentCategory ? id : null }
           : null,
-        activeQuestion: question
+        activeQuestion: question,
+        loading: false
       }
     }
 
@@ -647,13 +647,13 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
       const { categoryKeyExpanded } = state;
       return {
         ...state,
-        loading: false,
         // categoryKeyExpanded: categoryKeyExpanded
         //   ? { ...categoryKeyExpanded, questionId: categoryKeyExpanded.id === parentCategory ? id : null }
         //   : null,
         //categoryKeyExpanded: { partitionKey: parentCategory, id: parentCategory, questionId: id },
         activeQuestion: question,
-        formMode: FormMode.EditingQuestion
+        formMode: FormMode.EditingQuestion,
+        loading: false
       }
     }
 

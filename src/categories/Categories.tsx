@@ -35,7 +35,8 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
         categoryNodeOpening, categoryNodeOpened,
         activeCategory,
         activeQuestion,
-        formMode
+        formMode,
+        loading
     } = state;
 
     const { setLastRouteVisited, searchQuestions } = useGlobalContext();
@@ -188,6 +189,12 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
                     onHide={() => { setModalShow(false) }}
                     newQuestionRow={newQuestion}
                 />
+            }
+            {loading && <div className="d-flex justify-content-center align-items-center" style={{ position: 'absolute', top: '50%', left: '50%' }}>
+                <div className="spinner-border text-warning" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                </div>
+            </div>
             }
         </>
     );

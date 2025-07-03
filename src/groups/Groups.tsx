@@ -35,8 +35,7 @@ const Providered = ({ groupId_answerId, fromChatBotDlg }: IProps) => {
         groupNodeOpening, groupNodeOpened,
         activeGroup,
         activeAnswer,
-        formMode
-    } = state;
+        formMode, loading } = state;
 
     const { setLastRouteVisited, searchAnswers, loadAndCacheAllGroupRows } = useGlobalContext();
     const { isDarkMode, authUser, groupRows, groupRowsLoaded: shortGroupsLoaded } = useGlobalState();
@@ -196,6 +195,12 @@ const Providered = ({ groupId_answerId, fromChatBotDlg }: IProps) => {
                     onHide={() => { setModalShow(false) }}
                     newAnswerRow={newAnswer}
                 />
+            }
+            {loading && <div className="d-flex justify-content-center align-items-center" style={{ position: 'absolute', top: '50%', left: '50%' }}>
+                <div className="spinner-border text-info" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                </div>
+            </div>
             }
         </>
     );

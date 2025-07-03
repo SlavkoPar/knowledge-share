@@ -353,11 +353,11 @@ export class AutoSuggestQuestions extends React.Component<{
 		const matches = AutosuggestHighlightMatch(suggestion.title, params.query);
 		const parts = AutosuggestHighlightParse(suggestion.title, matches);
 		return (
-			<span style={{ textAlign: 'left' }}>
+			<span className="d-inline-block text-truncate" style={{ textAlign: 'left' }}>
 				{parts.map((part, index) => {
 					const className = part.highlight ? 'react-autosuggest__suggestion-match' : undefined;
 					return (
-						<span className={className} key={index}>
+						<span key={index}>
 							{part.text}
 						</span>
 					);

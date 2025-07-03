@@ -17,6 +17,7 @@ import { IChatBotAnswer, INewQuestion, INextAnswer, useAI } from 'hooks/useAI'
 import Q from 'assets/Q.png';
 import A from 'assets/A.png';
 import { useCategoryDispatch } from 'categories/CategoryProvider';
+import { isMobile } from 'react-device-detect';
 
 type ChatBotParams = {
     source: string;
@@ -508,7 +509,7 @@ const ChatBotDlg = ({ show, onHide }: IProps) => {
         return <div className="dark">
             <label className="text-warning">Please enter the Question</label>
             <div className="text-start">
-                <div className="w-90 questions">
+                <div className="questions border">
                     {isDisabled &&
                         <div>
                             {txt}
@@ -544,7 +545,7 @@ const ChatBotDlg = ({ show, onHide }: IProps) => {
                         I am your Buddy
                     </Offcanvas.Title>
                 </Offcanvas.Header>
-                <Offcanvas.Body className="p-0">
+                <Offcanvas.Body className="p-0 border border-1 rounded-3">
                     <Container id='container' fluid className='text-primary'> {/* align-items-center" */}
                         <Row className="m-0">
                             <Col>
@@ -556,7 +557,8 @@ const ChatBotDlg = ({ show, onHide }: IProps) => {
                                 </ul>
                             </Col>
                         </Row>
-                        <Row className="m-0 badge">
+                         {/* badge */}
+                        <Row className="m-0">   
                             <Col className='border border-0 border-primary mx-1 text-white p-0'>
                                 {/* <div className="d-inline"> */}
                                 {/* <div key='Welcome'>
