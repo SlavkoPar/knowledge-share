@@ -37,7 +37,7 @@ const EditQuestion = ({ inLine }: { inLine: boolean }) => {
         if (activeQuestion.parentCategory !== question.parentCategory) {
             /*
              await loadAndCacheAllCategoryRows(); // reload, group could have been changed
-             await openCategoryNode({ partitionKey: '', id: q.parentCategory, questionId: q.id });
+             await openNode({ partitionKey: '', id: q.parentCategory, questionId: q.id });
             */
         }
         // if (categoryChanged) {

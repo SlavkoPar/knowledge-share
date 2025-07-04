@@ -27,8 +27,7 @@ interface IProps {
 }
 
 const Providered = ({ groupId_answerId, fromChatBotDlg }: IProps) => {
-    console.log("=== Groups", groupId_answerId)
-    const { state, openGroupNode, loadTopGroupRows } = useGroupContext();
+    const { state, openNode, loadTopGroupRows } = useGroupContext();
     const {
         topRows: topGroupRows, topRowsLoading: topGroupRowsLoading, topRowsLoaded: topGroupRowsLoaded,
         keyExpanded: groupKeyExpanded, groupId_answerId_done,
@@ -99,19 +98,19 @@ const Providered = ({ groupId_answerId, fromChatBotDlg }: IProps) => {
                         const answerId = arr[1];
                         const keyExp = { partitionKey: null, id: groupId, answerId }
                         // setCatKeyExpanded(keyExp);
-                        console.log('zovem openGroupNode 1111111111111111111)', { groupId_answerId }, { groupId_answerId_done })
-                        await openGroupNode(keyExp, fromChatBotDlg ?? 'false')
+                        console.log('zovem openNode 1111111111111111111)', { groupId_answerId }, { groupId_answerId_done })
+                        await openNode(keyExp, fromChatBotDlg ?? 'false')
                             .then(() => { return null; });
                     }
                 }
                 else if (groupKeyExpanded && !groupNodeOpened) {
-                    console.log('zovem openGroupNode 2222222222222)', { groupKeyExpanded }, { groupNodeOpened })
-                    await openGroupNode(groupKeyExpanded)
+                    console.log('zovem openNode 2222222222222)', { groupKeyExpanded }, { groupNodeOpened })
+                    await openNode(groupKeyExpanded)
                         .then(() => { return null; });
                 }
             }
         })()
-    }, [groupKeyExpanded, groupNodeOpening, groupNodeOpened, openGroupNode, groupId_answerId, groupId_answerId_done, topGroupRowsLoaded])
+    }, [groupKeyExpanded, groupNodeOpening, groupNodeOpened, openNode, groupId_answerId, groupId_answerId_done, topGroupRowsLoaded])
 
     useEffect(() => {
         setLastRouteVisited(`/groups`);
@@ -132,7 +131,6 @@ const Providered = ({ groupId_answerId, fromChatBotDlg }: IProps) => {
     }
 
 
-    console.log('===>>> Groups !!!!!!!!!!!!!!!!!')
     //if (!groupNodeOpened)
     if (!shortGroupsLoaded || topGroupRows.length === 0)
         return null
@@ -140,7 +138,7 @@ const Providered = ({ groupId_answerId, fromChatBotDlg }: IProps) => {
     return (
         <>
             <Container>
-                <h6 style={{ color: 'rgb(13, 110, 253)', marginLeft: '30%' }}>Groups / Answers</h6>
+                <h6 className="text-info mx-auto w-75 fw-bold">Groups / Answers</h6>
 
                 <Row className={`${isDarkMode ? "dark" : ""}`}>
                     <Col>
@@ -171,7 +169,7 @@ const Providered = ({ groupId_answerId, fromChatBotDlg }: IProps) => {
                 </Button>
                 <Row className="my-1">
                     <Col xs={12} md={5} >
-                        <div className="border border-5 rounded-3 border-info">
+                        <div className="groups-border">
                             <GroupList groupRow={groupRow} level={0} title="root" isExpanded={true} />
                         </div>
                     </Col>

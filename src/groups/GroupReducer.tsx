@@ -50,6 +50,7 @@ export const initialState: IGroupsState = {
     answerId: null //"aaaaaa111"
   },
   groupId_answerId_done: undefined,
+
   activeGroup: null,
   activeAnswer: null,
 
@@ -375,16 +376,19 @@ const innerReducer = (state: IGroupsState, action: GroupsActions): IGroupsState 
       }
     }
 
-    case ActionTypes.SET_GROUP_ROW_EXPANDED: {
-      const { groupRow, formMode } = action.payload; // group doesn't contain  inAdding 
+    case ActionTypes.SET_ROW_EXPANDED: {
+      const { groupRow, formMode } = action.payload;
       const { partitionKey: rowPartitionkey, id: rowId } = groupRow;
-      const { partitionKey, id, answerId } = state.keyExpanded!;
-      const groupKeyExpanded = {
-        partitionKey: rowPartitionkey,
-        id: rowId,
-        answerId: rowPartitionkey === partitionKey && rowId === id
-          ? answerId
-          : null
+      let { keyExpanded } = state;
+      if (keyExpanded) {
+        const { partitionKey, id, answerId } = keyExpanded;
+        keyExpanded = {
+          partitionKey: rowPartitionkey,
+          id: rowId,
+          answerId: rowPartitionkey === partitionKey && rowId === id
+            ? answerId
+            : null
+        }
       }
       // Do not work with groupRow, 
       // groupRow will be proccesed in GroupReducer, rather than in innerReducer
@@ -392,14 +396,14 @@ const innerReducer = (state: IGroupsState, action: GroupsActions): IGroupsState 
         ...state,
         // keep mode
         loading: false,
-        keyExpanded: groupKeyExpanded,
+        keyExpanded,
         activeGroup: null,
         activeAnswer: null,
         formMode
       }
     }
 
-    case ActionTypes.SET_GROUP_ROW_COLLAPSED: {
+    case ActionTypes.SET_ROW_COLLAPSED: {
       const { groupRow } = action.payload; // group doesn't contain  inAdding 
       const { partitionKey, id } = groupRow;
       const groupKey = { partitionKey, id }

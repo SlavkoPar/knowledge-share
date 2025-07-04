@@ -137,7 +137,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
   }, [dispatch]);
 
 
-  const openCategoryNode = useCallback(
+  const openNode = useCallback(
     async (catKeyExp: ICategoryKeyExpanded, fromChatBotDlg: string = 'false'): Promise<any> => {
       return new Promise(async (resolve) => {
         try {
@@ -267,7 +267,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
             formMode = canEdit ? FormMode.EditingQuestion : FormMode.ViewingQuestion
           }
 
-          dispatch({ type: ActionTypes.SET_CATEGORY_ROW_EXPANDED, payload: { categoryRow, formMode: formMode! } });
+          dispatch({ type: ActionTypes.SET_ROW_EXPANDED, payload: { categoryRow, formMode: formMode! } });
           return categoryRow;
         }
       }
@@ -293,7 +293,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
         else {
           categoryRow.rootId = rootId;
           categoryRow.isExpanded = false;
-          dispatch({ type: ActionTypes.SET_CATEGORY_ROW_COLLAPSED, payload: { categoryRow } });
+          dispatch({ type: ActionTypes.SET_ROW_COLLAPSED, payload: { categoryRow } });
           return categoryKey;
         }
       }
@@ -331,7 +331,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
             ...categoryRow,
             categoryRows: [newCategoryRow, ...categoryRows],
           }
-          dispatch({ type: ActionTypes.SET_CATEGORY_ROW_EXPANDED, payload: { categoryRow: categoryRow2, formMode: FormMode.AddingCategory } });
+          dispatch({ type: ActionTypes.SET_ROW_EXPANDED, payload: { categoryRow: categoryRow2, formMode: FormMode.AddingCategory } });
           dispatch({ type: ActionTypes.SET_CATEGORY, payload: { categoryRow: { ...newCategoryRow, doc1: '' } } });
         }
         else {
@@ -468,7 +468,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
         })
       }
     }
-    }, [dispatch, formMode]);
+  }, [dispatch, formMode]);
 
 
   const updateCategory = useCallback(
@@ -988,7 +988,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
 
 
   const contextValue: ICategoriesContext = {
-    state, openCategoryNode, loadTopCategoryRows,
+    state, openNode: openNode, loadTopCategoryRows,
     addSubCategory, cancelAddCategory, createCategory,
     viewCategory, editCategory, updateCategory, deleteCategory, deleteCategoryVariation,
     expandCategory, collapseCategory,

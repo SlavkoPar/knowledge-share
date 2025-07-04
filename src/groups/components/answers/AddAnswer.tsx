@@ -49,7 +49,7 @@ const AddAnswer = ({ closeModal, showCloseButton, source, setError }: IProps) =>
             else if (closeModal) {
                 closeModal();
                 //dispatch({ type: ActionTypes.CLEAN_TREE, payload: { id: q.parentGroup } })
-                //await openGroupNode({ partitionKey: '', id: q.parentGroup, answerId: q.id });
+                //await openNode({ partitionKey: '', id: q.parentGroup, answerId: q.id });
             }
         }
     }

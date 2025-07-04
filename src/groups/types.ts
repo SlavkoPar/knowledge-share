@@ -508,7 +508,7 @@ export interface ILoadGroupAnswers {
 
 export interface IGroupsContext {
 	state: IGroupsState,
-	openGroupNode: (keyExpanded: IGroupKeyExpanded, fromChatBotDlg?: string) => Promise<any>;
+	openNode: (keyExpanded: IGroupKeyExpanded, fromChatBotDlg?: string) => Promise<any>;
 	loadTopGroupRows: () => Promise<any>,
 	addSubGroup: (groupRow: IGroupRow) => Promise<any>;
 	cancelAddGroup: () => Promise<any>;
@@ -565,8 +565,8 @@ export enum ActionTypes {
 	CANCEL_ADD_SUB_GROUP = 'CANCEL_ADD_SUB_GROUP',
 	SET_GROUP = 'SET_GROUP',
 	SET_GROUP_ROW = 'SET_GROUP_ROW',
-	SET_GROUP_ROW_EXPANDED = 'SET_GROUP_ROW_EXPANDED',
-	SET_GROUP_ROW_COLLAPSED = 'SET_GROUP_ROW_COLLAPSED',
+	SET_ROW_EXPANDED = 'SET_ROW_EXPANDED',
+	SET_ROW_COLLAPSED = 'SET_ROW_COLLAPSED',
 	SET_GROUP_ADDED = 'SET_GROUP_ADDED',
 	SET_GROUP_TO_VIEW = 'SET_GROUP_TO_VIEW',
 	SET_GROUP_TO_EDIT = 'SET_GROUP_TO_EDIT',
@@ -599,29 +599,11 @@ export enum ActionTypes {
 	CANCEL_ANSWER_FORM = 'CANCEL_ANSWER_FORM'
 }
 
-/*
-//export const actionsThatModifyFirstLevelGroupRow = [
-export const actionsThatModifyTreeView = [
-	// ActionTypes.SET_FIRST_LEVEL_GROUP_ROWS keep commented
-	// ActionTypes.SET_GROUP_NODE_OPENED,
-	ActionTypes.DELETE_GROUP,
-	ActionTypes.SET_GROUP_ROW_EXPANDED,
-	ActionTypes.SET_GROUP_ROW_COLLAPSED,
-	ActionTypes.SET_GROUP_UPDATED,
-	//ActionTypes.SET_GROUP_TO_VIEW,
-	//ActionTypes.SET_GROUP_TO_EDIT,
-	// ActionTypes.SET_ANSWER_TO_VIEW,
-	// ActionTypes.SET_ANSWER_TO_EDIT,
-	ActionTypes.CLOSE_GROUP_FORM,
-	ActionTypes.CANCEL_GROUP_FORM,
-	ActionTypes.ADD_ANSWER
-]
-	*/
 
 export const actionTypesStoringToLocalStorage = [
 	// ActionTypes.SET_GROUP_NODE_OPENED
-	ActionTypes.SET_GROUP_ROW_EXPANDED,
-	ActionTypes.SET_GROUP_ROW_COLLAPSED,
+	ActionTypes.SET_ROW_EXPANDED,
+	ActionTypes.SET_ROW_COLLAPSED,
 	ActionTypes.SET_GROUP_TO_VIEW,
 	ActionTypes.SET_GROUP_TO_EDIT,
 	ActionTypes.SET_ANSWER_TO_VIEW,
@@ -717,12 +699,12 @@ export type GroupsPayload = {
 	};
 
 
-	[ActionTypes.SET_GROUP_ROW_EXPANDED]: {
+	[ActionTypes.SET_ROW_EXPANDED]: {
 		groupRow: IGroupRow;
 		formMode: FormMode;
 	};
 
-	[ActionTypes.SET_GROUP_ROW_COLLAPSED]: {
+	[ActionTypes.SET_ROW_COLLAPSED]: {
 		groupRow: IGroupRow;
 	};
 

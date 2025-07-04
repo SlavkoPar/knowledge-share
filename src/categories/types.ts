@@ -533,7 +533,7 @@ export interface ILoadCategoryQuestions {
 
 export interface ICategoriesContext {
 	state: ICategoriesState,
-	openCategoryNode: (keyExpanded: ICategoryKeyExpanded, fromChatBotDlg?: string) => Promise<any>;
+	openNode: (keyExpanded: ICategoryKeyExpanded, fromChatBotDlg?: string) => Promise<any>;
 	loadTopCategoryRows: () => Promise<any>,
 	addSubCategory: (categoryRow: ICategoryRow) => Promise<any>;
 	cancelAddCategory: () => Promise<any>;
@@ -648,8 +648,8 @@ export enum ActionTypes {
 	CANCEL_ADD_SUB_CATEGORY = 'CANCEL_ADD_SUB_CATEGORY',
 	SET_CATEGORY = 'SET_CATEGORY',
 	SET_CATEGORY_ROW = 'SET_CATEGORY_ROW',
-	SET_CATEGORY_ROW_EXPANDED = 'SET_CATEGORY_ROW_EXPANDED',
-	SET_CATEGORY_ROW_COLLAPSED = 'SET_CATEGORY_ROW_COLLAPSED',
+	SET_ROW_EXPANDED = 'SET_ROW_EXPANDED',
+	SET_ROW_COLLAPSED = 'SET_ROW_COLLAPSED',
 	SET_CATEGORY_ADDED = 'SET_CATEGORY_ADDED',
 	SET_CATEGORY_TO_VIEW = 'SET_CATEGORY_TO_VIEW',
 	SET_CATEGORY_TO_EDIT = 'SET_CATEGORY_TO_EDIT',
@@ -705,8 +705,8 @@ export const actionsThatModifyTree = [
 
 export const actionStoringToLocalStorage = [
 	// ActionTypes.SET_CATEGORY_NODE_OPENED
-	ActionTypes.SET_CATEGORY_ROW_EXPANDED,
-	ActionTypes.SET_CATEGORY_ROW_COLLAPSED,
+	ActionTypes.SET_ROW_EXPANDED,
+	ActionTypes.SET_ROW_COLLAPSED,
 	ActionTypes.SET_CATEGORY_TO_VIEW,
 	ActionTypes.SET_CATEGORY_TO_EDIT,
 	ActionTypes.SET_QUESTION_TO_VIEW,
@@ -807,12 +807,12 @@ export type CategoriesPayload = {
 	};
 
 
-	[ActionTypes.SET_CATEGORY_ROW_EXPANDED]: {
+	[ActionTypes.SET_ROW_EXPANDED]: {
 		categoryRow: ICategoryRow;
 		formMode: FormMode;
 	};
 
-	[ActionTypes.SET_CATEGORY_ROW_COLLAPSED]: {
+	[ActionTypes.SET_ROW_COLLAPSED]: {
 		categoryRow: ICategoryRow;
 	};
 

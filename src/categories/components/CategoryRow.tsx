@@ -136,7 +136,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
             <Button
                 variant='link'
                 size="sm"
-                className="py-0 px-1  bg-light"
+                className="py-0 px-1 bg-light"
                 // onClick={expand}
                 title="Expand"
                 disabled={true} //{alreadyAdding || (!hasSubCategories && numOfQuestions === 0)}
@@ -146,7 +146,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
             <Button
                 variant='link'
                 size="sm"
-                className={`py-0 mx-0  category-row-title  ${isSelected ? 'fw-bold' : ''}`}
+                className={`py-0 mx-0 category-row-title ${isSelected ? 'fw-bold' : ''}`}
                 title={id}
                 onClick={onSelectCategory}
                 disabled={alreadyAdding}

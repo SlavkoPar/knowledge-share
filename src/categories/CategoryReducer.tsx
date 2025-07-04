@@ -365,20 +365,19 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
       }
     }
 
-    case ActionTypes.SET_CATEGORY_ROW_EXPANDED: {
-      const { categoryRow, formMode } = action.payload; // category doesn't contain  inAdding 
-      // const { partitionKey, id } = categoryRow;
-      // const categoryKey = { partitionKey, id };
-      // const { categoryKeyExpanded } = state;
-      // const { questionId } = categoryKeyExpanded!;
-
+    case ActionTypes.SET_ROW_EXPANDED: {
+      const { categoryRow, formMode } = action.payload;
       const { partitionKey: rowPartitionkey, id: rowId } = categoryRow;
-      const { partitionKey, id, questionId } = state.keyExpanded!;
-      const categoryKeyExpanded = {
-        partitionKey, id,
-        questionId: rowPartitionkey === partitionKey && rowId === id
-          ? questionId
-          : null
+      let { keyExpanded } = state;
+      if (keyExpanded) {
+        const { partitionKey, id, questionId } = keyExpanded;
+        keyExpanded = {
+          partitionKey: rowPartitionkey,
+          id: rowId,
+          questionId: rowPartitionkey === partitionKey && rowId === id
+            ? questionId
+            : null
+        }
       }
 
       // Do not work with categoryRow, 
@@ -387,14 +386,14 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
         ...state,
         // keep mode
         loading: false,
-        keyExpanded: categoryKeyExpanded,
+        keyExpanded,
         activeCategory: null,
         activeQuestion: null,
         formMode
       }
     }
 
-    case ActionTypes.SET_CATEGORY_ROW_COLLAPSED: {
+    case ActionTypes.SET_ROW_COLLAPSED: {
       const { categoryRow } = action.payload; // category doesn't contain  inAdding 
       const { partitionKey, id } = categoryRow;
       const categoryKey = { partitionKey, id }

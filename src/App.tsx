@@ -112,7 +112,7 @@ function App() {
         <Navigation />
       </header> */}
       <Row>
-        <Col md={10}>
+        <Col md={10} className="py-0">
           <div className="wrapper">
             <Routes>
               <Route path="/" element={(!isAuthenticated && !everLoggedIn) ? <AboutShort /> : <Categories />} />

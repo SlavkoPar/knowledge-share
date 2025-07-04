@@ -107,12 +107,12 @@ export const NavigationBar = () => {
                     <a className="navbar-brand mx-3" href="/">
                         <i>Knowledge Share</i>
                     </a>
-                    <NavLink to="/categories" className="nav-link">
-                        <img width="22" height="18" src={Q} alt="Questions" />{' '}Questions
+                    <NavLink to="/categories" className="nav-link text-warning">
+                        <img width="22" height="20" src={Q} alt="Questions" />{' '}Questions
                     </NavLink>
 
-                    <NavLink to="/groups" className="nav-link">
-                        <img width="22" height="18" src={A} alt="Answers" />{' '}Answers
+                    <NavLink to="/groups" className="nav-link text-info">
+                        <img width="22" height="20" src={A} alt="Answers" />{' '}Answers
                     </NavLink>
 
                     {/* <NavLink to={`/supporter/0/${encodeURIComponent('Does Firefox support Manifest 3?')}/xyz`} className="nav-link" */}

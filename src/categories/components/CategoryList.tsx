@@ -7,10 +7,10 @@ import { useCategoryContext } from "categories/CategoryProvider";
 const CategoryList = ({ title, categoryRow, level, isExpanded }: IParentInfo) => {
 
     const { state } = useCategoryContext();
-    const { keyExpanded: categoryKeyExpanded } = state;
+    const { keyExpanded } = state;
 
-    const { partitionKey, id, questionId } = categoryKeyExpanded
-        ? categoryKeyExpanded
+    const { partitionKey, id, questionId } = keyExpanded
+        ? keyExpanded
         : { partitionKey: null, id: null, questionId: null };
     const { categoryRows: subCategories } = categoryRow;
     //console.log('<<<<<<<<<CategoryList', categoryRow.id, subCategories )

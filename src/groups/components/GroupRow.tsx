@@ -121,7 +121,7 @@ const GroupRow = ({ groupRow, answerId }: { groupRow: IGroupRow, answerId: strin
 
     {/* <ListGroup horizontal> */ }
     const Row1 =
-        <div ref={hoverRef} className="d-flex justify-content-start align-items-center w-100 text-info group-row ">
+        <div ref={hoverRef} className={`d-flex justify-content-start align-items-center w-100 text-primary group-row${isSelected?'-selected':''}`}>
             <Button
                 variant='link'
                 size="sm"
@@ -145,7 +145,7 @@ const GroupRow = ({ groupRow, answerId }: { groupRow: IGroupRow, answerId: strin
             <Button
                 variant='link'
                 size="sm"
-                className={`py-0 mx-0 text-decoration-none bg-light  ${isSelected ? 'fw-bold' : ''}`}
+                className={`py-0 mx-0 group-row-title ${isSelected ? 'fw-bold' : ''}`}
                 title={id}
                 onClick={onSelectGroup}
                 disabled={alreadyAdding}

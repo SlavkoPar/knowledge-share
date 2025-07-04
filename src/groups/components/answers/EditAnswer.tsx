@@ -37,7 +37,7 @@ const EditAnswer = ({ inLine }: { inLine: boolean }) => {
         if (activeAnswer.parentGroup !== answer.parentGroup) {
             /*
              await loadAndCacheAllGroupRows(); // reload, group could have been changed
-             await openGroupNode({ partitionKey: '', id: q.parentGroup, answerId: q.id });
+             await openNode({ partitionKey: '', id: q.parentGroup, answerId: q.id });
             */
         }
         // if (groupChanged) {

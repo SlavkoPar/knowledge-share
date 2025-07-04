@@ -49,7 +49,7 @@ const AddQuestion = ({ closeModal, showCloseButton, source, setError }: IProps) 
             else if (closeModal) {
                 closeModal();
                 //dispatch({ type: ActionTypes.CLEAN_TREE, payload: { id: q.parentCategory } })
-                //await openCategoryNode({ partitionKey: '', id: q.parentCategory, questionId: q.id });
+                //await openNode({ partitionKey: '', id: q.parentCategory, questionId: q.id });
             }
         }
     }

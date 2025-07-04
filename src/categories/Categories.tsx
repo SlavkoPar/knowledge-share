@@ -28,7 +28,7 @@ interface IProps {
 
 const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
     console.log("=== Categories", categoryId_questionId)
-    const { state, openCategoryNode, loadTopCategoryRows } = useCategoryContext();
+    const { state, openNode, loadTopCategoryRows } = useCategoryContext();
     const {
         topRows: topCategoryRows, topRowsLoading: topCategoryRowsLoading, topRowsLoaded: topCategoryRowsLoaded,
         keyExpanded: categoryKeyExpanded, categoryId_questionId_done,
@@ -101,19 +101,19 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
                         const questionId = arr[1];
                         const keyExp = { partitionKey: categoryId, id: categoryId, questionId: questionId === 'null' ? null : questionId }
                         // setCatKeyExpanded(keyExp);
-                        console.log('zovem openCategoryNode 1111111111111111111)', { categoryId_questionId }, { categoryId_questionId_done })
-                        await openCategoryNode(keyExp, fromChatBotDlg ?? 'false')
+                        console.log('zovem openNode 1111111111111111111)', { categoryId_questionId }, { categoryId_questionId_done })
+                        await openNode(keyExp, fromChatBotDlg ?? 'false')
                             .then(() => { return null; });
                     }
                 }
                 else if (categoryKeyExpanded && !categoryNodeOpened) {
-                    console.log('zovem openCategoryNode 2222222222222)', { categoryKeyExpanded }, { categoryNodeOpened })
-                    await openCategoryNode(categoryKeyExpanded)
+                    console.log('zovem openNode 2222222222222)', { categoryKeyExpanded }, { categoryNodeOpened })
+                    await openNode(categoryKeyExpanded)
                         .then(() => { return null; });
                 }
             }
         })()
-    }, [categoryKeyExpanded, categoryNodeOpening, categoryNodeOpened, openCategoryNode, categoryId_questionId, categoryId_questionId_done, topCategoryRowsLoaded])
+    }, [categoryKeyExpanded, categoryNodeOpening, categoryNodeOpened, openNode, categoryId_questionId, categoryId_questionId_done, topCategoryRowsLoaded])
 
     useEffect(() => {
         setLastRouteVisited(`/categories`);
@@ -134,7 +134,7 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
     return (
         <>
             <Container>
-                <h6 style={{ color: 'rgb(13, 110, 253)', marginLeft: '30%' }}>Categories / Questions</h6>
+                <h5 className="text-warning mx-auto w-75 fw-bold">Categories / Questions</h5>
 
                 <Row className={`${isDarkMode ? "dark" : ""}`}>
                     <Col>

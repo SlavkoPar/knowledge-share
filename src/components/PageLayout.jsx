@@ -11,11 +11,9 @@ export const PageLayout = (props) => {
     return (
         <>
             <NavigationBar />
-            <br />
             {/* <h4>
                 <center>Share Knowledge</center>
             </h4> */}
-            <br />
             {props.children}
             <br />
             <AuthenticatedTemplate>

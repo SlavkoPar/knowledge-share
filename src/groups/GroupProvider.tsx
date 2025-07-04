@@ -136,17 +136,16 @@ export const GroupProvider: React.FC<Props> = ({ children }) => {
   }, [dispatch]);
 
 
-  const openGroupNode = useCallback(
+  const openNode = useCallback(
     async (groupKeyExp: IGroupKeyExpanded, fromChatBotDlg: string = 'false'): Promise<any> => {
       return new Promise(async (resolve) => {
         try {
           dispatch({ type: ActionTypes.SET_LOADING, payload: {} });
-          console.log('---GroupProvider.openGroupNode groupKeyExpanded:', groupKeyExp)
+          console.log('---GroupProvider.openNode groupKeyExpanded:', groupKeyExp)
           let { id, partitionKey } = groupKeyExp;
           console.assert(id);
           if (id && partitionKey === '') {
             const groupRow: IGroupRow | undefined = groupRows.get(id);
-            console.log("rrrrrrrrrrrrrrrrropenGroupNode", id, groupRow)
             if (groupRow) {
               groupKeyExp.partitionKey = groupRow.partitionKey;
               partitionKey = groupRow.partitionKey;
@@ -267,7 +266,7 @@ export const GroupProvider: React.FC<Props> = ({ children }) => {
           groupRow.isExpanded = true;
           //q.isSelected = q.id === answerId
 
-          dispatch({ type: ActionTypes.SET_GROUP_ROW_EXPANDED, payload: { groupRow, formMode: formMode! } });
+          dispatch({ type: ActionTypes.SET_ROW_EXPANDED, payload: { groupRow, formMode: formMode! } });
           return groupRow;
         }
       }
@@ -293,7 +292,7 @@ export const GroupProvider: React.FC<Props> = ({ children }) => {
         else {
           groupRow.rootId = rootId;
           groupRow.isExpanded = false;
-          dispatch({ type: ActionTypes.SET_GROUP_ROW_COLLAPSED, payload: { groupRow } });
+          dispatch({ type: ActionTypes.SET_ROW_COLLAPSED, payload: { groupRow } });
           return groupKey;
         }
       }
@@ -445,8 +444,8 @@ export const GroupProvider: React.FC<Props> = ({ children }) => {
     }
     else {
       if (parentGroup === null) { // topRow
-          group.rootId = groupRow.rootId;
-          dispatch({ type: ActionTypes.SET_GROUP_TO_EDIT, payload: { groupRow: group } });
+        group.rootId = groupRow.rootId;
+        dispatch({ type: ActionTypes.SET_GROUP_TO_EDIT, payload: { groupRow: group } });
       }
       else {
         const parentGroupKey = { partitionKey: parentGroup, id: parentGroup }
@@ -919,7 +918,7 @@ export const GroupProvider: React.FC<Props> = ({ children }) => {
   }, []);
 
   const contextValue: IGroupsContext = {
-    state, openGroupNode, loadTopGroupRows: loadFirstLevelGroupRows,
+    state, openNode: openNode, loadTopGroupRows: loadFirstLevelGroupRows,
     addSubGroup, cancelAddGroup, createGroup,
     viewGroup, editGroup, updateGroup, deleteGroup, deleteGroupVariation,
     expandGroup, collapseGroup,

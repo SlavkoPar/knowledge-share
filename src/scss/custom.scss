@@ -11,7 +11,7 @@
 /// Category -> Questions
 
 .categories-border {
-  border: 3x solid $blue-200;
+  border: 3px solid $blue-100;
   border-radius: 3px;
 }
 
@@ -26,7 +26,7 @@
 }
 
 .category-row-title {
-  background-color: $blue-100;
+  background-color: $light;
   color: $blue-700;
   text-decoration: none;
 }
@@ -43,7 +43,7 @@
 
 
 .question-row {
-  background-color: $yellow-300;
+  background-color: $yellow-400;
   color: #fff;
 }
 
@@ -53,11 +53,10 @@
 }
 
 .question-row-title {
-  background-color: $yellow-200;
+  background-color: $yellow-400;
   color: $blue-700;
   text-decoration: none;
 }
-
 
 .question-form {
   background-color: $yellow-500;
@@ -72,22 +71,60 @@
 ////////////////////////////
 /// Group -> Answers
 
-// .group-row {
-//    background-color: $cyan-100; 
-//    color:#aaa 
-// }
+.categories-border {
+  border: 3px solid $blue-100;
+  border-radius: 3px;
+}
+
+.group-row {
+  background-color: $blue-100;
+  color: #fff;
+}
+
+.group-row-selected {
+  background-color: $blue-200;
+  color: #fff;
+}
+
+.group-row-title {
+  background-color: $light;
+  color: $blue-700;
+  text-decoration: none;
+}
+
+.group-form {
+  background-color: $blue-200;
+  color: #ddd;
+}
+
+.group-form label {
+  color: rgba(33, 37, 41, 0.75);
+  font-size: 14px;
+}
+
 
 .answer-row {
+  background-color: $cyan-400;
+  color: #fff;
+}
+
+.answer-row-selected {
   background-color: $cyan-500;
   color: #fff;
-  // color: $dark;
+}
+
+.answer-row-title {
+  background-color: $cyan-400;
+  color: $blue-700;
+  text-decoration: none;
 }
 
 .answer-form {
-  background-color: rgb(107, 222, 245);
+  background-color: $cyan-500;
+  color: #ddd;
 }
 
 .answer-form label {
-  color: darkolivegreen;
+  color: $cyan-800;
   font-size: 14px;
 }
