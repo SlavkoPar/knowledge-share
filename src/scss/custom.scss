@@ -68,6 +68,23 @@
   font-size: 14px;
 }
 
+.related-filters {
+  background-color: $indigo-100;
+  color: #ddd;
+}
+
+.related-filter-row {
+  background-color: $indigo-300;
+  color: #ddd;
+  font-size: 14px;
+
+}
+
+.related-filter-row .title {
+  background-color: $indigo-200;
+  color: #ddd;
+  text-decoration: none;
+}
 ////////////////////////////
 /// Group -> Answers
 
