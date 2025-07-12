@@ -143,7 +143,7 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
                                 <AutoSuggestQuestions
                                     tekst={tekst}
                                     onSelectQuestion={onSelectQuestion}
-                                    allCats={categoryRows}
+                                    categoryRows={categoryRows}
                                     searchQuestions={searchQuestions}
                                 />
                             </div>

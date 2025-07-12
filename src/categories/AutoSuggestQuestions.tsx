@@ -43,13 +43,13 @@ const QuestionAutosuggestMulti = Autosuggest as { new(): Autosuggest<IQuestionRo
 export class AutoSuggestQuestions extends React.Component<{
 	tekst: string | undefined,
 	onSelectQuestion: (questionKey: IQuestionKey, underFilter: string) => void,
-	allCats: Map<string, ICategoryRow>,
+	categoryRows: Map<string, ICategoryRow>,
 	searchQuestions: (filter: string, count: number) => Promise<IQuestionRow[]>
 }, any> {
 	// region Fields
 	state: any;
 	isMob: boolean;
-	allCats: Map<string, ICategoryRow>;
+	categoryRows: Map<string, ICategoryRow>;
 	searchQuestions: (filter: string, count: number) => Promise<IQuestionRow[]>;
 	debouncedLoadSuggestions: (value: string) => void;
 	//inputAutosuggest: React.RefObject<HTMLInputElement>;
@@ -64,7 +64,7 @@ export class AutoSuggestQuestions extends React.Component<{
 			highlighted: ''
 		};
 		//this.inputAutosuggest = createRef<HTMLInputElement>();
-		this.allCats = props.allCats;
+		this.categoryRows = props.categoryRows;
 		this.searchQuestions = props.searchQuestions;
 		this.isMob = isMobile;
 		this.loadSuggestions = this.loadSuggestions.bind(this);
@@ -141,7 +141,7 @@ export class AutoSuggestQuestions extends React.Component<{
 	private satisfyingCategories = (searchWords: string[]): ICatIdTitle[] => {
 		const arr: ICatIdTitle[] = [];
 		searchWords.filter(w => w.length >= 3).forEach(w => {
-			this.allCats.forEach(async cat => {
+			this.categoryRows.forEach(async cat => {
 				const parentCategory = cat.id;
 				let j = 0;
 				// cat.words.forEach(catw => {
@@ -162,19 +162,19 @@ export class AutoSuggestQuestions extends React.Component<{
 		}
 		if (search.length < 2)
 			return [];
-		const catQuests = new Map<string | null, IQuestionRow[]>();
+		const catSection = new Map<string | null, IQuestionRow[]>();
 		const questionKeys: IQuestionKey[] = [];
 		try {
 			console.log('--------->>>>> getSuggestions')
-			var questionRows: IQuestionRow[] = await this.searchQuestions(escapedValue, 20);
-			questionRows.forEach((quest: IQuestionRow) => {
-				const { id, partitionKey, parentCategory, title, numOfAssignedAnswers, isSelected, rootId } = quest;
+			var questionRows: IQuestionRow[] = await this.searchQuestions(escapedValue, 10);
+			questionRows.forEach((questionRow: IQuestionRow) => {
+				const { id, partitionKey, parentCategory, title, numOfAssignedAnswers, isSelected, rootId } = questionRow;
 				const questionKey = { partitionKey, id }
 				if (!questionKeys.includes(questionKey)) {
 					questionKeys.push(questionKey);
 
 					// 2) Group questions by parentCategory
-					const quest: IQuestionRow = {
+					const row: IQuestionRow = {
 						partitionKey,
 						id,
 						rootId,
@@ -184,11 +184,11 @@ export class AutoSuggestQuestions extends React.Component<{
 						categoryTitle: '',
 						isSelected
 					}
-					if (!catQuests.has(parentCategory)) {
-						catQuests.set(parentCategory, [quest]);
+					if (!catSection.has(parentCategory)) {
+						catSection.set(parentCategory, [row]);
 					}
 					else {
-						catQuests.get(parentCategory)!.push(quest);
+						catSection.get(parentCategory)!.push(row);
 					}
 				}
 			})
@@ -258,8 +258,7 @@ export class AutoSuggestQuestions extends React.Component<{
 			////////////////////////////////////////////////////////////
 			// 
 			let catSections: ICatSection[] = [];
-			catQuests.forEach((quests, id) => {
-
+			catSection.forEach((quests, id) => {
 				let variationsss: string[] = [];
 				const catSection: ICatSection = {
 					id,
@@ -269,7 +268,7 @@ export class AutoSuggestQuestions extends React.Component<{
 					questionRows: []
 				};
 				if (id !== null) {
-					const cat = this.allCats.get(id);
+					const cat = this.categoryRows.get(id);
 					if (cat) {
 						const { title, titlesUpTheTree/*, variations*/ } = cat!;
 						catSection.categoryTitle = title;
@@ -311,7 +310,7 @@ export class AutoSuggestQuestions extends React.Component<{
 					}
 					else {
 					*/
-						catSection.questionRows.push(quest);
+					catSection.questionRows.push(quest);
 					/*}*/
 				});
 				catSections.push(catSection);
@@ -357,7 +356,7 @@ export class AutoSuggestQuestions extends React.Component<{
 				{parts.map((part, index) => {
 					const cls = part.highlight ? 'react-autosuggest__suggestion-match' : undefined;
 					return (
-						<span key={index} className={`${cls??''}`}>
+						<span key={index} className={`${cls ?? ''}`}>
 							{part.text}
 						</span>
 					);
@@ -373,7 +372,7 @@ export class AutoSuggestQuestions extends React.Component<{
 		// 	str = " ... / " + str;
 		return <span>{parentCategoryUp}</span>
 		// <strong>
-			//{parentCategoryUp}
+		//{parentCategoryUp}
 		// </strong>;
 	}
 

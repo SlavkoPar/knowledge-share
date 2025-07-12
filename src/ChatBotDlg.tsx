@@ -51,7 +51,7 @@ const ChatBotDlg = ({ show, onHide }: IProps) => {
     const [hasMoreAnswers, setHasMoreAnswers] = useState<boolean>(false);
 
     const { getSubCats, getQuestion, addHistory, addHistoryFilter, getAnswersRated, searchQuestions, setLastRouteVisited } = useGlobalContext();
-    const { canEdit, authUser, isDarkMode, variant, bg, categoryRows: cats, categoryRowsLoaded: catsLoaded } = useGlobalState();
+    const { canEdit, authUser, isDarkMode, variant, bg, categoryRows, categoryRowsLoaded: catsLoaded } = useGlobalState();
     const navigate = useNavigate();
 
     const [catsSelected, setCatsSelected] = useState(true);
@@ -519,7 +519,7 @@ const ChatBotDlg = ({ show, onHide }: IProps) => {
                         <AutoSuggestQuestions
                             tekst={txt}
                             onSelectQuestion={onSelectQuestion}
-                            allCats={cats}
+                            categoryRows={categoryRows}
                             searchQuestions={searchQuestions}
                         />
                     }
@@ -557,8 +557,8 @@ const ChatBotDlg = ({ show, onHide }: IProps) => {
                                 </ul>
                             </Col>
                         </Row>
-                         {/* badge */}
-                        <Row className="m-0">   
+                        {/* badge */}
+                        <Row className="m-0">
                             <Col className='border border-0 border-primary mx-1 text-white p-0'>
                                 {/* <div className="d-inline"> */}
                                 {/* <div key='Welcome'>
