@@ -432,6 +432,11 @@ export interface IQuestionRowDto extends IRecordDto {
 	Status?: number;
 }
 
+export interface IQuestionRowDtosEx {
+	questionRowDtos : IQuestionRowDto[];
+ 	msg: string;
+}
+
 export interface IQuestionDto extends IQuestionRowDto {
 	AssignedAnswerDtos?: IAssignedAnswerDto[];
 	RelatedFilterDtos?: IRelatedFilterDto[]

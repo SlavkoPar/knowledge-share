@@ -16,7 +16,9 @@ import {
 
 import { globalReducer, initialGlobalState } from "global/globalReducer";
 
-import { Category, ICategory, ICategoryDto, ICategoryKey, IQuestionRow, IQuestionRowDto, IQuestion, IQuestionDto, IQuestionDtoEx, IQuestionEx, IQuestionKey, Question, IAssignedAnswer, ICategoryRowDto, ICategoryRow, CategoryRow } from "categories/types";
+import { Category, ICategory, ICategoryDto, ICategoryKey, IQuestionRow, IQuestionRowDto, IQuestionRowDtosEx,
+  IQuestion, IQuestionDto, IQuestionDtoEx, IQuestionEx, IQuestionKey, Question, IAssignedAnswer, 
+  ICategoryRowDto, ICategoryRow, CategoryRow } from "categories/types";
 import { Group, IGroup, IGroupDto, IGroupKey, IAnswer, IAnswerDto, IAnswerKey, IAnswerRow, IAnswerRowDto, Answer, IGroupRow, IGroupRowDto, GroupRow } from "groups/types";
 
 import { IUser } from 'global/types';
@@ -200,11 +202,12 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
         console.time();
         const filterEncoded = encodeURIComponent(filter);
         const url = `${protectedResources.KnowledgeAPI.endpointQuestion}/${filterEncoded}/${count}/null`;
-        await Execute("GET", url).then((dtos: IQuestionRowDto[] | undefined) => {
-          console.log('questionRowDtos:', { dtos }, protectedResources.KnowledgeAPI.endpointCategory);
+        await Execute("GET", url).then((dtosEx: IQuestionRowDtosEx) => {
+          const { questionRowDtos, msg } = dtosEx;
+          console.log('questionRowDtos:', { dtos: dtosEx }, protectedResources.KnowledgeAPI.endpointCategory);
           console.timeEnd();
-          if (dtos) {
-            const list: IQuestionRow[] = dtos.map((dto: IQuestionRowDto) => {
+          if (questionRowDtos) {
+            const list: IQuestionRow[] = questionRowDtos.map((dto: IQuestionRowDto) => {
               const { PartitionKey, Id, ParentCategory, Title, NumOfAssignedAnswers, Included } = dto;
               return {
                 partitionKey: PartitionKey,
