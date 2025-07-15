@@ -1,18 +1,18 @@
 {
   "files": {
-    "main.css": "/knowledge-share/static/css/main.74cdfb9a.css",
-    "main.js": "/knowledge-share/static/js/main.f57936f8.js",
+    "main.css": "/knowledge-share/static/css/main.8ae57985.css",
+    "main.js": "/knowledge-share/static/js/main.0b0ed64b.js",
     "static/media/QuestionForm.png": "/knowledge-share/static/media/QuestionForm.5286a182127dd64e7904.png",
     "static/media/Q.png": "/knowledge-share/static/media/Q.4209512a2ea1935c338f.png",
     "static/media/QPlus.png": "/knowledge-share/static/media/QPlus.a9d1719c7a50e21d3475.png",
     "static/media/A.png": "/knowledge-share/static/media/A.69d84f9a4d04ea1e54d4.png",
     "static/media/APlus.png": "/knowledge-share/static/media/APlus.4175ba6e7cd5b00fff39.png",
     "index.html": "/knowledge-share/index.html",
-    "main.74cdfb9a.css.map": "/knowledge-share/static/css/main.74cdfb9a.css.map",
-    "main.f57936f8.js.map": "/knowledge-share/static/js/main.f57936f8.js.map"
+    "main.8ae57985.css.map": "/knowledge-share/static/css/main.8ae57985.css.map",
+    "main.0b0ed64b.js.map": "/knowledge-share/static/js/main.0b0ed64b.js.map"
   },
   "entrypoints": [
-    "static/css/main.74cdfb9a.css",
-    "static/js/main.f57936f8.js"
+    "static/css/main.8ae57985.css",
+    "static/js/main.0b0ed64b.js"
   ]
 }
