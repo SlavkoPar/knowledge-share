@@ -4,7 +4,7 @@ import { IGroupRow } from 'groups/types';
 
 export const initialState: IGroupRowsState = {
   loading: false,
-  parentGroup: null,
+  parentId: null,
   title: '',
   groupRows: []
 }
@@ -56,7 +56,7 @@ export const GroupRowsReducer: Reducer<IGroupRowsState, GroupRowsActions> = (sta
       const { id, title } = shortGroup;
       return {
         ...state,
-        parentGroup: id!,
+        parentId: id!,
         title
       };
     }
@@ -69,7 +69,7 @@ export const GroupRowsReducer: Reducer<IGroupRowsState, GroupRowsActions> = (sta
 
 function markForClean(groupRows: IGroupRow[], id: string | null) {
   let deca = groupRows
-    .filter(c => c.parentGroup === id)
+    .filter(c => c.parentId === id)
     .map(c => c.id)
 
   deca.forEach(id => {

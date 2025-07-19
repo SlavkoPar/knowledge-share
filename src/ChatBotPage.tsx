@@ -50,7 +50,7 @@ const ChatBotPage: React.FC = () => {
 	const { getCatsByKind, getQuestion, addHistory, addHistoryFilter, getAnswersRated, searchQuestions, setLastRouteVisited } = useGlobalContext();
 	const { dbp, canEdit, authUser, isDarkMode, variant, bg, categoryRows: cats, categoryRowsLoaded: catsLoaded, lastRouteVisited } = useGlobalState();
 
-	const setParentCategory = (cat: ICategory) => {
+	const setParentId = (cat: ICategory) => {
 		alert(cat.title)
 	}
 	const [showUsage, setShowUsage] = useState(false);
@@ -371,9 +371,9 @@ const ChatBotPage: React.FC = () => {
 				<Col xs={12} md={3} className='mb-1'>
 					<label className="text-info">Please enter the Question</label>
 					{/* <CatList
-				parentCategory={'null'}
+				parentId={'null'}
 				level={1}
-				setParentCategory={setParentCategory}
+				setParentId={setParentId}
 			/> */}
 				</Col>
 				<Col xs={0} md={12}>

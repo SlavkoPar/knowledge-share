@@ -7,7 +7,7 @@ import { ActionTypes, FormMode, IAnswer, IAnswerKey, AnswerKey } from "groups/ty
 
 const EditAnswer = ({ inLine }: { inLine: boolean }) => {
     const { state, updateAnswer } = useGroupContext();
-    const { answerLoading, activeAnswer  } = state;
+    const { loadingAnswer, activeAnswer } = state;
     if (!activeAnswer)
         return null;
 
@@ -30,14 +30,14 @@ const EditAnswer = ({ inLine }: { inLine: boolean }) => {
             }
         }
 
-        const { parentGroup } = activeAnswer;
-        const groupChanged = parentGroup !== newAnswer.parentGroup;
+        const { parentId } = activeAnswer;
+        const groupChanged = parentId !== newAnswer.parentId;
         //const answerKey = new AnswerKey(activeAnswer).answerKey;
-        const answer = await updateAnswer(rootId!, parentGroup!, newAnswer, groupChanged);
-        if (activeAnswer.parentGroup !== answer.parentGroup) {
+        const answer = await updateAnswer(rootId!, parentId!, newAnswer, groupChanged);
+        if (activeAnswer.parentId !== answer.parentId) {
             /*
              await loadAndCacheAllGroupRows(); // reload, group could have been changed
-             await openNode({ partitionKey: '', id: q.parentGroup, answerId: q.id });
+             await openNode({ partitionKey: '', id: q.parentId, answerId: q.id });
             */
         }
         // if (groupChanged) {

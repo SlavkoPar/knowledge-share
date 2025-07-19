@@ -29,15 +29,17 @@ interface IProps {
 const Providered = ({ groupId_answerId, fromChatBotDlg }: IProps) => {
     const { state, openNode, loadTopGroupRows } = useGroupContext();
     const {
-        topRows: topGroupRows, topRowsLoading: topGroupRowsLoading, topRowsLoaded: topGroupRowsLoaded,
-        keyExpanded: groupKeyExpanded, groupId_answerId_done,
-        nodeOpening: groupNodeOpening, nodeOpened: groupNodeOpened,
+        topRows, topRowsLoading, topRowsLoaded,
+        keyExpanded, groupId_answerId_done,
+        nodeOpening, nodeOpened,
         activeGroup,
         activeAnswer,
-        formMode, loading } = state;
+        loadingGroups, loadingAnswers,
+        loadingGroup, loadingAnswer,
+        formMode} = state;
 
     const { setLastRouteVisited, searchAnswers, loadAndCacheAllGroupRows } = useGlobalContext();
-    const { isDarkMode, authUser, groupRows, groupRowsLoaded: shortGroupsLoaded } = useGlobalState();
+    const { isDarkMode, authUser, groupRows, groupRowsLoaded } = useGlobalState();
 
     const [modalShow, setModalShow] = useState(false);
     const handleClose = () => {
@@ -57,13 +59,13 @@ const Providered = ({ groupId_answerId, fromChatBotDlg }: IProps) => {
     const [catKeyExpanded, setCatKeyExpanded] = useState<IGroupKeyExpanded>({
         partitionKey: null,
         id: null,
-        answerId: groupKeyExpanded ? groupKeyExpanded.answerId : null
+        answerId: keyExpanded ? keyExpanded.answerId : null
     })
 
     const groupRow: IGroupRow = {
         ...initialGroup,
         level: 1,
-        groupRows: topGroupRows
+        groupRows: topRows
     }
 
 
@@ -72,15 +74,15 @@ const Providered = ({ groupId_answerId, fromChatBotDlg }: IProps) => {
     useEffect(() => {
         (async () => {
             // SET_FIRST_LEVEL_GROUP_ROWS  Level:1
-            if (!topGroupRowsLoading && !topGroupRowsLoaded) {
+            if (!topRowsLoading && !topRowsLoaded) {
                 await loadTopGroupRows()
             }
         })()
-    }, [topGroupRowsLoading, topGroupRowsLoaded, loadTopGroupRows]);
+    }, [topRowsLoading, topRowsLoaded, loadTopGroupRows]);
 
     useEffect(() => {
         (async () => {
-            if (!groupNodeOpening && topGroupRows.length > 0) {
+            if (!nodeOpening && topRows.length > 0) {
                 if (groupId_answerId) {
                     if (groupId_answerId === 'add_answer') {
                         const sNewAnswer = localStorage.getItem('New_Answer');
@@ -92,7 +94,7 @@ const Providered = ({ groupId_answerId, fromChatBotDlg }: IProps) => {
                             return null;
                         }
                     }
-                    else if (groupId_answerId !== groupId_answerId_done) { //} && !groupNodeOpened) {
+                    else if (groupId_answerId !== groupId_answerId_done) { //} && !nodeOpened) {
                         const arr = groupId_answerId.split('_');
                         const groupId = arr[0];
                         const answerId = arr[1];
@@ -103,42 +105,43 @@ const Providered = ({ groupId_answerId, fromChatBotDlg }: IProps) => {
                             .then(() => { return null; });
                     }
                 }
-                else if (groupKeyExpanded && !groupNodeOpened) {
-                    console.log('zovem openNode 2222222222222)', { groupKeyExpanded }, { groupNodeOpened })
-                    await openNode(groupKeyExpanded)
+                else if (keyExpanded && !nodeOpened) {
+                    console.log('zovem openNode 2222222222222)', { keyExpanded }, { nodeOpened })
+                    await openNode(keyExpanded)
                         .then(() => { return null; });
                 }
             }
         })()
-    }, [groupKeyExpanded, groupNodeOpening, groupNodeOpened, openNode, groupId_answerId, groupId_answerId_done, topGroupRowsLoaded])
+    }, [keyExpanded, nodeOpening, nodeOpened, openNode, groupId_answerId, groupId_answerId_done, topRowsLoaded])
 
     useEffect(() => {
         setLastRouteVisited(`/groups`);
     }, [setLastRouteVisited])
 
     useEffect(() => {
-        if (!shortGroupsLoaded) {
+        if (!groupRowsLoaded) {
             loadAndCacheAllGroupRows();
         }
-    }, [shortGroupsLoaded])
+    }, [groupRowsLoaded])
 
 
     if (groupId_answerId !== 'add_answer') {
-        if (/*groupKeyExpanded ||*/ (groupId_answerId && groupId_answerId !== groupId_answerId_done)) {
-            console.log("zzzzzz loading...", { groupKeyExpanded, groupId_answerId, groupId_answerId_done })
+        if (/*keyExpanded ||*/ (groupId_answerId && groupId_answerId !== groupId_answerId_done)) {
+            console.log("zzzzzz loading...", { keyExpanded, groupId_answerId, groupId_answerId_done })
             return <div>loading...</div>
         }
     }
 
 
-    //if (!groupNodeOpened)
-    if (!shortGroupsLoaded || topGroupRows.length === 0)
+    //if (!nodeOpened)
+    if (!groupRowsLoaded || topRows.length === 0)
         return null
 
     return (
         <>
             <Container>
-                <h6 className="text-info mx-auto w-75 fw-bold">Groups / Answers</h6>
+                    <h5 className="text-warning mx-auto w-75 fw-bold"><span className='groups'>Group / </span><span className='answers'>Answers</span></h5>
+
 
                 <Row className={`${isDarkMode ? "dark" : ""}`}>
                     <Col>
@@ -194,11 +197,28 @@ const Providered = ({ groupId_answerId, fromChatBotDlg }: IProps) => {
                     newAnswerRow={newAnswer}
                 />
             }
-            {loading && <div className="d-flex justify-content-center align-items-center" style={{ position: 'absolute', top: '50%', left: '50%' }}>
-                <div className="spinner-border text-info" role="status">
-                    <span className="visually-hidden">Loading...</span>
+            {(loadingGroups || loadingAnswers) &&
+                <div className="d-flex justify-content-center align-items-center" style={{ position: 'absolute', top: '40%', left: '20%' }}>
+                    <div className={`spinner-border ${loadingAnswers ? 'answer' : 'group'}-spinner`} role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </div>
                 </div>
-            </div>
+            }
+
+            {loadingGroup &&
+                <div className="d-flex justify-content-center align-items-center" style={{ position: 'absolute', top: '50%', left: '50%' }}>
+                    <div className="spinner-border group-spinner" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            }
+
+            {loadingAnswer &&
+                <div className="d-flex justify-content-center align-items-center" style={{ position: 'absolute', top: '50%', left: '50%' }}>
+                    <div className="spinner-border answer-spinner" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </div>
+                </div>
             }
         </>
     );

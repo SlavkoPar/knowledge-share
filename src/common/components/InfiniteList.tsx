@@ -50,7 +50,7 @@ function loadItems(startCursor = 0): Promise<Response> {
           title: `This is item ${id.toString()}`,
           wsId: '',
           level: 0,
-          parentCategory: 'SAFARI',
+          parentId: 'SAFARI',
           questionAnswers: [],
           source: 0,
           status: 0

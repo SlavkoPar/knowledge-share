@@ -5,6 +5,7 @@ import { ICategoryRow } from 'categories/types';
 import { IGroupRow } from 'groups/types';
 
 const initialAuthUser: IAuthUser = {
+    workspace: "DEMO",
     nickName: '',
     name: '',
     email: '',
@@ -184,10 +185,9 @@ const reducer: Reducer<IGlobalState, GlobalActions> = (state, action) => {
 
         case GlobalActionTypes.SET_ALL_CATEGORY_ROWS: {
             const { categoryRows } = action.payload;
-            console.log("GlobalActionTypes.SET_ALL_CATEGORY_ROWS", categoryRows)
             return {
                 ...state,
-                categoryRows: categoryRows,
+                categoryRows,
                 categoryRowsLoaded: Date.now()
             };
         }

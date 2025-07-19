@@ -83,15 +83,15 @@ const ChatBotDlg = ({ show, onHide }: IProps) => {
 
     const onEntering = async (node: HTMLElement, isAppearing: boolean): Promise<any> => {
         setCatLevels([]);
-        const parentCategory = 'MTS'; // null
-        const res = await getSubCats(parentCategory);
+        const parentId = 'MTS'; // null
+        const res = await getSubCats(parentId);
         const { subCats, parentHeader } = res;
         console.log('/////////////////////////////////////////////////////', subCats)
         setCatLevels((prevState) => ([
             ...prevState,
             {
                 level: 1,
-                catId: parentCategory,
+                catId: parentId,
                 header: parentHeader,
                 subCats,
                 subCatIdSelected: null

@@ -18,8 +18,8 @@ import { IVariation } from 'groups/types'
 const VariationRow = ({ groupKey, tag, groupInAdding }: { groupKey: IGroupKey, tag: IVariation, groupInAdding: boolean | undefined }) => {
     const { partitionKey, id } = groupKey;
     const { name } = tag;
-    const { parentGroup, level, inViewing, inEditing, inAdding, numOfTags } = {
-        parentGroup: '',
+    const { parentId, level, inViewing, inEditing, inAdding, numOfTags } = {
+        parentId: '',
         level: 0,
         inViewing: false,
         inEditing: false,

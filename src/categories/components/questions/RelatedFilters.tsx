@@ -52,7 +52,7 @@ const RelatedFilters = ({ questionKey, questionTitle, relatedFilters }: IProps) 
     }
 
     return (
-        <div className='mx-0 my-1 border rounded-2 px-1 py-1 border border-light fs-6 related-filters'>
+        <div className='mx-0 my-1 border rounded-2 px-1 py-1border-light fs-6 related-filters'>
             <div>
                 <label className="text-muted">Most frequently selected Filters (as the next Question in ChatBot)</label>
                 {relatedFilters.length > 0

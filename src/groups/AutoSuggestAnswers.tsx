@@ -145,7 +145,7 @@ export class AutoSuggestAnswers extends React.Component<{
 		const arr: IGroupIdTitle[] = [];
 		searchWords.filter(w => w.length >= 3).forEach(w => {
 			this.groupRows.forEach(async group => {
-				const parentGroup = group.id;
+				const parentId = group.id;
 				let j = 0;
 				// cat.words.forEach(catw => {
 				// 	if (catw.includes(w)) {
@@ -171,28 +171,28 @@ export class AutoSuggestAnswers extends React.Component<{
 			console.log('--------->>>>> getSuggestions')
 			var answerRows: IAnswerRow[] = await this.searchAnswers(escapedValue, 20);
 			answerRows.forEach((row: IAnswerRow) => {
-				const { id, partitionKey, parentGroup, title, isSelected, rootId } = row;
+				const { id, topId: partitionKey, parentId, title, isSelected, rootId } = row;
 
 				if (!this.alreadyAssigned.includes(id)) {
 					const answerKey = { partitionKey, id }
 					if (!answerKeys.includes(answerKey)) {
 						answerKeys.push(answerKey);
 
-						// 2) Group answers by parentGroup
+						// 2) Group answers by parentId
 						const answ: IAnswerRow = {
-							partitionKey,
+							topId: partitionKey,
 							id,
-							parentGroup,
+							parentId,
 							title,
 							groupTitle: '',
 							isSelected,
 							rootId
 						}
-						if (!groupAnswers.has(parentGroup)) {
-							groupAnswers.set(parentGroup, [answ]);
+						if (!groupAnswers.has(parentId)) {
+							groupAnswers.set(parentId, [answ]);
 						}
 						else {
-							groupAnswers.get(parentGroup)!.push(answ);
+							groupAnswers.get(parentId)!.push(answ);
 						}
 					}
 				}
@@ -213,30 +213,30 @@ export class AutoSuggestAnswers extends React.Component<{
 				let i = 0;
 				while (i < catIdTitles.length) {
 					const catIdTitle = catIdTitles[i];
-					const parentGroup = catIdTitle.id;
-					for await (const cursor of index.iterate(parentGroup)) {
+					const parentId = catIdTitle.id;
+					for await (const cursor of index.iterate(parentId)) {
 						const q: IAnswer = cursor.value;
 						const { id, title } = q;
 						//if (!answerRows.includes(id!))
 						//	answerRows.push(id!);
 
-						const answerKey = { parentGroup, id }
+						const answerKey = { parentId, id }
 						if (!answerKeys.includes(answerKey)) {
 							answerKeys.push(answerKey);
 
 							//console.log(q);
-							// 2) Group answers by parentGroup
+							// 2) Group answers by parentId
 							const quest: IAnswerRow = {
 								id,
-								parentGroup,
+								parentId,
 								title,
 								groupTitle: catIdTitle.title
 							}
-							if (!catQuests.has(parentGroup)) {
-								catQuests.set(parentGroup, [quest]);
+							if (!catQuests.has(parentId)) {
+								catQuests.set(parentId, [quest]);
 							}
 							else {
-								catQuests.get(parentGroup)!.push(quest);
+								catQuests.get(parentId)!.push(quest);
 							}
 						}
 					}
@@ -341,7 +341,7 @@ export class AutoSuggestAnswers extends React.Component<{
 	protected onSuggestionSelected(event: React.FormEvent<any>, data: Autosuggest.SuggestionSelectedEventData<IAnswerRow>): void {
 		const answer: IAnswerRow = data.suggestion;
 		// alert(`Selected answer is ${answer.answerId} (${answer.text}).`);
-		this.props.onSelectAnswer({ partitionKey: answer.parentGroup, id: answer.id }, this.state.value);
+		this.props.onSelectAnswer({ partitionKey: answer.parentId, id: answer.id }, this.state.value);
 	}
 
 	/*

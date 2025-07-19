@@ -8,7 +8,7 @@ import QuestionRow from "categories/components/questions/QuestionRow";
 //const QuestionList = ({ title, categoryRow, level }: IParentInfo) => {
 const QuestionList = ({ level, categoryRow }: { level: number, categoryRow: ICategoryRow }) => {
   const { state, loadCategoryQuestions } = useCategoryContext();
-  const { keyExpanded: categoryKeyExpanded, questionLoading, error, activeQuestion } = state;
+  const { keyExpanded: categoryKeyExpanded, loadingQuestion: questionLoading, error, activeQuestion } = state;
   const { partitionKey, id, questionId } = categoryKeyExpanded
     ? categoryKeyExpanded
     : { partitionKey: null, id: null, questionId: null };
@@ -64,7 +64,7 @@ const QuestionList = ({ level, categoryRow }: { level: number, categoryRow: ICat
   return (
     <div
       ref={rootRef}
-      className="ms-2" //  border border-1 border-info
+      className="ms-0" // border border-1 border-info rounded-2"
       // className="max-h-[500px] max-w-[500px] overflow-auto bg-slate-100"
       style={{ maxHeight: '300px', overflowY: 'auto' }}
     >

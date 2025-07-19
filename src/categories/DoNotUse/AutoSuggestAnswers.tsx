@@ -148,8 +148,8 @@ export class AutoSuggestAnswers extends React.Component<{
 		const arr: IShortGroupIdTitle[] = [];
 		searchWords.filter(w => w.length >= 3).forEach(w => {
 			this.groupRows.forEach(async group => {
-				//const parentGroup = group.groupKey.id;
-				const parentGroup = group.parentGroup;
+				//const parentId = group.groupKey.id;
+				const parentId = group.parentId;
 				let j = 0;
 				// grp.words.forEach(grpw => {
 				// 	if (grpw.includes(w)) {
@@ -175,26 +175,26 @@ export class AutoSuggestAnswers extends React.Component<{
 			console.log('--------->>>>> getSuggestions')
 			var shortAnswerList: IAnswerRow[] = await this.searchAnswers(escapedValue, 20);
 			shortAnswerList.forEach((shortAnswer: IAnswerRow) => {
-				const { partitionKey, id, parentGroup, title } = shortAnswer;
+				const { topId: partitionKey, id, parentId, title } = shortAnswer;
 				if (!this.alreadyAssigned.includes(id)) {
 					const answerKey = { partitionKey, id }
 					if (!answerKeys.includes(answerKey)) {
 						answerKeys.push(answerKey);
 					}
 
-					//2) Group answers by parentGroup
+					//2) Group answers by parentId
 					// const ans2: IAnswerRow = {
 					// 	partitionKey,
 					// 	id,
-					// 	parentGroup,
+					// 	parentId,
 					// 	title,
 					// 	groupTitle: ''
 					// }
-					if (!groupAnswers.has(parentGroup)) {
-						groupAnswers.set(parentGroup, [shortAnswer]);
+					if (!groupAnswers.has(parentId)) {
+						groupAnswers.set(parentId, [shortAnswer]);
 					}
 					else {
-						groupAnswers.get(parentGroup)!.push(shortAnswer);
+						groupAnswers.get(parentId)!.push(shortAnswer);
 					}
 					//}
 				}
@@ -278,8 +278,8 @@ export class AutoSuggestAnswers extends React.Component<{
 
 	protected onSuggestionSelected(event: React.FormEvent<any>, data: Autosuggest.SuggestionSelectedEventData<IAnswerRow>): void {
 		const answer: IAnswerRow = data.suggestion;
-		alert(`Selected answer is ${answer.partitionKey} / ${answer.id}.`);
-		this.props.onSelectGroupAnswer({ partitionKey: answer.partitionKey, id: answer.id });
+		alert(`Selected answer is ${answer.topId} / ${answer.id}.`);
+		this.props.onSelectGroupAnswer({ partitionKey: answer.topId, id: answer.id });
 	}
 
 	/*

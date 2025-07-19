@@ -12,25 +12,23 @@ const CategoryList = ({ title, categoryRow, level, isExpanded }: IParentInfo) =>
     const { partitionKey, id, questionId } = keyExpanded
         ? keyExpanded
         : { partitionKey: null, id: null, questionId: null };
-    const { categoryRows: subCategories } = categoryRow;
-    //console.log('<<<<<<<<<CategoryList', categoryRow.id, subCategories )
+    const { categoryRows } = categoryRow;
+    //console.log('<<<<<<<<<CategoryList', categoryRow.id, categoryRows )
 
     return (
-        <div className={level! > 1 ? 'ms-2' : ''}>
-            <>
-                <ListGroup as="ul" variant='dark' className="mb-0">
-                    {subCategories!.map((c: ICategoryRow) =>
-                        <CategoryRow
-                            //categoryRow={{ ...c, isSelected: c.id === id }}
-                            categoryRow={c}
-                            questionId={c.partitionKey === partitionKey && c.id === id ? questionId : null}
-                            key={c.id}
-                        />
-                    )}
-                </ListGroup>
-                {/* {state.error && state.error} */}
-                {/* {state.loading && <div>...loading</div>} */}
-            </>
+        <div className={level! > 1 ? 'ms-2' : ''} >
+            <ListGroup as="ul" variant='dark' className="mb-0 category-bg">
+                {categoryRows!.map((c: ICategoryRow) =>
+                    <CategoryRow
+                        //categoryRow={{ ...c, isSelected: c.id === id }}
+                        categoryRow={c}
+                        questionId={c.partitionKey === partitionKey && c.id === id ? questionId : null}
+                        key={c.id}
+                    />
+                )}
+            </ListGroup>
+            {/* {state.error && state.error} */}
+            {/* {state.loading && <div>...loading</div>} */}
         </div>
     );
 };

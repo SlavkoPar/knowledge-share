@@ -142,7 +142,7 @@ export class AutoSuggestQuestions extends React.Component<{
 		const arr: ICatIdTitle[] = [];
 		searchWords.filter(w => w.length >= 3).forEach(w => {
 			this.categoryRows.forEach(async cat => {
-				const parentCategory = cat.id;
+				const parentId = cat.id;
 				let j = 0;
 				// cat.words.forEach(catw => {
 				// 	if (catw.includes(w)) {
@@ -168,27 +168,27 @@ export class AutoSuggestQuestions extends React.Component<{
 			console.log('--------->>>>> getSuggestions')
 			var questionRows: IQuestionRow[] = await this.searchQuestions(escapedValue, 10);
 			questionRows.forEach((questionRow: IQuestionRow) => {
-				const { id, partitionKey, parentCategory, title, numOfAssignedAnswers, isSelected, rootId } = questionRow;
-				const questionKey = { partitionKey, id }
+				const { topId, id, parentId, title, numOfAssignedAnswers, isSelected, rootId } = questionRow;
+				const questionKey = { topId, id }
 				if (!questionKeys.includes(questionKey)) {
 					questionKeys.push(questionKey);
 
-					// 2) Group questions by parentCategory
+					// 2) Group questions by parentId
 					const row: IQuestionRow = {
-						partitionKey,
+						topId,
 						id,
 						rootId,
-						parentCategory,
+						parentId,
 						numOfAssignedAnswers,
 						title,
 						categoryTitle: '',
 						isSelected
 					}
-					if (!catSection.has(parentCategory)) {
-						catSection.set(parentCategory, [row]);
+					if (!catSection.has(parentId)) {
+						catSection.set(parentId, [row]);
 					}
 					else {
-						catSection.get(parentCategory)!.push(row);
+						catSection.get(parentId)!.push(row);
 					}
 				}
 			})
@@ -208,30 +208,30 @@ export class AutoSuggestQuestions extends React.Component<{
 				let i = 0;
 				while (i < catIdTitles.length) {
 					const catIdTitle = catIdTitles[i];
-					const parentCategory = catIdTitle.id;
-					for await (const cursor of index.iterate(parentCategory)) {
+					const parentId = catIdTitle.id;
+					for await (const cursor of index.iterate(parentId)) {
 						const q: IQuestion = cursor.value;
 						const { id, title } = q;
 						//if (!questionRows.includes(id!))
 						//	questionRows.push(id!);
 
-						const questionKey = { parentCategory, id }
+						const questionKey = { parentId, id }
 						if (!questionKeys.includes(questionKey)) {
 							questionKeys.push(questionKey);
 
 							//console.log(q);
-							// 2) Group questions by parentCategory
+							// 2) Group questions by parentId
 							const quest: IQuestionRow = {
 								id,
-								parentCategory,
+								parentId,
 								title,
 								categoryTitle: catIdTitle.title
 							}
-							if (!catQuests.has(parentCategory)) {
-								catQuests.set(parentCategory, [quest]);
+							if (!catQuests.has(parentId)) {
+								catQuests.set(parentId, [quest]);
 							}
 							else {
-								catQuests.get(parentCategory)!.push(quest);
+								catQuests.get(parentId)!.push(quest);
 							}
 						}
 					}
@@ -335,7 +335,7 @@ export class AutoSuggestQuestions extends React.Component<{
 	protected onSuggestionSelected(event: React.FormEvent<any>, data: Autosuggest.SuggestionSelectedEventData<IQuestionRow>): void {
 		const question: IQuestionRow = data.suggestion;
 		// alert(`Selected question is ${question.questionId} (${question.text}).`);
-		this.props.onSelectQuestion({ partitionKey: question.parentCategory, id: question.id }, this.state.value);
+		this.props.onSelectQuestion({ topId: question.parentId, id: question.id }, this.state.value);
 	}
 
 	/*

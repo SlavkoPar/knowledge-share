@@ -19,7 +19,7 @@ import AddGroup from './AddGroup';
 
 const GroupRow = ({ groupRow, answerId }: { groupRow: IGroupRow, answerId: string | null }) => {
 
-    const { partitionKey, id, title, level, hasSubGroups, groupRows: subGroups,
+    const { topId: partitionKey, id, title, level, hasSubGroups, groupRows: subGroups,
         numOfAnswers, answerRows, isExpanded, rootId } = groupRow;
 
     const groupKey: IGroupKey = { partitionKey, id }
@@ -121,7 +121,7 @@ const GroupRow = ({ groupRow, answerId }: { groupRow: IGroupRow, answerId: strin
 
     {/* <ListGroup horizontal> */ }
     const Row1 =
-        <div ref={hoverRef} className={`d-flex justify-content-start align-items-center w-100 text-primary group-row${isSelected?'-selected':''}`}>
+        <div ref={hoverRef} className={`d-flex justify-content-start align-items-center w-100 text-primary group-row${isSelected ? '-selected' : ''}`}>
             <Button
                 variant='link'
                 size="sm"

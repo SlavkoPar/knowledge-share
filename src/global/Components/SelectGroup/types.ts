@@ -6,7 +6,7 @@ import { IGroup, IGroupKey, IAnswer, IAnswerEx, IAnswerKey, IAnswerRow, IGroupRo
 
 export interface IGroupRowsState {
 	loading: boolean,
-	parentGroup: string | null,
+	parentId: string | null,
 	title: string,
 	groupRows: IGroupRow[], // drop down categories
 	error?: Error;
@@ -22,7 +22,7 @@ export interface IGroupRowInfo {
 
 export interface IGroupRowsState {
 	loading: boolean,
-	parentGroup: string | null,
+	parentId: string | null,
 	title: string,
 	groupRows: IGroupRow[], // drop down groups
 	error?: Error;

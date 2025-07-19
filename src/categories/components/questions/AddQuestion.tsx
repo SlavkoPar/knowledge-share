@@ -22,15 +22,15 @@ const AddQuestion = ({ closeModal, showCloseButton, source, setError }: IProps) 
         : '';
 
     if (!closeModal) {
-        // const cat = state.topCategoryRows.find(c => c.id === questionRow.parentCategory)
+        // const cat = state.topCategoryRows.find(c => c.id === questionRow.parentId)
         // questionRow.categoryTitle = cat ? cat.title : '';
     }
 
     const cancelAdd = async () => {
         await cancelAddQuestion();
     }
-    
-    
+
+
     const submitForm = async (questionObject: IQuestion) => {
         const newQuestion: IQuestion = {
             ...questionObject,
@@ -48,8 +48,8 @@ const AddQuestion = ({ closeModal, showCloseButton, source, setError }: IProps) 
             }
             else if (closeModal) {
                 closeModal();
-                //dispatch({ type: ActionTypes.CLEAN_TREE, payload: { id: q.parentCategory } })
-                //await openNode({ partitionKey: '', id: q.parentCategory, questionId: q.id });
+                //dispatch({ type: ActionTypes.CLEAN_TREE, payload: { id: q.parentId } })
+                //await openNode({ partitionKey: '', id: q.parentId, questionId: q.id });
             }
         }
     }

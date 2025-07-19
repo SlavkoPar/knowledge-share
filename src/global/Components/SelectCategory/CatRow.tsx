@@ -17,8 +17,8 @@ interface ICatRow {
     setParentCat: (cat: ICategoryRow) => void;
 }
 
-const CatRow = ({ cat , dispatch, setParentCat, selId }: ICatRow) => {
-    const { partitionKey, id, title, level, isExpanded} = cat;
+const CatRow = ({ cat, dispatch, setParentCat, selId }: ICatRow) => {
+    const { partitionKey, id, title, level, isExpanded } = cat;
     const categoryKey = { partitionKey, id };
 
     const { isDarkMode, variant, bg } = useGlobalState();
@@ -79,7 +79,7 @@ const CatRow = ({ cat , dispatch, setParentCat, selId }: ICatRow) => {
                         selId={selId}
                         level={level + 1}
                         categoryKey={categoryKey}
-                        setParentCategory={setParentCat}
+                        setParentId={setParentCat}
                     />
                 </ListGroup.Item>
             }

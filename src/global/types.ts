@@ -10,6 +10,8 @@ export interface IWhoWhen {
 }
 
 export interface IRecord {
+	workspace?: string,
+	topId: string,
 	created?: IWhoWhen;
 	modified?: IWhoWhen;
 }
@@ -21,6 +23,8 @@ export interface IWhoWhenDto {
 }
 
 export interface IRecordDto {
+	Workspace?: string,
+	TopId: string,
 	Created?: IWhoWhenDto;
 	Modified?: IWhoWhenDto;
 }
@@ -88,6 +92,7 @@ export class HistoryDto {
 
 
 export interface IAuthUser {
+	workspace: string,
 	color?: string,
 	nickName: string,
 	name: string;
@@ -114,7 +119,7 @@ export enum ROLES {
 // export interface IShortGroup {
 // 	partitionKey: string,
 // 	id: string;
-// 	parentGroup: string | null;
+// 	parentId: string | null;
 // 	header: string;
 // 	title: string;
 // 	titlesUpTheTree: string; // traverse up the tree, until root
@@ -155,7 +160,7 @@ export interface IGlobalStateFromLocalStorage {
 }
 
 export interface IParentInfo {
-	parentCategory: string,
+	parentId: string,
 	title?: string, // to easier follow getting the list of sub-categories
 	level: number
 }
@@ -281,7 +286,7 @@ export type GlobalPayload = {
 
 export interface IShortGroupsState {
 	loading: boolean,
-	parentGroup: string | null,
+	parentId: string | null,
 	title: string,
 	shortGroups: IGroup[], // drop down groups
 	error?: Error;

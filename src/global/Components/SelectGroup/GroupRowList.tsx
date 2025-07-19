@@ -21,9 +21,9 @@ const GroupRowList = ({ groupKey, level, setParentGroup }: IGroupRowInfo) => {
         })()
     }, [getGroupRows, shortGroupKey]);
 
-    //const parentGroup = groupKey.id === 'null' ? null : groupKey.id;
-    //const parentGroup = groupKey ? groupKey.id : null;
-    const myGroupRows = state.groupRows.filter(c => c.parentGroup === id);
+    //const parentId = groupKey.id === 'null' ? null : groupKey.id;
+    //const parentId = groupKey ? groupKey.id : null;
+    const myGroupRows = state.groupRows.filter(c => c.parentId === id);
     console.log({ mySubShortGroups: myGroupRows })
 
     const setParentShortGroup = (shortGroup: IGroupRow) => {

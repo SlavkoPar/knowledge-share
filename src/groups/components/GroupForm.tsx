@@ -23,7 +23,7 @@ const GroupForm = ({ inLine, formMode, group, answerId, submitForm, children }: 
   const editing = formMode === FormMode.EditingGroup;
   const adding = formMode === FormMode.AddingGroup;
 
-  const { partitionKey, id, title, variations, answerRows, kind } = group;
+  const { topId: partitionKey, id, title, variations, answerRows, kind } = group;
   const groupKey: IGroupKey = { partitionKey, id };
   const groupKeyExpanded: IGroupKeyExpanded = { partitionKey, id, answerId };
 
@@ -70,7 +70,7 @@ const GroupForm = ({ inLine, formMode, group, answerId, submitForm, children }: 
     }
   });
 
-  
+
   const debouncedTitleHandler = useCallback(
     debounce((id: string, value: string) => {
       dispatch({ type: ActionTypes.GROUP_TITLE_CHANGED, payload: { id, value } })
@@ -93,7 +93,7 @@ const GroupForm = ({ inLine, formMode, group, answerId, submitForm, children }: 
 
   const isDisabled = false;
 
-  
+
 
   return (
     // data-bs-theme={`${isDarkMode ? 'dark' : 'light'}`}

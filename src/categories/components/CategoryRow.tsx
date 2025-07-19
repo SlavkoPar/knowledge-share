@@ -20,9 +20,9 @@ import AddCategory from './AddCategory';
 const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, questionId: string | null }) => {
 
     const { partitionKey, id, title, level, hasSubCategories, categoryRows: subCategories,
-        numOfQuestions, questionRows, isExpanded, rootId } = categoryRow;
+        numOfQuestions, questionRows, isExpanded, topId: rootId } = categoryRow;
 
-    const categoryKey: ICategoryKey = { partitionKey, id }
+    const categoryKey: ICategoryKey = { workspace: partitionKey, id }
 
     // const [categoryKey] = useState<ICategoryKey>({ partitionKey, id }); // otherwise reloads
     const [catKeyExpanded] = useState<ICategoryKeyExpanded>({ partitionKey, id, questionId }); // otherwise reloads
@@ -54,7 +54,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
         }
         else {
             const expandInfo: IExpandInfo = {
-                rootId: rootId!,
+                topId: rootId!,
                 categoryKey,
                 formMode: canEdit ? FormMode.EditingCategory : FormMode.ViewingCategory
             }
@@ -91,7 +91,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
                     formMode = FormMode.None
                 }
                 const expandInfo: IExpandInfo = {
-                    rootId: rootId!,
+                    topId: rootId!,
                     categoryKey,
                     includeQuestionId: questionId ?? undefined,
                     formMode // differs from handleExpandClick
@@ -122,103 +122,108 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
 
     {/* <ListGroup horizontal> */ }
     const Row1 =
-        <div ref={hoverRef} className={`d-flex justify-content-start align-items-center w-100 text-primary category-row${isSelected?'-selected':''}`}>
-            <Button
-                variant='link'
-                size="sm"
-                className="py-0 px-1  bg-light"
-                onClick={(e) => { handleExpandClick(); e.stopPropagation() }}
-                title="Expand"
-                disabled={alreadyAdding || (!hasSubCategories && numOfQuestions === 0)}
-            >
-                <FontAwesomeIcon icon={isExpanded ? faCaretDown : faCaretRight} size='lg' />
-            </Button>
-            <Button
-                variant='link'
-                size="sm"
-                className="py-0 px-1 bg-light"
-                // onClick={expand}
-                title="Expand"
-                disabled={true} //{alreadyAdding || (!hasSubCategories && numOfQuestions === 0)}
-            >
-                <FontAwesomeIcon icon={faFolder} size='sm' />
-            </Button>
-            <Button
-                variant='link'
-                size="sm"
-                className={`py-0 mx-0 category-row-title ${isSelected ? 'fw-bold' : ''}`}
-                title={id}
-                onClick={onSelectCategory}
-                disabled={alreadyAdding}
-            >
-                {title}
-            </Button>
+        <>
+            <div ref={hoverRef} className={`d-flex justify-content-start align-items-center w-100 category-row${isSelected ? '-selected' : ''}`}>
+                <Button
+                    variant='link'
+                    size="sm"
+                    className="py-0 px-1" //  bg-light"
+                    onClick={(e) => { handleExpandClick(); e.stopPropagation() }}
+                    title="Expand"
+                    disabled={alreadyAdding || (!hasSubCategories && numOfQuestions === 0)}
+                >
+                    <FontAwesomeIcon icon={isExpanded ? faCaretDown : faCaretRight} size='lg' />
+                </Button>
+                <Button
+                    variant='link'
+                    size="sm"
+                    className="py-0 px-1 bg-light"
+                    // onClick={expand}
+                    title="Expand"
+                    disabled={true} //{alreadyAdding || (!hasSubCategories && numOfQuestions === 0)}
+                >
+                    <FontAwesomeIcon icon={faFolder} size='sm' />
+                </Button>
+                <Button
+                    variant='link'
+                    size="sm"
+                    className={`py-0 mx-0 category-row-title ${isSelected ? 'fw-bold' : ''}`}
+                    title={id}
+                    onClick={onSelectCategory}
+                    disabled={alreadyAdding}
+                >
+                    {title}
+                </Button>
 
-            <Badge pill bg="secondary" className={numOfQuestions === 0 ? 'd-none' : 'd-inline'}>
-                {numOfQuestions}Q
-                {/* <FontAwesomeIcon icon={faQuestion} size='sm' /> */}
-                {/* <img width="22" height="18" src={Q} alt="Question" /> */}
-            </Badge>
+                <Badge pill bg="secondary" className={numOfQuestions === 0 ? 'd-none' : 'd-inline'}>
+                    {numOfQuestions}Q
+                    {/* <FontAwesomeIcon icon={faQuestion} size='sm' /> */}
+                    {/* <img width="22" height="18" src={Q} alt="Question" /> */}
+                </Badge>
 
-            {canEdit && !alreadyAdding && hoverProps.isHovered &&
-                <>
-                    <Button variant='link' size="sm" className="ms-1 py-0 px-0"
-                        //onClick={() => { dispatch({ type: ActionTypes.EDIT, category }) }}>
-                        onClick={() => edit()}
-                    >
-                        <FontAwesomeIcon icon={faEdit} size='lg' />
-                    </Button>
-                    <Button
-                        variant='link'
-                        size="sm"
-                        className="py-0 mx-1 text-primary float-end"
-                        title="Add SubCategory"
-                        onClick={() => {
-                            categoryRow.level += 1;
-                            addSubCategory(categoryRow)
-                            //</>const categoryInfo: ICategoryInfo = { categoryKey: { partitionKey, id: parentCategory }, level: 0 }
-                            // dispatch({
-                            //     type: ActionTypes.ADD_SUB_CATEGORY,
-                            //     payload: {
-                            //         rootId,
-                            //         categoryKey,
-                            //         level: categoryRow.level + 1
-                            //     }
-                            // })
-                            // if (!isExpanded)
-                            //     dispatch({ type: ActionTypes.SET_EXPANDED, payload: { categoryKey } });
-                        }}
-                    >
-                        <FontAwesomeIcon icon={faPlus} size='lg' />
-                    </Button>
-                </>
-            }
+                {canEdit && !alreadyAdding && hoverProps.isHovered &&
+                    <>
+                        <Button variant='link' size="sm" className="ms-1 py-0 px-0"
+                            //onClick={() => { dispatch({ type: ActionTypes.EDIT, category }) }}>
+                            onClick={() => edit()}
+                        >
+                            <FontAwesomeIcon icon={faEdit} size='lg' />
+                        </Button>
+                        <Button
+                            variant='link'
+                            size="sm"
+                            className="py-0 mx-1 text-primary float-end"
+                            title="Add SubCategory"
+                            onClick={() => {
+                                categoryRow.level += 1;
+                                addSubCategory(categoryRow)
+                                //</>const categoryInfo: ICategoryInfo = { categoryKey: { partitionKey, id: parentId }, level: 0 }
+                                // dispatch({
+                                //     type: ActionTypes.ADD_SUB_CATEGORY,
+                                //     payload: {
+                                //         rootId,
+                                //         categoryKey,
+                                //         level: categoryRow.level + 1
+                                //     }
+                                // })
+                                // if (!isExpanded)
+                                //     dispatch({ type: ActionTypes.SET_EXPANDED, payload: { categoryKey } });
+                            }}
+                        >
+                            <FontAwesomeIcon icon={faPlus} size='lg' />
+                        </Button>
+                    </>
+                }
 
-            {/* TODO what about archive questions  numOfQuestions === 0 &&*/}
-            {canEdit && !alreadyAdding && hoverProps.isHovered && !hasSubCategories &&
-                <div className="position-absolute d-flex align-items-center top-0 end-0">
-                    <Button
-                        variant='link'
-                        size="sm"
-                        className="py-0 mx-1 text-secondary float-end"
-                        title="Add Question"
-                        onClick={async () => {
-                            const categoryInfo: ICategoryInfo = { categoryKey: { partitionKey, id: categoryRow.id }, level: categoryRow.level }
-                            addQuestion(categoryKey, rootId!);
-                        }}
-                    >
-                        <img width="22" height="18" src={QPlus} alt="Add Question" />
-                    </Button>
+                {/* TODO what about archive questions  numOfQuestions === 0 &&*/}
+                {canEdit && !alreadyAdding && hoverProps.isHovered && !hasSubCategories &&
+                    <div className="position-absolute d-flex align-items-center top-0 end-0">
+                        <Button
+                            variant='link'
+                            size="sm"
+                            className="py-0 mx-1 text-secondary float-end"
+                            title="Add Question"
+                            onClick={async () => {
+                                const categoryInfo: ICategoryInfo = { categoryKey: { workspace: partitionKey, id: categoryRow.id }, level: categoryRow.level }
+                                addQuestion(categoryKey, rootId!);
+                            }}
+                        >
+                            <img width="22" height="18" src={QPlus} alt="Add Question" />
+                        </Button>
 
-                    <Button variant='link' size="sm" className="py-0 mx-1 float-end"
-                        disabled={hasSubCategories || numOfQuestions > 0}
-                        onClick={deleteCategoryRow}
-                    >
-                        <FontAwesomeIcon icon={faRemove} size='lg' />
-                    </Button>
-                </div>
-            }
-        </div>
+                        <Button variant='link' size="sm" className="py-0 mx-1 float-end"
+                            disabled={hasSubCategories || numOfQuestions > 0}
+                            onClick={deleteCategoryRow}
+                        >
+                            <FontAwesomeIcon icon={faRemove} size='lg' />
+                        </Button>
+                    </div>
+                }
+            </div>
+            <div className='ps-3'>
+                {showQuestions && <QuestionList level={level + 1} categoryRow={categoryRow} />}
+            </div>
+        </>
 
     // console.log({ title, isExpanded })
 
@@ -228,8 +233,8 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
     return (
         <>
             <ListGroup.Item
-                variant={"primary"}
-                className="py-0 px-1 w-100"
+                // variant={"primary"}
+                className="py-0 px-1 w-100 category-bg"
                 as="li"
             >
                 {/*inAdding &&*/showForm && formMode === FormMode.AddingCategory &&
@@ -279,7 +284,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
             {/* !inAdding && */}
             {(isExpanded) && // Row2   //  || inAdding
                 <ListGroup.Item
-                    className="py-0 px-0 border-0 border-warning border-bottom-0" // border border-3 "
+                    className="py-0 px-0 border-0 border-warning border-bottom-0 category-bg" // border border-3 "
                     variant={"primary"}
                     as="li"
                 >
@@ -288,9 +293,9 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
                             {hasSubCategories &&
                                 <CategoryList level={level + 1} categoryRow={categoryRow} title={title} isExpanded={isExpanded} />
                             }
-                            {showQuestions &&
+                            {/* {showQuestions &&
                                 <QuestionList level={level + 1} categoryRow={categoryRow} />
-                            }
+                            } */}
                         </>
                     }
 

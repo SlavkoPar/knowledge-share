@@ -78,11 +78,10 @@ export class RelatedFilter {
 }
 
 export interface IQuestionRow extends IRecord {
-	partitionKey: string;
 	id: string;
 	title: string;
 	numOfAssignedAnswers: number;
-	parentCategory: string | null;
+	parentId: string | null;
 	categoryTitle?: string;
 	isSelected?: boolean;
 	rootId: string
@@ -99,13 +98,12 @@ export interface IQuestion extends IQuestionRow {
 }
 
 export interface ICategoryKey {
-	partitionKey: string | null;
+	workspace?: string;
+	topId: string;
 	id: string | null;
 }
 
-export interface ICategoryKeyExpanded { //extends ICategoryKey {
-	partitionKey: string | null;
-	id: string | null;
+export interface ICategoryKeyExpanded extends ICategoryKey {
 	questionId: string | null;
 }
 
@@ -120,8 +118,8 @@ export interface ICategoryKeyExtended extends ICategoryKey {
 
 
 export interface IQuestionKey {
-	parentCategory?: string;
-	partitionKey: string | null;   // ona day we are going to enable question
+	parentId?: string;
+	topId: string | null;   // ona day we are going to enable question
 	id: string;
 }
 
@@ -131,11 +129,9 @@ export interface IVariation {
 }
 
 export interface ICategoryRowDto extends IRecordDto {
-	PartitionKey: string;
 	Id: string;
 	Kind: number;
-	RootId?: string;
-	ParentCategory: string | null;
+	ParentId: string | null;
 	Title: string;
 	Link: string | null;
 	Header: string;
@@ -154,11 +150,9 @@ export interface ICategoryDto extends ICategoryRowDto {
 }
 
 export interface ICategoryRow extends IRecord {
-	partitionKey: string; // | null is a valid value so you can store data with null value in indexeddb 
 	id: string;
 	kind: number;
-	rootId: string | null;
-	parentCategory: string | null; // | null is a valid value so you can store data with null value in indexeddb 
+	parentId: string | null; // | null is a valid value so you can store data with null value in indexeddb 
 	title: string;
 	link: string | null;
 	header: string;
@@ -183,11 +177,11 @@ export const IsCategory = (obj: any): boolean => typeof obj === 'object' && obj 
 
 export class CategoryRowDto {
 	constructor(categoryRow: ICategoryRow) {
-		const { partitionKey, id, parentCategory, modified } = categoryRow;
+		const { partitionKey, id, parentId, modified } = categoryRow;
 		this.categoryRowDto = {
 			PartitionKey: partitionKey,
 			Id: id,
-			ParentCategory: parentCategory,
+			ParentId: parentId,
 			Title: '',
 			Link: '',
 			Header: '',
@@ -207,14 +201,15 @@ export class CategoryRowDto {
 
 export class CategoryRow {
 	constructor(categoryRowDto: ICategoryRowDto) {
-		const { PartitionKey, Id, RootId, ParentCategory, Kind, Title, Link, Header, Variations, Level,
+		const { Workspace, TopId, Id, ParentId, Kind, Title, Link, Header, Variations, Level,
 			HasSubCategories, SubCategoryRowDtos,
 			NumOfQuestions, QuestionRowDtos,
 			IsExpanded } = categoryRowDto;
 		this.categoryRow = {
-			partitionKey: PartitionKey,
+			workspace: Workspace,
+			topId: TopId,
 			id: Id,
-			parentCategory: ParentCategory,
+			parentId: ParentId,
 			title: Title,
 			link: Link,
 			header: Header,
@@ -228,21 +223,20 @@ export class CategoryRow {
 				: [],
 			level: Level,
 			kind: Kind,
-			isExpanded: IsExpanded,
-			rootId: RootId ?? null
+			isExpanded: IsExpanded
 		}
 	}
 	categoryRow: ICategoryRow;
 }
 
 export class QuestionRow {
-	constructor(rowDto: IQuestionRowDto) { //, parentCategory: string) {
-		const { PartitionKey, Id, ParentCategory, NumOfAssignedAnswers, Title, CategoryTitle, Created, Modified, Included, RootId } = rowDto;
+	constructor(rowDto: IQuestionRowDto) { //, parentId: string) {
+		const { PartitionKey, Id, ParentId, NumOfAssignedAnswers, Title, CategoryTitle, Created, Modified, Included, RootId } = rowDto;
 		this.questionRow = {
 			partitionKey: PartitionKey,
 			id: Id,
 			rootId: RootId!,
-			parentCategory: ParentCategory,
+			parentId: ParentId,
 			numOfAssignedAnswers: NumOfAssignedAnswers ?? 0,
 			title: Title,
 			categoryTitle: CategoryTitle,
@@ -257,11 +251,11 @@ export class QuestionRow {
 }
 
 export class QuestionRowDto {
-	constructor(row: IQuestionRow) { //, parentCategory: string) {
+	constructor(row: IQuestionRow) { //, parentId: string) {
 		this.questionRowDto = {
 			PartitionKey: row.partitionKey,
 			Id: row.id,
-			ParentCategory: row.parentCategory ?? '',
+			ParentId: row.parentId ?? '',
 			NumOfAssignedAnswers: row.numOfAssignedAnswers ?? 0,
 			Title: '',
 			CategoryTitle: '',
@@ -278,7 +272,8 @@ export class CategoryKey {
 	constructor(cat: ICategoryRow | ICategory | ICategoryKeyExtended) {
 		this.categoryKey = cat
 			? {
-				partitionKey: cat.partitionKey,
+				workspace: cat.workspace,
+				topId: cat.topId,
 				id: cat.id
 			}
 			: null
@@ -290,7 +285,7 @@ export class CategoryKey {
 
 export class Category {
 	constructor(dto: ICategoryDto) {
-		const { PartitionKey, Id, Kind, RootId, ParentCategory, Title, Link, Header, Level, Variations, NumOfQuestions,
+		const { PartitionKey, Id, Kind, RootId, ParentId, Title, Link, Header, Level, Variations, NumOfQuestions,
 			HasSubCategories, SubCategoryRowDtos, Created, Modified, QuestionRowDtos, IsExpanded, Doc1 } = dto;
 
 		const categoryRows = SubCategoryRowDtos
@@ -305,8 +300,8 @@ export class Category {
 			partitionKey: PartitionKey,
 			id: Id,
 			kind: Kind,
-			rootId: RootId!,
-			parentCategory: ParentCategory!,
+			topId: RootId!,
+			parentId: ParentId!,
 			title: Title,
 			link: Link,
 			header: Header,
@@ -329,12 +324,12 @@ export class Category {
 
 export class CategoryDto {
 	constructor(category: ICategory) {
-		const { partitionKey, id, kind, parentCategory, title, link, header, level, variations, created, modified, doc1 } = category;
+		const { partitionKey, id, kind, parentId, title, link, header, level, variations, created, modified, doc1 } = category;
 		this.categoryDto = {
 			PartitionKey: partitionKey,
 			Id: id,
 			Kind: kind,
-			ParentCategory: parentCategory,
+			ParentId: parentId,
 			Title: title,
 			Link: link,
 			Header: header ?? '',
@@ -353,7 +348,7 @@ export class CategoryDto {
 }
 
 export class Question {
-	constructor(dto: IQuestionDto) { //, parentCategory: string) {
+	constructor(dto: IQuestionDto) { //, parentId: string) {
 		const assignedAnswers = dto.AssignedAnswerDtos ?
 			dto.AssignedAnswerDtos.map((dto: IAssignedAnswerDto) => new AssignedAnswer(dto).assignedAnswer)
 			: [];
@@ -363,7 +358,7 @@ export class Question {
 		// TODO possible to call base class construtor
 		this.question = {
 			rootId: '', // TODO will be set later
-			parentCategory: dto.ParentCategory,
+			parentId: dto.ParentId,
 			partitionKey: dto.PartitionKey,
 			id: dto.Id,
 			title: dto.Title,
@@ -388,9 +383,9 @@ export class QuestionKey {
 	constructor(question: IQuestionRow | IQuestion | undefined) {
 		this.questionKey = question
 			? {
-				partitionKey: question.partitionKey,
+				topId: question.partitionKey,
 				id: question.id,
-				parentCategory: question.parentCategory ?? undefined
+				parentId: question.parentId ?? undefined
 			}
 			: null
 	}
@@ -399,12 +394,12 @@ export class QuestionKey {
 
 export class QuestionDto {
 	constructor(question: IQuestion) {
-		const { partitionKey, id, parentCategory, title, source, status, created, modified,
+		const { partitionKey, id, parentId, title, source, status, created, modified,
 			numOfAssignedAnswers, numOfRelatedFilters } = question;
 		this.questionDto = {
 			PartitionKey: partitionKey,
 			Id: id,
-			ParentCategory: parentCategory ?? 'null',  // TODO proveri
+			ParentId: parentId ?? 'null',  // TODO proveri
 			Title: title,
 			//AssignedAnswerDtos: question.assignedAnswers.map((a: IAssignedAnswer) => new AssignedAnswerDto(a).assignedAnswerDto),
 			NumOfAssignedAnswers: numOfAssignedAnswers,
@@ -423,7 +418,7 @@ export interface IQuestionRowDto extends IRecordDto {
 	PartitionKey: string;
 	Id: string;
 	RootId?: string,
-	ParentCategory: string;
+	ParentId: string;
 	NumOfAssignedAnswers?: number,
 	Title: string;
 	CategoryTitle?: string;
@@ -433,15 +428,15 @@ export interface IQuestionRowDto extends IRecordDto {
 }
 
 export interface IQuestionRowDtosEx {
-	questionRowDtos : IQuestionRowDto[];
- 	msg: string;
+	questionRowDtos: IQuestionRowDto[];
+	msg: string;
 }
 
 export interface IQuestionDto extends IQuestionRowDto {
 	AssignedAnswerDtos?: IAssignedAnswerDto[];
 	RelatedFilterDtos?: IRelatedFilterDto[]
 	NumOfRelatedFilters?: number;
-	oldParentCategory?: string;
+	oldParentId?: string;
 }
 
 export interface IQuestionDtoEx {
@@ -485,7 +480,7 @@ export interface ICategoryInfo {
 }
 
 export interface IExpandInfo {
-	rootId: string;
+	topId: string;
 	categoryKey: ICategoryKey;
 	formMode: FormMode;
 	includeQuestionId?: string;
@@ -497,7 +492,7 @@ export interface IExpandInfo {
 export interface IParentInfo {
 	//execute?: (method: string, endpoint: string) => Promise<any>,
 	// partitionKey: string | null,
-	// parentCategory: string | null,
+	// parentId: string | null,
 	//categoryKey: ICategoryKey,
 	categoryRow: ICategoryRow,
 	startCursor?: number,
@@ -520,8 +515,10 @@ export interface ICategoriesState {
 	nodeOpened: boolean;
 	activeCategory: ICategory | null;
 	activeQuestion: IQuestion | null;
-	loading: boolean;
-	questionLoading: boolean,
+	loadingCategories: boolean,
+	loadingQuestions: boolean,
+	loadingCategory: boolean,
+	loadingQuestion: boolean,
 	error?: Error;
 	whichRowId?: string; // category.id or question.id
 }
@@ -539,7 +536,7 @@ export interface ILoadCategoryQuestions {
 export interface ICategoriesContext {
 	state: ICategoriesState,
 	openNode: (keyExpanded: ICategoryKeyExpanded, fromChatBotDlg?: string) => Promise<any>;
-	loadTopCategoryRows: () => Promise<any>,
+	loadTopRows: () => Promise<any>,
 	addSubCategory: (categoryRow: ICategoryRow) => Promise<any>;
 	cancelAddCategory: () => Promise<any>;
 	createCategory: (category: ICategory) => void,
@@ -558,7 +555,7 @@ export interface ICategoriesContext {
 	createQuestion: (question: IQuestion, fromModal: boolean) => Promise<any>;
 	viewQuestion: (questionRow: IQuestionRow) => void;
 	editQuestion: (questionRow: IQuestionRow) => void;
-	updateQuestion: (rootId: string, oldParentCategory: string, question: IQuestion, categoryChanged: boolean) => Promise<any>;
+	updateQuestion: (rootId: string, oldParentId: string, question: IQuestion, categoryChanged: boolean) => Promise<any>;
 	assignQuestionAnswer: (action: 'Assign' | 'UnAssign', questionKey: IQuestionKey, answerKey: IAnswerKey, assigned: IWhoWhen) => Promise<any>;
 	deleteQuestion: (questionRow: IQuestionRow) => void;
 }
@@ -642,9 +639,9 @@ export class AssignedAnswer {
 export enum ActionTypes {
 	SET_TOP_ROWS = 'SET_TOP_ROWS',
 	SET_NODE_OPENED = "SET_NODE_OPENED",
-	SET_LOADING = 'SET_LOADING',
+	SET_LOADING_CATEGORY = 'SET_LOADING_CATEGORY',
+	SET_LOADING_QUESTION = 'SET_LOADING_QUESTION',
 	SET_TOP_ROWS_LOADING = 'SET_TOP_ROWS_LOADING',
-	SET_CATEGORY_LOADING = 'SET_CATEGORY_LOADING',
 	SET_CATEGORY_QUESTIONS_LOADING = 'SET_CATEGORY_QUESTIONS_LOADING',
 	SET_SUB_CATEGORIES = 'SET_SUB_CATEGORIES',
 	SET_ERROR = 'SET_ERROR',
@@ -653,7 +650,9 @@ export enum ActionTypes {
 	CANCEL_ADD_SUB_CATEGORY = 'CANCEL_ADD_SUB_CATEGORY',
 	SET_CATEGORY = 'SET_CATEGORY',
 	SET_CATEGORY_ROW = 'SET_CATEGORY_ROW',
+	SET_ROW_EXPANDING = 'SET_ROW_EXPANDING',
 	SET_ROW_EXPANDED = 'SET_ROW_EXPANDED',
+	SET_ROW_COLLAPSING = 'SET_ROW_COLLAPSING',
 	SET_ROW_COLLAPSED = 'SET_ROW_COLLAPSED',
 	SET_CATEGORY_ADDED = 'SET_CATEGORY_ADDED',
 	SET_CATEGORY_TO_VIEW = 'SET_CATEGORY_TO_VIEW',
@@ -669,7 +668,7 @@ export enum ActionTypes {
 	FORCE_OPEN_NODE = "FORCE_OPEN_NODE",
 
 	// questions
-	LOAD_CATEGORY_QUESTIONS = 'LOAD_CATEGORY_QUESTIONS',
+	CATEGORY_QUESTIONS_LOADED = 'CATEGORY_QUESTIONS_LOADED',
 	ADD_QUESTION = 'ADD_QUESTION',
 	QUESTION_TITLE_CHANGED = 'QUESTION_TITLE_CHANGED',
 
@@ -726,19 +725,17 @@ export type CategoriesPayload = {
 		categoryRow?: ICategoryRow;
 	}
 
-	[ActionTypes.SET_LOADING]: {
+	[ActionTypes.SET_LOADING_CATEGORY]: {
 		categoryRow?: ICategoryRow;
 	}
 
-	[ActionTypes.SET_CATEGORY_LOADING]: {
+	[ActionTypes.SET_LOADING_QUESTION]: {
 		categoryRow?: ICategoryRow;
-		id: string;
-		loading: boolean;
 	}
 
 	[ActionTypes.SET_CATEGORY_QUESTIONS_LOADING]: {
 		categoryRow?: ICategoryRow;
-		questionLoading: boolean;
+		loadingQuestion: boolean;
 	}
 
 	[ActionTypes.NODE_OPENING]: {
@@ -758,7 +755,7 @@ export type CategoriesPayload = {
 
 	[ActionTypes.SET_TOP_ROWS]: {
 		categoryRow?: ICategoryRow;
-		topCategoryRows: ICategoryRow[];
+		topRows: ICategoryRow[];
 	};
 
 	[ActionTypes.SET_SUB_CATEGORIES]: {
@@ -787,12 +784,9 @@ export type CategoriesPayload = {
 		value: string;
 	}
 
-
-
 	[ActionTypes.CANCEL_ADD_SUB_CATEGORY]: {
 		categoryRow?: ICategoryRow;
 	}
-
 
 	[ActionTypes.SET_CATEGORY]: {
 		categoryRow: ICategory;
@@ -812,9 +806,17 @@ export type CategoriesPayload = {
 	};
 
 
+	[ActionTypes.SET_ROW_EXPANDING]: {
+		categoryRow?: ICategoryRow;
+	};
+
 	[ActionTypes.SET_ROW_EXPANDED]: {
 		categoryRow: ICategoryRow;
 		formMode: FormMode;
+	};
+
+	[ActionTypes.SET_ROW_COLLAPSING]: {
+		categoryRow?: ICategoryRow;
 	};
 
 	[ActionTypes.SET_ROW_COLLAPSED]: {
@@ -860,7 +862,7 @@ export type CategoriesPayload = {
 
 	/////////////
 	// questions
-	[ActionTypes.LOAD_CATEGORY_QUESTIONS]: {
+	[ActionTypes.CATEGORY_QUESTIONS_LOADED]: {
 		categoryRow: ICategoryRow
 	};
 

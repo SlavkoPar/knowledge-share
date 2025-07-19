@@ -16,9 +16,11 @@ import {
 
 import { globalReducer, initialGlobalState } from "global/globalReducer";
 
-import { Category, ICategory, ICategoryDto, ICategoryKey, IQuestionRow, IQuestionRowDto, IQuestionRowDtosEx,
-  IQuestion, IQuestionDto, IQuestionDtoEx, IQuestionEx, IQuestionKey, Question, IAssignedAnswer, 
-  ICategoryRowDto, ICategoryRow, CategoryRow } from "categories/types";
+import {
+  Category, ICategory, ICategoryDto, ICategoryKey, IQuestionRow, IQuestionRowDto, IQuestionRowDtosEx,
+  IQuestion, IQuestionDto, IQuestionDtoEx, IQuestionEx, IQuestionKey, Question, IAssignedAnswer,
+  ICategoryRowDto, ICategoryRow, CategoryRow
+} from "categories/types";
 import { Group, IGroup, IGroupDto, IGroupKey, IAnswer, IAnswerDto, IAnswerKey, IAnswerRow, IAnswerRowDto, Answer, IGroupRow, IGroupRowDto, GroupRow } from "groups/types";
 
 import { IUser } from 'global/types';
@@ -117,26 +119,20 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
         const url = protectedResources.KnowledgeAPI.endpointCategoryRow;
         await Execute("GET", url, null)
           .then((catDtos: ICategoryRowDto[]) => {   //  | Response
-            console.log('loadAllCategoryRows', protectedResources.KnowledgeAPI.endpointCategoryRow)
             const categoryRows = new Map<string, ICategoryRow>();
             console.timeEnd();
-            // if (categoryDtos instanceof Response) {
-            //   throw (categoryDtos);
-            // }
-            //const data: ICategoryDto[] = categoryDtos;
-            catDtos.forEach((rowDto: ICategoryRowDto) => categoryRows.set(rowDto.Id, new CategoryRow(rowDto).categoryRow));
-            //
+            catDtos.forEach((rowDto: ICategoryRowDto) =>
+              categoryRows.set(rowDto.Id, new CategoryRow(rowDto).categoryRow));
             categoryRows.forEach(cat => {
-              let { partitionKey, id, parentCategory, title, variations, hasSubCategories, level, kind } = cat;
+              let { id, parentId, title, variations, hasSubCategories, level, kind } = cat;
               let titlesUpTheTree = id;
-              let parentCat = parentCategory;
+              let parentCat = parentId;
               while (parentCat) {
                 const cat2 = categoryRows.get(parentCat)!;
                 titlesUpTheTree = cat2!.id + ' / ' + titlesUpTheTree;
-                parentCat = cat2.parentCategory;
+                parentCat = cat2.parentId;
               }
               cat.titlesUpTheTree = titlesUpTheTree;
-
               categoryRows.set(id, cat);
             })
             dispatch({ type: GlobalActionTypes.SET_ALL_CATEGORY_ROWS, payload: { categoryRows } });
@@ -172,13 +168,13 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
             rowDtos.forEach((rowDto: IGroupRowDto) => groupRows.set(rowDto.Id, new GroupRow(rowDto).groupRow));
             //
             groupRows.forEach(groupRow => {
-              let { partitionKey, id, parentGroup, title, variations, hasSubGroups, level, kind } = groupRow;
+              let { topId: partitionKey, id, parentId, title, variations, hasSubGroups, level, kind } = groupRow;
               let titlesUpTheTree = id;
-              let parentGrp = parentGroup;
+              let parentGrp = parentId;
               while (parentGrp) {
                 const groupRow2 = groupRows.get(parentGrp)!;
                 titlesUpTheTree = groupRow2!.id + ' / ' + titlesUpTheTree;
-                parentGrp = groupRow2.parentGroup;
+                parentGrp = groupRow2.parentId;
               }
               groupRow.titlesUpTheTree = titlesUpTheTree;
               groupRows.set(id, groupRow);
@@ -208,11 +204,11 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
           console.timeEnd();
           if (questionRowDtos) {
             const list: IQuestionRow[] = questionRowDtos.map((dto: IQuestionRowDto) => {
-              const { PartitionKey, Id, ParentCategory, Title, NumOfAssignedAnswers, Included } = dto;
+              const { PartitionKey, Id, ParentId, Title, NumOfAssignedAnswers, Included } = dto;
               return {
                 partitionKey: PartitionKey,
                 id: Id,
-                parentCategory: ParentCategory,
+                parentId: ParentId,
                 title: Title,
                 categoryTitle: '',
                 numOfAssignedAnswers: NumOfAssignedAnswers ?? 0,
@@ -223,7 +219,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
             // const list: IQuestionRow[] = dtos.map((q: IQuestionRowDto) => ({
             //   partitionKey: q.PartitionKey,
             //   id: q.Id,
-            //   parentCategory: q.ParentCategory,
+            //   parentId: q.ParentId,
             //   numOfAssignedAnswers: q.NumOfAssignedAnswers ?? 0,
             //   title: q.Title,
             //   categoryTitle: '',
@@ -261,14 +257,14 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
         if (groupRow.id === groupId) {
           parentHeader = groupRow.header!;
         }
-        else if (groupRow.parentGroup === groupId) {
-          const { partitionKey, id, parentGroup, header, title, level, kind, hasSubGroups } = groupRow;
+        else if (groupRow.parentId === groupId) {
+          const { topId: partitionKey, id, parentId, header, title, level, kind, hasSubGroups } = groupRow;
           const row: IGroupRow = {
-            partitionKey,
+            topId: partitionKey,
             id,
             header,
             title,
-            parentGroup,
+            parentId,
             titlesUpTheTree: "",
             hasSubGroups,
             level,
@@ -309,11 +305,11 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
             const list: IAnswerRow[] = dtos.map((rowDto: IAnswerRowDto) => {
               const answer = new Answer(rowDto).answer;
               return answer;
-              //const { PartitionKey, Id, ParentGroup, Title } = rowDto;
+              //const { PartitionKey, Id, ParentId, Title } = rowDto;
               // return {
               //   partitionKey: PartitionKey,
               //   id: Id,
-              //   parentGroup: ParentGroup,
+              //   parentId: ParentId,
               //   title: Title,
               //   groupTitle: ''
               // }
@@ -356,7 +352,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
   const getQuestion = async (questionKey: IQuestionKey): Promise<any> => {
     return new Promise(async (resolve) => {
       try {
-        const { partitionKey, id } = questionKey;
+        const { topId: partitionKey, id } = questionKey;
         const url = `${protectedResources.KnowledgeAPI.endpointQuestion}/${partitionKey}/${id}`;
         console.time()
         await Execute("GET", url)
@@ -404,7 +400,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
           //   header,
           //   title,
           //   link,
-          //   parentCategory: "",
+          //   parentId: "",
           //   titlesUpTheTree: "",
           //   variations: [],
           //   hasSubCategories: false,
@@ -439,7 +435,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
           //   header,
           //   title,
           //   link,
-          //   parentCategory: "",
+          //   parentId: "",
           //   titlesUpTheTree: "",
           //   variations: [],
           //   hasSubCategories: false,
@@ -470,13 +466,13 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
         if (id === categoryId) {
           parentHeader = ""; //cat.header!;
         }
-        else if (cat.parentCategory === categoryId) {
-          // const { partitionKey, id, parentCategory, title, level, kind, hasSubCategories } = cat;
+        else if (cat.parentId === categoryId) {
+          // const { partitionKey, id, parentId, title, level, kind, hasSubCategories } = cat;
           // const c: ICat = {
           //   partitionKey,
           //   id,
           //   title,
-          //   parentCategory,
+          //   parentId,
           //   titlesUpTheTree: "",
           //   variations: [],
           //   hasSubCategories,
@@ -538,7 +534,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
     return new Promise(async (resolve) => {
       try {
         const { partitionKey, id } = answerKey;
-        //const url = `${process.env.REACT_APP_API_URL}/Answer/${parentGroup}/${id}`;
+        //const url = `${process.env.REACT_APP_API_URL}/Answer/${parentId}/${id}`;
         //console.log(`FETCHING --->>> ${url}`)
         //dispatch({ type: GlobalActionTypes.SET_LOADING, payload: {} })
         console.time()
@@ -554,7 +550,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
           .then(({ data: answerDto }) => {
             const categories: IGroup[] = [];
             console.timeEnd();
-            const answer: IAnswer = new Answer(answerDto, parentGroup).answer;
+            const answer: IAnswer = new Answer(answerDto, parentId).answer;
             answer.groupTitle = 'nadji me';
             resolve(answer);
           })
@@ -599,14 +595,14 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
       const groups: IGroupRow[] = [];
       shortGroups.forEach((c, id) => {
         if (c.kind === kind) {
-          const { partitionKey, id, header, title, level } = c;
+          const { topId: partitionKey, id, header, title, level } = c;
           const groupRow: IGroupRow = {
-            partitionKey,
+            topId: partitionKey,
             id,
             header,
             title,
             //link,
-            parentGroup: "",
+            parentId: "",
             titlesUpTheTree: "",
             //variations: [],
             hasSubGroups: false,

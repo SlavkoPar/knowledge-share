@@ -14,7 +14,7 @@ const VariationList = ({ groupKey, variations }: { groupKey: IGroupKey, variatio
   const { topRows: groups, error } = state;
 
 
-  //const group = groups.find(c => c.id === parentGroup)!
+  //const group = groups.find(c => c.id === parentId)!
   // const { tags, numOfTags, hasMore } = group;
 
   useEffect(() => {
@@ -23,7 +23,7 @@ const VariationList = ({ groupKey, variations }: { groupKey: IGroupKey, variatio
 
   // useEffect(() => {
   //   if (groupId != null) {
-  //     if (groupId === parentGroup!.toString() && tagId) {
+  //     if (groupId === parentId!.toString() && tagId) {
   //       setTimeout(() => {
   //         if (canEdit)
   //           editTag(parseInt(tagId))
@@ -32,7 +32,7 @@ const VariationList = ({ groupKey, variations }: { groupKey: IGroupKey, variatio
   //       }, 3000)
   //     }
   //   }
-  // }, [viewTag, parentGroup, groupId, tagId, canEdit]);
+  // }, [viewTag, parentId, groupId, tagId, canEdit]);
 
   // console.log('TagList render', tags, level)
 

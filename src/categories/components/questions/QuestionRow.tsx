@@ -22,9 +22,9 @@ import { initialQuestion } from 'categories/CategoryReducer';
 
 //const QuestionRow = ({ question, categoryInAdding }: { ref: React.ForwardedRef<HTMLLIElement>, question: IQuestion, categoryInAdding: boolean | undefined }) => {
 const QuestionRow = ({ questionRow }: { questionRow: IQuestionRow }) => {
-    const { id, partitionKey, parentCategory, title, numOfAssignedAnswers, isSelected, rootId } = questionRow;
-    const questionKey: IQuestionKey = { partitionKey, id, parentCategory: parentCategory ?? undefined };
-    const categoryKey: ICategoryKey = { partitionKey, id: parentCategory }
+    const { id, partitionKey, parentId, title, numOfAssignedAnswers, isSelected, rootId } = questionRow;
+    const questionKey: IQuestionKey = { topId: partitionKey, id, parentId: parentId ?? undefined };
+    const categoryKey: ICategoryKey = { workspace: partitionKey, id: parentId }
 
     const { canEdit, isDarkMode, variant, bg, authUser } = useGlobalState();
     const { state, viewQuestion, addQuestion, editQuestion, deleteQuestion } = useCategoryContext();
@@ -76,7 +76,7 @@ const QuestionRow = ({ questionRow }: { questionRow: IQuestionRow }) => {
     const [hoverRef, hoverProps] = useHover();
 
     const Row1 =
-        <div ref={hoverRef} className={`d-flex justify-content-start align-items-center w-100 position-relative question-row${showForm?'-selected':''}`}>
+        <div ref={hoverRef} className={`d-flex justify-content-start align-items-center w-100 position-relative question-row${showForm ? '-selected' : ''}`}>
             <Button
                 variant='link'
                 size="sm"
@@ -122,7 +122,7 @@ const QuestionRow = ({ questionRow }: { questionRow: IQuestionRow }) => {
                         className="ms-1 p-0 text-secondary d-flex align-items-center"
                         title="Add Question"
                         onClick={() => {
-                            const categoryInfo: ICategoryInfo = { categoryKey: { partitionKey, id: parentCategory }, level: 0 }
+                            const categoryInfo: ICategoryInfo = { categoryKey: { workspace: partitionKey, id: parentId }, level: 0 }
                             addQuestion(categoryKey, rootId!);
                         }}
                     >
@@ -137,7 +137,7 @@ const QuestionRow = ({ questionRow }: { questionRow: IQuestionRow }) => {
         // <div className="py-0 px-0 w-100 list-group-item border">
         <ListGroup.Item
             // variant={"primary"}
-            className="py-0 px-1 w-100"
+            className="py-0 px-0 w-100"
             as="li"
         >
             {showForm && formMode === FormMode.AddingQuestion &&
@@ -147,7 +147,7 @@ const QuestionRow = ({ questionRow }: { questionRow: IQuestionRow }) => {
                             showCloseButton={true}
                             source={0} />
                     </div>
-                    <div className="d-none d-md-block">
+                    <div className="d-none d-md-block  border rounded-3">
                         {Row1}
                     </div>
                 </>

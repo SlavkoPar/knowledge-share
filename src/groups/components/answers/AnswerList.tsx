@@ -8,9 +8,9 @@ import AnswerRow from "groups/components/answers/AnswerRow";
 //const AnswerList = ({ title, groupRow, level }: IParentInfo) => {
 const AnswerList = ({ level, groupRow }: { level: number, groupRow: IGroupRow }) => {
   const { state, loadGroupAnswers } = useGroupContext();
-  const { keyExpanded: groupKeyExpanded, answerLoading, error, activeAnswer } = state;
-  const { partitionKey, id, answerId } = groupKeyExpanded
-    ? groupKeyExpanded
+  const { keyExpanded, loadingAnswer, error, activeAnswer } = state;
+  const { partitionKey, id, answerId } = keyExpanded
+    ? keyExpanded
     : { partitionKey: null, id: null, answerId: null };
 
   const { answerRows } = groupRow;
@@ -50,7 +50,7 @@ const AnswerList = ({ level, groupRow }: { level: number, groupRow: IGroupRow })
 
 
   const [infiniteRef, { rootRef }] = useInfiniteScroll({
-    loading: answerLoading,
+    loading: loadingAnswer,
     hasNextPage: hasMoreAnswers!,
     onLoadMore: loadMore,
     disabled: Boolean(error),

@@ -46,7 +46,7 @@ const AssignedAnswersChatBot = ({ questionId, questionTitle, assignedAnswers, is
 
     const onAnswerCreated = async (answer: IAnswer | null) => {
         if (answer) {
-            const { partitionKey, id } = answer;
+            const { topId: partitionKey, id } = answer;
             const answerKey = { partitionKey, id }
             await onSelectQuestionAnswer(answerKey);
         }

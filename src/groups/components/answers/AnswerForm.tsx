@@ -33,9 +33,9 @@ const AnswerForm = ({ answer, submitForm, children, showCloseButton, source = 0,
 
   const isDisabled = viewing;
 
-  const { partitionKey, parentGroup, title, link, id } = answer;
-  const answerKey = { parentGroup: parentGroup ?? undefined, partitionKey, id };
-  const groupKey: IGroupKey = { partitionKey, id: parentGroup };
+  const { topId: partitionKey, parentId, title, link, id } = answer;
+  const answerKey = { parentId: parentId ?? undefined, partitionKey, id };
+  const groupKey: IGroupKey = { partitionKey, id: parentId };
 
   const dispatch = useGroupDispatch();
 
@@ -72,7 +72,7 @@ const AnswerForm = ({ answer, submitForm, children, showCloseButton, source = 0,
     initialValues: answer,
     validationSchema: Yup.object().shape({
       title: Yup.string().required("Required"),
-      parentGroup: Yup.string().required("Required").notOneOf(['000000000000000000000000'])
+      parentId: Yup.string().required("Required").notOneOf(['000000000000000000000000'])
     }),
     onSubmit: (values: IAnswer) => {
       // console.log('AnswerForm.onSubmit', JSON.stringify(values, null, 2))
@@ -89,12 +89,12 @@ const AnswerForm = ({ answer, submitForm, children, showCloseButton, source = 0,
   const handleChangeTitle = (event: ChangeEvent<HTMLTextAreaElement>) => {
     formik.handleChange(event);
     const value = event.target.value;
-    debouncedTitleHandler(formik.values.parentGroup!, id, value)
+    debouncedTitleHandler(formik.values.parentId!, id, value)
   };
 
 
   const setParentGroup = (cat: IGroupRow) => {
-    formik.setFieldValue('parentGroup', cat.id);
+    formik.setFieldValue('parentId', cat.id);
     formik.setFieldValue('groupTitle', cat.title);
   }
 
@@ -110,7 +110,7 @@ const AnswerForm = ({ answer, submitForm, children, showCloseButton, source = 0,
         <Stack direction="horizontal" gap={0} className="border">
           <div className="p-0"><Form.Label>Group:</Form.Label></div>
           <div className="p-1">
-            <Form.Group controlId="parentGroup" className="group-select form-select-sm w-90">
+            <Form.Group controlId="parentId" className="group-select form-select-sm w-90">
               <Dropdown>
                 <Dropdown.Toggle variant="light" id="dropdown-basic" className="px-2 py-0 text-primary border" disabled={isDisabled}>
                   <span className="text-wrap me-1">{formik.values.groupTitle}</span>
@@ -118,7 +118,7 @@ const AnswerForm = ({ answer, submitForm, children, showCloseButton, source = 0,
                 <Dropdown.Menu className="p-0 border" >
                   <Dropdown.Item className="p-0 m-0 rounded-3">
                     <GroupRowList
-                      selId={formik.values.parentGroup}
+                      selId={formik.values.parentId}
                       groupKey={null}  // TODO {groupKey}
                       level={1}
                       setParentGroup={setParentGroup}
@@ -129,22 +129,22 @@ const AnswerForm = ({ answer, submitForm, children, showCloseButton, source = 0,
 
               <Form.Control
                 as="input"
-                name="parentGroup"
+                name="parentId"
                 onChange={formik.handleChange}
                 //onBlur={formik.handleBlur}
                 // onBlur={(e: React.FocusEvent<HTMLTextAreaElement>): void => {
                 //   if (isEdit && formik.initialValues.title !== formik.values.title)
                 //     formik.submitForm();
                 // }}
-                value={formik.values.parentGroup ? formik.values.parentGroup : ''}
+                value={formik.values.parentId ? formik.values.parentId : ''}
                 placeholder='Group'
                 className="text-primary w-100"
                 disabled={isDisabled}
                 hidden={true}
               />
               <Form.Text className="text-danger">
-                {formik.touched.parentGroup && formik.errors.parentGroup ? (
-                  <div className="text-danger">{formik.errors.parentGroup ? 'required' : ''}</div>
+                {formik.touched.parentId && formik.errors.parentId ? (
+                  <div className="text-danger">{formik.errors.parentId ? 'required' : ''}</div>
                 ) : null}
               </Form.Text>
             </Form.Group>

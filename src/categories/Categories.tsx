@@ -28,15 +28,18 @@ interface IProps {
 
 const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
     console.log("=== Categories", categoryId_questionId)
-    const { state, openNode, loadTopCategoryRows } = useCategoryContext();
+    const { state, openNode, loadTopRows } = useCategoryContext();
     const {
-        topRows: topCategoryRows, topRowsLoading: topCategoryRowsLoading, topRowsLoaded: topCategoryRowsLoaded,
+        topRows, topRowsLoading, topRowsLoaded,
         keyExpanded: categoryKeyExpanded, categoryId_questionId_done,
         nodeOpening: categoryNodeOpening, nodeOpened: categoryNodeOpened,
         activeCategory,
         activeQuestion,
         formMode,
-        loading
+        loadingCategories,
+        loadingQuestions,
+        loadingCategory,
+        loadingQuestion
     } = state;
 
     const { setLastRouteVisited, searchQuestions } = useGlobalContext();
@@ -58,7 +61,7 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
     }
 
     const [catKeyExpanded, setCatKeyExpanded] = useState<ICategoryKeyExpanded>({
-        partitionKey: null,
+        topId: '', // null
         id: null,
         questionId: categoryKeyExpanded ? categoryKeyExpanded.questionId : null
     })
@@ -66,7 +69,7 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
     const categoryRow: ICategoryRow = {
         ...initialCategory,
         level: 1,
-        categoryRows: topCategoryRows
+        categoryRows: topRows
     }
 
 
@@ -74,16 +77,16 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
 
     useEffect(() => {
         (async () => {
-            // SET_FIRST_LEVEL_CATEGORY_ROWS  Level:1
-            if (!topCategoryRowsLoading && !topCategoryRowsLoaded) {
-                await loadTopCategoryRows()
+            // SET_TOP_ROWS  Level:1
+            if (!topRowsLoading && !topRowsLoaded) {
+                await loadTopRows()
             }
         })()
-    }, [topCategoryRowsLoading, topCategoryRowsLoaded, loadTopCategoryRows]);
+    }, [topRowsLoading, topRowsLoaded, loadTopRows]);
 
     useEffect(() => {
         (async () => {
-            if (!categoryNodeOpening && topCategoryRows.length > 0) {
+            if (!categoryNodeOpening && topRows.length > 0) {
                 if (categoryId_questionId) {
                     if (categoryId_questionId === 'add_question') {
                         const sNewQuestion = localStorage.getItem('New_Question');
@@ -113,7 +116,7 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
                 }
             }
         })()
-    }, [categoryKeyExpanded, categoryNodeOpening, categoryNodeOpened, openNode, categoryId_questionId, categoryId_questionId_done, topCategoryRowsLoaded])
+    }, [categoryKeyExpanded, categoryNodeOpening, categoryNodeOpened, openNode, categoryId_questionId, categoryId_questionId_done, topRowsLoaded])
 
     useEffect(() => {
         setLastRouteVisited(`/categories`);
@@ -128,13 +131,13 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
 
     console.log('===>>> Categories !!!!!!!!!!!!!!!!!')
     //if (!categoryNodeOpened)
-    if (topCategoryRows.length === 0)
+    if (topRows.length === 0)
         return null
 
     return (
         <>
             <Container>
-                <h5 className="text-warning mx-auto w-75 fw-bold">Categories / Questions</h5>
+                <h5 className="text-warning mx-auto w-75 fw-bold"><span className='categories'>Categories / </span><span className='questions'>Questions</span></h5>
 
                 <Row className={`${isDarkMode ? "dark" : ""}`}>
                     <Col>
@@ -163,11 +166,13 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
                 >
                     Add Category
                 </Button>
+
                 <Row className="my-1">
                     <Col xs={12} md={5}>
-                        <div className="categories-border">
+                        <div className="categories-border" style={{ position: 'relative' }}>
                             <CategoryList categoryRow={categoryRow} level={0} title="root" isExpanded={true} />
                         </div>
+
                     </Col>
                     <Col xs={0} md={7}>
                         {/* <div class="d-none d-lg-block">hide on screens smaller than lg</div> */}
@@ -190,11 +195,30 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
                     newQuestionRow={newQuestion}
                 />
             }
-            {loading && <div className="d-flex justify-content-center align-items-center" style={{ position: 'absolute', top: '50%', left: '50%' }}>
-                <div className="spinner-border text-warning" role="status">
-                    <span className="visually-hidden">Loading...</span>
+
+
+            {(loadingCategories || loadingQuestions) &&
+                <div className="d-flex justify-content-center align-items-center" style={{ position: 'absolute', top: '40%', left: '20%' }}>
+                    <div className={`spinner-border ${loadingQuestions?'question':'category'}-spinner`} role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </div>
                 </div>
-            </div>
+            }
+
+            {loadingCategory &&
+                <div className="d-flex justify-content-center align-items-center" style={{ position: 'absolute', top: '50%', left: '50%' }}>
+                    <div className="spinner-border category-spinner" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            }
+
+            {loadingQuestion &&
+                <div className="d-flex justify-content-center align-items-center" style={{ position: 'absolute', top: '50%', left: '50%' }}>
+                    <div className="spinner-border question-spinner" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </div>
+                </div>
             }
         </>
     );

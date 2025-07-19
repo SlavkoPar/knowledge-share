@@ -22,9 +22,9 @@ import { initialAnswer } from 'groups/GroupReducer';
 
 //const AnswerRow = ({ answer, groupInAdding }: { ref: React.ForwardedRef<HTMLLIElement>, answer: IAnswer, groupInAdding: boolean | undefined }) => {
 const AnswerRow = ({ answerRow }: { answerRow: IAnswerRow }) => {
-    const { id, partitionKey, parentGroup, title, isSelected, rootId } = answerRow;
-    const answerKey: IAnswerKey = { partitionKey, id, parentGroup: parentGroup ?? undefined };
-    const groupKey: IGroupKey = { partitionKey, id: parentGroup }
+    const { id, topId: partitionKey, parentId, title, isSelected, rootId } = answerRow;
+    const answerKey: IAnswerKey = { partitionKey, id, parentId: parentId ?? undefined };
+    const groupKey: IGroupKey = { partitionKey, id: parentId }
 
     const { canEdit, isDarkMode, variant, bg, authUser } = useGlobalState();
     const { state, viewAnswer, addAnswer, editAnswer, deleteAnswer } = useGroupContext();
@@ -118,7 +118,7 @@ const AnswerRow = ({ answerRow }: { answerRow: IAnswerRow }) => {
                         className="ms-1 p-0 text-secondary d-flex align-items-center"
                         title="Add Answer"
                         onClick={() => {
-                            const groupInfo: IGroupInfo = { groupKey: { partitionKey, id: parentGroup }, level: 0 }
+                            const groupInfo: IGroupInfo = { groupKey: { partitionKey, id: parentId }, level: 0 }
                             addAnswer(groupKey, rootId!);
                         }}
                     >

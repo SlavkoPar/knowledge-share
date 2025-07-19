@@ -4,7 +4,7 @@ import { CatsActions, CatsActionTypes, ICatsState } from './types';
 
 export const initialState: ICatsState = {
   loading: false,
-  parentCategory: null,
+  parentId: null,
   title: '',
   cats: []
 }
@@ -56,7 +56,7 @@ export const CatsReducer: Reducer<ICatsState, CatsActions> = (state, action) => 
       const { id, title } = cat;
       return {
         ...state,
-        parentCategory: id!,
+        parentId: id!,
         title
       };
     }
@@ -69,7 +69,7 @@ export const CatsReducer: Reducer<ICatsState, CatsActions> = (state, action) => 
 
 function markForClean(cats: ICategoryRow[], id: string | null) {
   let deca = cats
-    .filter(c => c.parentCategory === id)
+    .filter(c => c.parentId === id)
     .map(c => c.id)
 
   deca.forEach(id => {

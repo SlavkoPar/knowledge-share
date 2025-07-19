@@ -35,7 +35,7 @@ const SupportPage: React.FC = () => {
 	const { canEdit, authUser, isDarkMode, variant, bg, categoryRows: cats, categoryRowsLoaded: catsLoaded } = useGlobalState();
 
 	const onSelectQuestion = async (questionKey: IQuestionKey) => {
-		navigate(`/categories/${questionKey.partitionKey}_${questionKey.id}`)
+		navigate(`/categories/${questionKey.topId}_${questionKey.id}`)
 	}
 
 	// useEffect(() => {

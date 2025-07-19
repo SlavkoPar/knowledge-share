@@ -34,9 +34,9 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
 
   const isDisabled = viewing;
 
-  const { partitionKey, parentCategory, title, id, assignedAnswers, relatedFilters } = question;
-  const questionKey = { parentCategory: parentCategory ?? undefined, partitionKey, id };
-  const categoryKey: ICategoryKey = { partitionKey, id: parentCategory };
+  const { partitionKey, parentId, title, id, assignedAnswers, relatedFilters } = question;
+  const questionKey = { parentId: parentId ?? undefined, partitionKey, id };
+  const categoryKey: ICategoryKey = { workspace: partitionKey, id: parentId };
 
   const dispatch = useCategoryDispatch();
 
@@ -73,7 +73,7 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
     initialValues: question,
     validationSchema: Yup.object().shape({
       title: Yup.string().required("Required"),
-      parentCategory: Yup.string().required("Required").notOneOf(['000000000000000000000000'])
+      parentId: Yup.string().required("Required").notOneOf(['000000000000000000000000'])
     }),
     onSubmit: (values: IQuestion) => {
       // console.log('QuestionForm.onSubmit', JSON.stringify(values, null, 2))
@@ -82,20 +82,20 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
     }
   });
 
-   const debouncedTitleHandler = useCallback(
-      debounce((categoryId: string, id: string, value: string) => {
-        dispatch({ type: ActionTypes.QUESTION_TITLE_CHANGED, payload: { categoryId, id, value } })
-      }, 500), []);
-  
-    const handleChangeTitle = (event: ChangeEvent<HTMLTextAreaElement>) => {
-      formik.handleChange(event);
-      const value = event.target.value;
-      debouncedTitleHandler(formik.values.parentCategory!, id, value)
-    };
-  
+  const debouncedTitleHandler = useCallback(
+    debounce((categoryId: string, id: string, value: string) => {
+      dispatch({ type: ActionTypes.QUESTION_TITLE_CHANGED, payload: { categoryId, id, value } })
+    }, 500), []);
 
-  const setParentCategory = (cat: ICategoryRow) => {
-    formik.setFieldValue('parentCategory', cat.id);
+  const handleChangeTitle = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    formik.handleChange(event);
+    const value = event.target.value;
+    debouncedTitleHandler(formik.values.parentId!, id, value)
+  };
+
+
+  const setParentId = (cat: ICategoryRow) => {
+    formik.setFieldValue('parentId', cat.id);
     formik.setFieldValue('categoryTitle', cat.title);
   }
 
@@ -111,7 +111,7 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
         <Stack direction="horizontal" gap={0} className="border">
           <div className="p-0"><Form.Label>Category:</Form.Label></div>
           <div className="p-1">
-            <Form.Group controlId="parentCategory" className="category-select form-select-sm w-90">
+            <Form.Group controlId="parentId" className="category-select form-select-sm w-90">
               <Dropdown>
                 <Dropdown.Toggle variant="light" id="dropdown-basic" className="px-2 py-0 text-primary border" disabled={isDisabled}>
                   <span className="text-wrap me-1">{formik.values.categoryTitle}</span>
@@ -119,10 +119,10 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
                 <Dropdown.Menu className="p-0 border" >
                   <Dropdown.Item className="p-0 m-0 rounded-3">
                     <CatList
-                      selId={formik.values.parentCategory}
+                      selId={formik.values.parentId}
                       categoryKey={null}  // TODO {categoryKey}
                       level={1}
-                      setParentCategory={setParentCategory}
+                      setParentId={setParentId}
                     />
                   </Dropdown.Item>
                 </Dropdown.Menu>
@@ -130,22 +130,22 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
 
               <Form.Control
                 as="input"
-                name="parentCategory"
+                name="parentId"
                 onChange={formik.handleChange}
                 //onBlur={formik.handleBlur}
                 // onBlur={(e: React.FocusEvent<HTMLTextAreaElement>): void => {
                 //   if (isEdit && formik.initialValues.title !== formik.values.title)
                 //     formik.submitForm();
                 // }}
-                value={formik.values.parentCategory ? formik.values.parentCategory : ''}
+                value={formik.values.parentId ? formik.values.parentId : ''}
                 placeholder='Category'
                 className="text-primary w-100"
                 disabled={isDisabled}
                 hidden={true}
               />
               <Form.Text className="text-danger">
-                {formik.touched.parentCategory && formik.errors.parentCategory ? (
-                  <div className="text-danger">{formik.errors.parentCategory ? 'required' : ''}</div>
+                {formik.touched.parentId && formik.errors.parentId ? (
+                  <div className="text-danger">{formik.errors.parentId ? 'required' : ''}</div>
                 ) : null}
               </Form.Text>
             </Form.Group>
@@ -157,7 +157,7 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
           <Form.Control
             as="textarea"
             name="title"
-            placeholder={formik.values.title === "new Question" ? "new Question" :  "question text"}
+            placeholder={formik.values.title === "new Question" ? "new Question" : "question text"}
             ref={nameRef}
             onChange={handleChangeTitle}
             // onBlur={formik.handleBlur}
@@ -247,7 +247,7 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
             />
           </div>
         }
-        { ((formik.dirty && editing) || adding) && 
+        {((formik.dirty && editing) || adding) &&
           <FormButtons
             cancelForm={cancelForm}
             handleSubmit={formik.handleSubmit}

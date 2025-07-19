@@ -6,12 +6,12 @@ import { useGlobalContext } from "global/GlobalProvider";
 import { CatsActionTypes, ICatInfo } from "./types";
 import { ICategoryKey, ICategoryRow } from "categories/types";
 
-const CatList = ({ selId, categoryKey, level, setParentCategory }: ICatInfo) => {
+const CatList = ({ selId, categoryKey, level, setParentId }: ICatInfo) => {
     const [state, dispatch] = useReducer(CatsReducer, initialState);
     const { getSubCats } = useGlobalContext();
 
     const { id } = categoryKey ?? { id: null };
-    const [catKey, setCatKey] = useState<ICategoryKey|null>(categoryKey)
+    const [catKey, setCatKey] = useState<ICategoryKey | null>(categoryKey)
 
     useEffect(() => {
         (async () => {
@@ -21,17 +21,17 @@ const CatList = ({ selId, categoryKey, level, setParentCategory }: ICatInfo) => 
         })()
     }, [getSubCats, catKey]);
 
-    const mySubCats = state.cats.filter(c => c.parentCategory === id);
+    const mySubCats = state.cats.filter(c => c.parentId === id);
 
     const setParentCat = (cat: ICategoryRow) => {
         dispatch({ type: CatsActionTypes.SET_PARENT_CAT, payload: { cat } })
-        setParentCategory!(cat);
+        setParentId!(cat);
     }
 
     return (
         <div className={level > 1 ? 'border  border-7 ms-4 h-25' : 'border border-7  h-25'} style={{ overflowY: 'auto' }}>
             <ListGroup as="ul" variant='dark' className="mb-0">
-                {mySubCats.filter(c => c.id !== selId).map((cat:ICategoryRow) =>
+                {mySubCats.filter(c => c.id !== selId).map((cat: ICategoryRow) =>
                     <CatRow
                         cat={cat}
                         selId={selId}

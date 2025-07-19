@@ -10,29 +10,41 @@
 ////////////////////////////
 /// Category -> Questions
 
+.categories { color: $indigo-300; }
+.questions { color: $yellow-500; }
+
 .categories-border {
-  border: 3px solid $blue-100;
+  border: 3px solid $indigo-100;
   border-radius: 3px;
 }
 
+.category-bg {
+  background-color: $indigo-100 !important;
+}
+
 .category-row {
-  background-color: $blue-100;
+  background-color: $indigo-100;
   color: #fff;
 }
 
 .category-row-selected {
-  background-color: $blue-200;
+  background-color: $indigo-300;
   color: #fff;
 }
 
 .category-row-title {
-  background-color: $light;
-  color: $blue-700;
+   background-color: #eee;
+  // background-color: $indigo-100;
+  color: $indigo-700;
   text-decoration: none;
 }
 
+.category-spinner {
+  color: $indigo-500
+}
+
 .category-form {
-  background-color: $blue-200;
+  background-color: $indigo-200;
   color: #ddd;
 }
 
@@ -41,10 +53,11 @@
   font-size: 14px;
 }
 
-
 .question-row {
   background-color: $yellow-400;
   color: #fff;
+  border: 1px solid $yellow-200;
+  border-radius: 1px;
 }
 
 .question-row-selected {
@@ -53,9 +66,13 @@
 }
 
 .question-row-title {
-  background-color: $yellow-400;
-  color: $blue-700;
+  background-color: $yellow-100;
+  color: $gray-700;
   text-decoration: none;
+}
+
+.question-spinner {
+  color: $yellow-500
 }
 
 .question-form {
@@ -64,53 +81,67 @@
 }
 
 .question-form label {
-  color: $yellow-800;
+  color: $indigo-700;
   font-size: 14px;
 }
 
 .related-filters {
-  background-color: $indigo-100;
+  background-color: $blue-100;
   color: #ddd;
 }
 
 .related-filter-row {
-  background-color: $indigo-300;
+  background-color: $blue-300;
   color: #ddd;
   font-size: 14px;
 
 }
 
 .related-filter-row .title {
-  background-color: $indigo-200;
+  background-color: $blue-200;
   color: #ddd;
   text-decoration: none;
 }
+
+
 ////////////////////////////
 /// Group -> Answers
 
-.categories-border {
-  border: 3px solid $blue-100;
+.groups { color: $teal-300; }
+.answers { color: $cyan-500; }
+
+.groups-border {
+  border: 3px solid $teal-200;
   border-radius: 3px;
 }
 
+.group-bg {
+  background-color: $teal-200 !important;
+}
+
 .group-row {
-  background-color: $blue-100;
+  background-color: $teal-200;
   color: #fff;
 }
 
 .group-row-selected {
-  background-color: $blue-200;
+  background-color: $teal-400;
   color: #fff;
 }
 
 .group-row-title {
-  background-color: $light;
-  color: $blue-700;
+   background-color: $teal-100;
+  // background-color: $teal-100;
+  color: $teal-700;
   text-decoration: none;
 }
 
+.group-spinner {
+  color: $teal-500
+}
+
 .group-form {
-  background-color: $blue-200;
+  background-color: $teal-200;
   color: #ddd;
 }
 
@@ -119,10 +150,11 @@
   font-size: 14px;
 }
 
-
 .answer-row {
   background-color: $cyan-400;
   color: #fff;
+  border: 1px solid $cyan-200;
+  border-radius: 1px;
 }
 
 .answer-row-selected {
@@ -131,9 +163,13 @@
 }
 
 .answer-row-title {
-  background-color: $cyan-400;
-  color: $blue-700;
+  background-color: $cyan-100;
+  color: $gray-700;
   text-decoration: none;
+}
+
+.answer-spinner {
+  color: $cyan-500
 }
 
 .answer-form {
@@ -142,6 +178,7 @@
 }
 
 .answer-form label {
-  color: $cyan-800;
+  color: $teal-700;
   font-size: 14px;
 }
+ 

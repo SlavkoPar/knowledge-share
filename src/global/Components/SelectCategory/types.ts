@@ -7,7 +7,7 @@ import { ActionMap } from "global/types";
 
 export interface ICatsState {
 	loading: boolean,
-	parentCategory: string | null,
+	parentId: string | null,
 	title: string,
 	cats: ICategoryRow[], // drop down categories
 	error?: Error;
@@ -17,7 +17,7 @@ export interface ICatInfo {
 	selId: string | null;
 	categoryKey: ICategoryKey | null,
 	level: number,
-	setParentCategory: (cat: ICategoryRow) => void;
+	setParentId: (cat: ICategoryRow) => void;
 }
 
 export enum CatsActionTypes {

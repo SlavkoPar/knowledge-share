@@ -18,7 +18,7 @@ interface IShortGroupRow {
 }
 
 const SelGroupRow = ({ groupRow: shortGroup, dispatch, setParentGroup, selId }: IShortGroupRow) => {
-    const { partitionKey, id, title, level, isExpanded } = shortGroup;
+    const { topId: partitionKey, id, title, level, isExpanded } = shortGroup;
     const groupKey = { partitionKey, id };
 
     const { isDarkMode, variant, bg } = useGlobalState();

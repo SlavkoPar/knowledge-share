@@ -23,7 +23,7 @@ const GroupList = ({ title, groupRow, level, isExpanded }: IParentInfo) => {
                         <GroupRow
                             //groupRow={{ ...c, isSelected: c.id === id }}
                             groupRow={c}
-                            answerId={c.partitionKey === partitionKey && c.id === id ? answerId : null}
+                            answerId={c.topId === partitionKey && c.id === id ? answerId : null}
                             key={c.id}
                         />
                     )}

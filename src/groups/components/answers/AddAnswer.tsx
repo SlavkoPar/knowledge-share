@@ -22,15 +22,15 @@ const AddAnswer = ({ closeModal, showCloseButton, source, setError }: IProps) =>
         : '';
 
     if (!closeModal) {
-        // const cat = state.topGroupRows.find(c => c.id === answerRow.parentGroup)
+        // const cat = state.topGroupRows.find(c => c.id === answerRow.parentId)
         // answerRow.groupTitle = cat ? cat.title : '';
     }
 
     const cancelAdd = async () => {
         await cancelAddAnswer();
     }
-    
-    
+
+
     const submitForm = async (answerObject: IAnswer) => {
         const newAnswer: IAnswer = {
             ...answerObject,
@@ -48,8 +48,8 @@ const AddAnswer = ({ closeModal, showCloseButton, source, setError }: IProps) =>
             }
             else if (closeModal) {
                 closeModal();
-                //dispatch({ type: ActionTypes.CLEAN_TREE, payload: { id: q.parentGroup } })
-                //await openNode({ partitionKey: '', id: q.parentGroup, answerId: q.id });
+                //dispatch({ type: ActionTypes.CLEAN_TREE, payload: { id: q.parentId } })
+                //await openNode({ partitionKey: '', id: q.parentId, answerId: q.id });
             }
         }
     }

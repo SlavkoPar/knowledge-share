@@ -7,7 +7,7 @@ import { ActionTypes, FormMode, IQuestion, IQuestionKey, QuestionKey } from "cat
 
 const EditQuestion = ({ inLine }: { inLine: boolean }) => {
     const { state, updateQuestion } = useCategoryContext();
-    const { questionLoading, activeQuestion  } = state;
+    const { loadingQuestion: questionLoading, activeQuestion } = state;
     if (!activeQuestion)
         return null;
 
@@ -30,14 +30,14 @@ const EditQuestion = ({ inLine }: { inLine: boolean }) => {
             }
         }
 
-        const { parentCategory } = activeQuestion;
-        const categoryChanged = parentCategory !== newQuestion.parentCategory;
+        const { parentId } = activeQuestion;
+        const categoryChanged = parentId !== newQuestion.parentId;
         //const questionKey = new QuestionKey(activeQuestion).questionKey;
-        const question = await updateQuestion(rootId!, parentCategory!, newQuestion, categoryChanged);
-        if (activeQuestion.parentCategory !== question.parentCategory) {
+        const question = await updateQuestion(rootId!, parentId!, newQuestion, categoryChanged);
+        if (activeQuestion.parentId !== question.parentId) {
             /*
              await loadAndCacheAllCategoryRows(); // reload, group could have been changed
-             await openNode({ partitionKey: '', id: q.parentCategory, questionId: q.id });
+             await openNode({ partitionKey: '', id: q.parentId, questionId: q.id });
             */
         }
         // if (categoryChanged) {
