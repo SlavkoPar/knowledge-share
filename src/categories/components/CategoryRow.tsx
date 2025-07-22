@@ -6,7 +6,7 @@ import QPlus from 'assets/QPlus.png';
 import { ListGroup, Button, Badge } from "react-bootstrap";
 
 import { useGlobalState } from 'global/GlobalProvider'
-import { ActionTypes, ICategoryInfo, ICategoryKey, ICategoryKeyExpanded, ICategoryRow, FormMode, IExpandInfo } from "categories/types";
+import { ActionTypes, ICategoryInfo, ICategoryKey, ICategoryKeyExpanded, ICategoryRow, FormMode, IExpandInfo, CategoryKey } from "categories/types";
 import { useCategoryContext, useCategoryDispatch } from 'categories/CategoryProvider'
 import { useHover } from 'hooks/useHover';
 import { ICategory } from 'categories/types'
@@ -19,18 +19,18 @@ import AddCategory from './AddCategory';
 
 const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, questionId: string | null }) => {
 
-    const { partitionKey, id, title, level, hasSubCategories, categoryRows: subCategories,
-        numOfQuestions, questionRows, isExpanded, topId: rootId } = categoryRow;
+    const { topId, parentId, id, title, level, hasSubCategories, categoryRows: subCategories,
+        numOfQuestions, questionRows, isExpanded } = categoryRow;
 
-    const categoryKey: ICategoryKey = { workspace: partitionKey, id }
+    const categoryKey: ICategoryKey = new CategoryKey(categoryRow).categoryKey!;
 
-    // const [categoryKey] = useState<ICategoryKey>({ partitionKey, id }); // otherwise reloads
-    const [catKeyExpanded] = useState<ICategoryKeyExpanded>({ partitionKey, id, questionId }); // otherwise reloads
+    // const [categoryKey] = useState<ICategoryKey>({ topId, id }); // otherwise reloads
+    // const [catKeyExpanded] = useState<ICategoryKeyExpanded>({ topId, id, questionId }); // otherwise reloads
 
     const { canEdit, isDarkMode, variant, bg, authUser } = useGlobalState();
 
     const { state, addSubCategory, viewCategory, editCategory, deleteCategory, expandCategory, collapseCategory, addQuestion } = useCategoryContext();
-    let { formMode, keyExpanded: categoryKeyExpanded, activeCategory } = state;
+    let { formMode, keyExpanded, activeCategory } = state;
     const isSelected = activeCategory !== null && (activeCategory.id === id);
     const showForm = isSelected;
 
@@ -54,7 +54,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
         }
         else {
             const expandInfo: IExpandInfo = {
-                topId: rootId!,
+                topId: topId!,
                 categoryKey,
                 formMode: canEdit ? FormMode.EditingCategory : FormMode.ViewingCategory
             }
@@ -85,13 +85,13 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
 
     useEffect(() => {
         if (numOfQuestions > 0 && !isExpanded) { //!isExpanded && !isSelected) {
-            if (categoryKeyExpanded && categoryKeyExpanded.id === id) { // catKeyExpanded.id) {
-                console.log('%%%%%%%%%%%%%%%%%%%%%%%% Zovem iz CategoryRow', categoryKeyExpanded.id, id)
+            if (keyExpanded && keyExpanded.id === id) { // catKeyExpanded.id) {
+                console.log('%%%%%%%%%%%%%%%%%%%%%%%% Zovem iz CategoryRow', keyExpanded.id, id)
                 if (formMode !== FormMode.AddingCategory) {
                     formMode = FormMode.None
                 }
                 const expandInfo: IExpandInfo = {
-                    topId: rootId!,
+                    topId: topId!,
                     categoryKey,
                     includeQuestionId: questionId ?? undefined,
                     formMode // differs from handleExpandClick
@@ -99,7 +99,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
                 expandCategory(expandInfo);
             }
         }
-    }, [id, isExpanded, isSelected, expandCategory, categoryKeyExpanded]) // 
+    }, [id, isExpanded, isSelected, expandCategory, keyExpanded]) // 
 
     useEffect(() => {
         (async () => {
@@ -177,11 +177,11 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
                             onClick={() => {
                                 categoryRow.level += 1;
                                 addSubCategory(categoryRow)
-                                //</>const categoryInfo: ICategoryInfo = { categoryKey: { partitionKey, id: parentId }, level: 0 }
+                                //</>const categoryInfo: ICategoryInfo = { categoryKey: { topId, id: parentId }, level: 0 }
                                 // dispatch({
                                 //     type: ActionTypes.ADD_SUB_CATEGORY,
                                 //     payload: {
-                                //         rootId,
+                                //         topId,
                                 //         categoryKey,
                                 //         level: categoryRow.level + 1
                                 //     }
@@ -204,8 +204,8 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
                             className="py-0 mx-1 text-secondary float-end"
                             title="Add Question"
                             onClick={async () => {
-                                const categoryInfo: ICategoryInfo = { categoryKey: { workspace: partitionKey, id: categoryRow.id }, level: categoryRow.level }
-                                addQuestion(categoryKey, rootId!);
+                                //const categoryInfo: ICategoryInfo = { categoryKey: { workspace: topId, id: categoryRow.id }, level: categoryRow.level }
+                                addQuestion(categoryKey, topId!);
                             }}
                         >
                             <img width="22" height="18" src={QPlus} alt="Add Question" />

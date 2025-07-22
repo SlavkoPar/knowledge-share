@@ -17,8 +17,8 @@ const AddQuestion = ({ closeModal, showCloseButton, source, setError }: IProps) 
 
     const { state, cancelAddQuestion, createQuestion } = useCategoryContext();
     const { activeQuestion } = state;
-    const rootId = activeQuestion
-        ? activeQuestion.rootId
+    const topId = activeQuestion
+        ? activeQuestion.topId
         : '';
 
     if (!closeModal) {
@@ -34,7 +34,7 @@ const AddQuestion = ({ closeModal, showCloseButton, source, setError }: IProps) 
     const submitForm = async (questionObject: IQuestion) => {
         const newQuestion: IQuestion = {
             ...questionObject,
-            rootId: rootId!,
+            topId: topId!,
             created: {
                 time: new Date(),
                 nickName: ''
@@ -49,7 +49,7 @@ const AddQuestion = ({ closeModal, showCloseButton, source, setError }: IProps) 
             else if (closeModal) {
                 closeModal();
                 //dispatch({ type: ActionTypes.CLEAN_TREE, payload: { id: q.parentId } })
-                //await openNode({ partitionKey: '', id: q.parentId, questionId: q.id });
+                //await openNode({ topId: '', id: q.parentId, questionId: q.id });
             }
         }
     }

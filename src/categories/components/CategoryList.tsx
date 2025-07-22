@@ -9,9 +9,9 @@ const CategoryList = ({ title, categoryRow, level, isExpanded }: IParentInfo) =>
     const { state } = useCategoryContext();
     const { keyExpanded } = state;
 
-    const { partitionKey, id, questionId } = keyExpanded
+    const { topId, id, questionId } = keyExpanded
         ? keyExpanded
-        : { partitionKey: null, id: null, questionId: null };
+        : { topId: null, id: null, questionId: null };
     const { categoryRows } = categoryRow;
     //console.log('<<<<<<<<<CategoryList', categoryRow.id, categoryRows )
 
@@ -22,7 +22,7 @@ const CategoryList = ({ title, categoryRow, level, isExpanded }: IParentInfo) =>
                     <CategoryRow
                         //categoryRow={{ ...c, isSelected: c.id === id }}
                         categoryRow={c}
-                        questionId={c.partitionKey === partitionKey && c.id === id ? questionId : null}
+                        questionId={c.topId === topId && c.id === id ? questionId : null}
                         key={c.id}
                     />
                 )}

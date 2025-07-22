@@ -10,7 +10,6 @@ export interface IWhoWhen {
 }
 
 export interface IRecord {
-	workspace?: string,
 	topId: string,
 	created?: IWhoWhen;
 	modified?: IWhoWhen;
@@ -23,8 +22,9 @@ export interface IWhoWhenDto {
 }
 
 export interface IRecordDto {
-	Workspace?: string,
+	Workspace: string;
 	TopId: string,
+	ParentId: string | null;
 	Created?: IWhoWhenDto;
 	Modified?: IWhoWhenDto;
 }
@@ -117,7 +117,7 @@ export enum ROLES {
 
 
 // export interface IShortGroup {
-// 	partitionKey: string,
+// 	topId: string,
 // 	id: string;
 // 	parentId: string | null;
 // 	header: string;

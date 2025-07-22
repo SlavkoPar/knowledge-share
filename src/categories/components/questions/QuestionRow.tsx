@@ -5,7 +5,7 @@ import { faEdit, faRemove, faQuestion, faPlus, faReply } from '@fortawesome/free
 import { ListGroup, Button, Badge } from "react-bootstrap";
 
 import { useGlobalState } from 'global/GlobalProvider'
-import { ActionTypes, FormMode, ICategoryInfo, ICategoryKey, IQuestionKey, IQuestionRow } from "categories/types";
+import { ActionTypes, FormMode, ICategoryInfo, ICategoryKey, IQuestionKey, IQuestionRow, QuestionKey } from "categories/types";
 import { useCategoryContext, useCategoryDispatch } from 'categories/CategoryProvider'
 import { useHover } from 'hooks/useHover';
 import { IQuestion } from 'categories/types'
@@ -22,9 +22,9 @@ import { initialQuestion } from 'categories/CategoryReducer';
 
 //const QuestionRow = ({ question, categoryInAdding }: { ref: React.ForwardedRef<HTMLLIElement>, question: IQuestion, categoryInAdding: boolean | undefined }) => {
 const QuestionRow = ({ questionRow }: { questionRow: IQuestionRow }) => {
-    const { id, partitionKey, parentId, title, numOfAssignedAnswers, isSelected, rootId } = questionRow;
-    const questionKey: IQuestionKey = { topId: partitionKey, id, parentId: parentId ?? undefined };
-    const categoryKey: ICategoryKey = { workspace: partitionKey, id: parentId }
+    const { id, topId, parentId, title, numOfAssignedAnswers, isSelected } = questionRow;
+    const questionKey: IQuestionKey = new QuestionKey(questionRow).questionKey!;
+    const categoryKey: ICategoryKey = { topId, parentId, id: parentId! } // proveri
 
     const { canEdit, isDarkMode, variant, bg, authUser } = useGlobalState();
     const { state, viewQuestion, addQuestion, editQuestion, deleteQuestion } = useCategoryContext();
@@ -122,8 +122,8 @@ const QuestionRow = ({ questionRow }: { questionRow: IQuestionRow }) => {
                         className="ms-1 p-0 text-secondary d-flex align-items-center"
                         title="Add Question"
                         onClick={() => {
-                            const categoryInfo: ICategoryInfo = { categoryKey: { workspace: partitionKey, id: parentId }, level: 0 }
-                            addQuestion(categoryKey, rootId!);
+                            const categoryInfo: ICategoryInfo = { categoryKey, level: 0 }
+                            addQuestion(categoryKey, topId!);
                         }}
                     >
                         <img width="22" height="18" src={QPlus} alt="Add Question" />

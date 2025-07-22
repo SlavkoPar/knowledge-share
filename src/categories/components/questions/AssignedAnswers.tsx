@@ -47,8 +47,8 @@ const AssignedAnswers = ({ questionKey, questionTitle, assignedAnswers, isDisabl
 
     const onAnswerCreated = async (answer: IAnswer | null) => {
         if (answer) {
-            const { topId: partitionKey, id } = answer;
-            const answerKey = { partitionKey, id }
+            const { topId: topId, id } = answer;
+            const answerKey = { topId, id }
             await onSelectAnswer(answerKey);
         }
         handleClose()

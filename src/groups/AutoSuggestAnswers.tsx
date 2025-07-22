@@ -171,22 +171,21 @@ export class AutoSuggestAnswers extends React.Component<{
 			console.log('--------->>>>> getSuggestions')
 			var answerRows: IAnswerRow[] = await this.searchAnswers(escapedValue, 20);
 			answerRows.forEach((row: IAnswerRow) => {
-				const { id, topId: partitionKey, parentId, title, isSelected, rootId } = row;
+				const { id, topId, parentId, title, isSelected } = row;
 
 				if (!this.alreadyAssigned.includes(id)) {
-					const answerKey = { partitionKey, id }
+					const answerKey = { topId, id }
 					if (!answerKeys.includes(answerKey)) {
 						answerKeys.push(answerKey);
 
 						// 2) Group answers by parentId
 						const answ: IAnswerRow = {
-							topId: partitionKey,
+							topId,
 							id,
 							parentId,
 							title,
 							groupTitle: '',
-							isSelected,
-							rootId
+							isSelected
 						}
 						if (!groupAnswers.has(parentId)) {
 							groupAnswers.set(parentId, [answ]);
@@ -341,7 +340,7 @@ export class AutoSuggestAnswers extends React.Component<{
 	protected onSuggestionSelected(event: React.FormEvent<any>, data: Autosuggest.SuggestionSelectedEventData<IAnswerRow>): void {
 		const answer: IAnswerRow = data.suggestion;
 		// alert(`Selected answer is ${answer.answerId} (${answer.text}).`);
-		this.props.onSelectAnswer({ partitionKey: answer.parentId, id: answer.id }, this.state.value);
+		this.props.onSelectAnswer({ topId: answer.parentId, id: answer.id }, this.state.value);
 	}
 
 	/*

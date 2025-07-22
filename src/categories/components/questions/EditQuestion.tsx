@@ -11,7 +11,7 @@ const EditQuestion = ({ inLine }: { inLine: boolean }) => {
     if (!activeQuestion)
         return null;
 
-    const { rootId } = activeQuestion!;
+    const { topId } = activeQuestion!;
 
     console.log("#################################### EditQuestion inLine:", { inLine }, { activeQuestion })
 
@@ -33,11 +33,11 @@ const EditQuestion = ({ inLine }: { inLine: boolean }) => {
         const { parentId } = activeQuestion;
         const categoryChanged = parentId !== newQuestion.parentId;
         //const questionKey = new QuestionKey(activeQuestion).questionKey;
-        const question = await updateQuestion(rootId!, parentId!, newQuestion, categoryChanged);
+        const question = await updateQuestion(parentId!, newQuestion, categoryChanged);
         if (activeQuestion.parentId !== question.parentId) {
             /*
              await loadAndCacheAllCategoryRows(); // reload, group could have been changed
-             await openNode({ partitionKey: '', id: q.parentId, questionId: q.id });
+             await openNode({ topId: '', id: q.parentId, questionId: q.id });
             */
         }
         // if (categoryChanged) {

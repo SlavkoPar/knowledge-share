@@ -44,6 +44,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
   // we reset changes, and again we use initialGlobalState
   // so, don't use globalDispatch inside of inner Provider, like Categories Provider
   const [globalState, dispatch] = useReducer(globalReducer, initialGlobalState);
+  const { workspace } = globalState.authUser;
 
   console.log('--------> GlobalProvider')
 
@@ -116,13 +117,13 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
     return new Promise(async (resolve) => {
       try {
         console.time();
-        const url = protectedResources.KnowledgeAPI.endpointCategoryRow;
+        const url = `${protectedResources.KnowledgeAPI.endpointCategoryRow}/${workspace}`;
         await Execute("GET", url, null)
-          .then((catDtos: ICategoryRowDto[]) => {   //  | Response
+          .then((catRowDtos: ICategoryRowDto[]) => {   //  | Response
             const categoryRows = new Map<string, ICategoryRow>();
             console.timeEnd();
-            catDtos.forEach((rowDto: ICategoryRowDto) =>
-              categoryRows.set(rowDto.Id, new CategoryRow(rowDto).categoryRow));
+            catRowDtos.forEach((rowDto: ICategoryRowDto) =>
+            categoryRows.set(rowDto.Id, new CategoryRow(rowDto).categoryRow));
             categoryRows.forEach(cat => {
               let { id, parentId, title, variations, hasSubCategories, level, kind } = cat;
               let titlesUpTheTree = id;
@@ -168,7 +169,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
             rowDtos.forEach((rowDto: IGroupRowDto) => groupRows.set(rowDto.Id, new GroupRow(rowDto).groupRow));
             //
             groupRows.forEach(groupRow => {
-              let { topId: partitionKey, id, parentId, title, variations, hasSubGroups, level, kind } = groupRow;
+              let { topId: topId, id, parentId, title, variations, hasSubGroups, level, kind } = groupRow;
               let titlesUpTheTree = id;
               let parentGrp = parentId;
               while (parentGrp) {
@@ -197,27 +198,26 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
       try {
         console.time();
         const filterEncoded = encodeURIComponent(filter);
-        const url = `${protectedResources.KnowledgeAPI.endpointQuestion}/${filterEncoded}/${count}/null`;
+        const url = `${protectedResources.KnowledgeAPI.endpointQuestion}/${workspace}/${filterEncoded}/${count}/null`;
         await Execute("GET", url).then((dtosEx: IQuestionRowDtosEx) => {
           const { questionRowDtos, msg } = dtosEx;
           console.log('questionRowDtos:', { dtos: dtosEx }, protectedResources.KnowledgeAPI.endpointCategory);
           console.timeEnd();
           if (questionRowDtos) {
             const list: IQuestionRow[] = questionRowDtos.map((dto: IQuestionRowDto) => {
-              const { PartitionKey, Id, ParentId, Title, NumOfAssignedAnswers, Included } = dto;
+              const { TopId, Id, ParentId, Title, NumOfAssignedAnswers, Included } = dto;
               return {
-                partitionKey: PartitionKey,
+                topId: TopId,
                 id: Id,
                 parentId: ParentId,
                 title: Title,
                 categoryTitle: '',
                 numOfAssignedAnswers: NumOfAssignedAnswers ?? 0,
                 isSelected: Included !== undefined,
-                rootId: ''   // TODO do not use roort id in search
               }
             })
             // const list: IQuestionRow[] = dtos.map((q: IQuestionRowDto) => ({
-            //   partitionKey: q.PartitionKey,
+            //   topId: q.PartitionKey,
             //   id: q.Id,
             //   parentId: q.ParentId,
             //   numOfAssignedAnswers: q.NumOfAssignedAnswers ?? 0,
@@ -258,9 +258,9 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
           parentHeader = groupRow.header!;
         }
         else if (groupRow.parentId === groupId) {
-          const { topId: partitionKey, id, parentId, header, title, level, kind, hasSubGroups } = groupRow;
+          const { topId: topId, id, parentId, header, title, level, kind, hasSubGroups } = groupRow;
           const row: IGroupRow = {
-            topId: partitionKey,
+            topId,
             id,
             header,
             title,
@@ -270,7 +270,6 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
             level,
             kind,
             isExpanded: false,
-            rootId: null,
             link: null,
             groupRows: [],
             variations: [],
@@ -307,7 +306,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
               return answer;
               //const { PartitionKey, Id, ParentId, Title } = rowDto;
               // return {
-              //   partitionKey: PartitionKey,
+              //   topId: PartitionKey,
               //   id: Id,
               //   parentId: ParentId,
               //   title: Title,
@@ -352,8 +351,8 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
   const getQuestion = async (questionKey: IQuestionKey): Promise<any> => {
     return new Promise(async (resolve) => {
       try {
-        const { topId: partitionKey, id } = questionKey;
-        const url = `${protectedResources.KnowledgeAPI.endpointQuestion}/${partitionKey}/${id}`;
+        const { topId: topId, id } = questionKey;
+        const url = `${protectedResources.KnowledgeAPI.endpointQuestion}/${topId}/${id}`;
         console.time()
         await Execute("GET", url)
           .then((questionDtoEx: IQuestionDtoEx) => {
@@ -393,9 +392,9 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
       const categories: ICategoryRow[] = [];
       cats.forEach((c, id) => {
         if (c.kind === kind) {
-          const { partitionKey, id, title, level, link, header } = c;
+          const { topId, id, title, level, link, header } = c;
           // const cat: ICat = {
-          //   partitionKey,
+          //   topId,
           //   id: id,
           //   header,
           //   title,
@@ -428,9 +427,9 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
       const categories: ICategoryRow[] = [];
       cats.forEach((c, id) => {
         if (c.kind === kind) {
-          const { partitionKey, id, header, title, link, level } = c;
+          const { topId, id, header, title, link, level } = c;
           // const cat: ICategoryRow = {
-          //   partitionKey,
+          //   topId,
           //   id,
           //   header,
           //   title,
@@ -467,9 +466,9 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
           parentHeader = ""; //cat.header!;
         }
         else if (cat.parentId === categoryId) {
-          // const { partitionKey, id, parentId, title, level, kind, hasSubCategories } = cat;
+          // const { topId, id, parentId, title, level, kind, hasSubCategories } = cat;
           // const c: ICat = {
-          //   partitionKey,
+          //   topId,
           //   id,
           //   title,
           //   parentId,
@@ -533,7 +532,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
   const getAnswer = async (answerKey: IAnswerKey): Promise<any> => {
     return new Promise(async (resolve) => {
       try {
-        const { partitionKey, id } = answerKey;
+        const { topId, id } = answerKey;
         //const url = `${process.env.REACT_APP_API_URL}/Answer/${parentId}/${id}`;
         //console.log(`FETCHING --->>> ${url}`)
         //dispatch({ type: GlobalActionTypes.SET_LOADING, payload: {} })
@@ -558,7 +557,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
             console.log('FETCHING --->>>', error);
           });
         */
-        const url = `${protectedResources.KnowledgeAPI.endpointAnswer}/${partitionKey}/${id}`;
+        const url = `${protectedResources.KnowledgeAPI.endpointAnswer}/${topId}/${id}`;
         await Execute("GET", url).then((answerDto: IAnswerDto) => {
           console.timeEnd();
           console.log({ response: answerDto });
@@ -595,9 +594,9 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
       const groups: IGroupRow[] = [];
       shortGroups.forEach((c, id) => {
         if (c.kind === kind) {
-          const { topId: partitionKey, id, header, title, level } = c;
+          const { topId: topId, id, header, title, level } = c;
           const groupRow: IGroupRow = {
-            topId: partitionKey,
+            topId,
             id,
             header,
             title,
@@ -609,7 +608,6 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
             level,
             kind,
             isExpanded: false,
-            rootId: null,
             link: null,
             groupRows: [],
             variations: [],
@@ -630,7 +628,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
 
   const addHistory = useCallback(
     async (history: IHistory) => {
-      //const { partitionKey, id, variations, title, kind, modified } = history;
+      //const { topId, id, variations, title, kind, modified } = history;
       //dispatch({ type: ActionTypes.SET_CATEGORY_LOADING, payload: { id, loading: false } });
       try {
         const historyDto = new HistoryDto(history).historyDto;
@@ -660,7 +658,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
     const mapAnswerRating = new Map<string, IAssignedAnswer>();
     // try {
     //   console.log("getAnswersRated", { questionKey })
-    //   const url = `${protectedResources.KnowledgeAPI.endpointHistory}/${questionKey.partitionKey}/${questionKey.id}`;
+    //   const url = `${protectedResources.KnowledgeAPI.endpointHistory}/${questionKey.topId}/${questionKey.id}`;
     //   console.time()
     //   const answerRatedListEx: IAnswerRatedListEx = { answerRatedList: null, msg: "" }
     //   await Execute("GET", url)
@@ -719,7 +717,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
 
 
   const addHistoryFilter = useCallback(async (historyFilterDto: IHistoryFilterDto) => {
-    //const { partitionKey, id, variations, title, kind, modified } = history;
+    //const { topId, id, variations, title, kind, modified } = history;
     //dispatch({ type: ActionTypes.SET_CATEGORY_LOADING, payload: { id, loading: false } });
     try {
       //const historyDto = new HistoryDto(historyFilterDto).historyDto;

@@ -175,16 +175,16 @@ export class AutoSuggestAnswers extends React.Component<{
 			console.log('--------->>>>> getSuggestions')
 			var shortAnswerList: IAnswerRow[] = await this.searchAnswers(escapedValue, 20);
 			shortAnswerList.forEach((shortAnswer: IAnswerRow) => {
-				const { topId: partitionKey, id, parentId, title } = shortAnswer;
+				const { topId: topId, id, parentId, title } = shortAnswer;
 				if (!this.alreadyAssigned.includes(id)) {
-					const answerKey = { partitionKey, id }
+					const answerKey = { topId, id }
 					if (!answerKeys.includes(answerKey)) {
 						answerKeys.push(answerKey);
 					}
 
 					//2) Group answers by parentId
 					// const ans2: IAnswerRow = {
-					// 	partitionKey,
+					// 	topId,
 					// 	id,
 					// 	parentId,
 					// 	title,
@@ -279,7 +279,7 @@ export class AutoSuggestAnswers extends React.Component<{
 	protected onSuggestionSelected(event: React.FormEvent<any>, data: Autosuggest.SuggestionSelectedEventData<IAnswerRow>): void {
 		const answer: IAnswerRow = data.suggestion;
 		alert(`Selected answer is ${answer.topId} / ${answer.id}.`);
-		this.props.onSelectGroupAnswer({ partitionKey: answer.topId, id: answer.id });
+		this.props.onSelectGroupAnswer({ topId: answer.topId, id: answer.id });
 	}
 
 	/*

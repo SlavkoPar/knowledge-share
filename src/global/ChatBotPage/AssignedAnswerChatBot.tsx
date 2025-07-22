@@ -20,7 +20,7 @@ interface IProps {
 const AssignedAnswerChatBot = ({ questionTitle, assignedAnswer, isDisabled, unAssignAnswer }: IProps) => {
 
     const { questionKey, answerKey, answerTitle: title, created } = assignedAnswer;
-    const { partitionKey, id } = answerKey;
+    const { topId, id } = answerKey;
     const emailFromClient = localStorage.getItem('emailFromClient');
 
     const rowTitle = `Created by: Pera, ${formatDate(new Date(created.time))}`

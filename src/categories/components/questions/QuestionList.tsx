@@ -9,9 +9,9 @@ import QuestionRow from "categories/components/questions/QuestionRow";
 const QuestionList = ({ level, categoryRow }: { level: number, categoryRow: ICategoryRow }) => {
   const { state, loadCategoryQuestions } = useCategoryContext();
   const { keyExpanded: categoryKeyExpanded, loadingQuestion: questionLoading, error, activeQuestion } = state;
-  const { partitionKey, id, questionId } = categoryKeyExpanded
+  const { topId, id, questionId } = categoryKeyExpanded
     ? categoryKeyExpanded
-    : { partitionKey: null, id: null, questionId: null };
+    : { topId: null, id: null, questionId: null };
 
   const { questionRows } = categoryRow;
 

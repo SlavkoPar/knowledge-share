@@ -5,7 +5,7 @@ import { useFormik } from "formik";
 import { Form, CloseButton, Row, Col, Stack } from "react-bootstrap";
 import { CreatedModifiedForm } from "common/CreateModifiedForm"
 import { FormButtons } from "common/FormButtons"
-import { ActionTypes, CategoryKey, FormMode, ICategoryRow, ICategory, ICategoryKey, IQuestion, IQuestionFormProps } from "categories/types";
+import { ActionTypes, CategoryKey, FormMode, ICategoryRow, ICategory, ICategoryKey, IQuestion, IQuestionFormProps, QuestionKey } from "categories/types";
 
 import { Select } from 'common/components/Select';
 import { sourceOptions } from 'common/sourceOptions'
@@ -34,9 +34,9 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
 
   const isDisabled = viewing;
 
-  const { partitionKey, parentId, title, id, assignedAnswers, relatedFilters } = question;
-  const questionKey = { parentId: parentId ?? undefined, partitionKey, id };
-  const categoryKey: ICategoryKey = { workspace: partitionKey, id: parentId };
+  const { topId, parentId, title, id, assignedAnswers, relatedFilters } = question;
+  const questionKey = new QuestionKey(question).questionKey;
+  const categoryKey: ICategoryKey = { topId, parentId, id: parentId! }; // proveri
 
   const dispatch = useCategoryDispatch();
 
@@ -228,14 +228,14 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
         {(viewing || editing) &&
           <div className="my-1">
             <AssignedAnswers
-              questionKey={questionKey}
+              questionKey={questionKey!}
               questionTitle={title}
               assignedAnswers={assignedAnswers}
               isDisabled={isDisabled}
             />
 
             <RelatedFilters
-              questionKey={questionKey}
+              questionKey={questionKey!}
               questionTitle={title}
               relatedFilters={relatedFilters}
             />

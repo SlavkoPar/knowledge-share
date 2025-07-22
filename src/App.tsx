@@ -9,7 +9,7 @@ import './App.css';
 import './AutoSuggest.css';
 
 import Categories from "categories/Categories"
-import Groups from "groups/Groups"
+//import Groups from "groups/Groups"
 import About from 'About';
 import Health from 'Health';
 import SupportPage from './SupportPage';
@@ -125,8 +125,8 @@ function App() {
               <Route path="/ChatBotPage/:source/:tekst/:email" element={<ChatBotPage />} />
               <Route path="/categories/:categoryId_questionId/:fromChatBotDlg" element={<Categories />} />
               <Route path="/categories" element={<Categories />} />
-              <Route path="/groups/:groupId_AnswerId" element={<Groups />} />
-              <Route path="/groups" element={<Groups />} />
+              {/* <Route path="/groups/:groupId_AnswerId" element={<Groups />} />
+              <Route path="/groups" element={<Groups />} /> */}
               <Route path="/about" element={<About />} />
               <Route path="/about-short" element={<AboutShort />} />
               <Route path="/health" element={<Health />} />

@@ -136,6 +136,7 @@ const reducer: Reducer<IGlobalState, GlobalActions> = (state, action) => {
             return {
                 ...state,
                 authUser: {
+                    workspace: 'DEMO',
                     nickName,
                     name,
                     email: '',

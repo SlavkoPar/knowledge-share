@@ -18,8 +18,8 @@ interface ICatRow {
 }
 
 const CatRow = ({ cat, dispatch, setParentCat, selId }: ICatRow) => {
-    const { partitionKey, id, title, level, isExpanded } = cat;
-    const categoryKey = { partitionKey, id };
+    const { topId, parentId, id, title, level, isExpanded } = cat;
+    const categoryKey = { topId, parentId, id };
 
     const { isDarkMode, variant, bg } = useGlobalState();
 

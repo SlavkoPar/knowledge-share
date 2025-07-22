@@ -6,7 +6,7 @@ import { isMobile } from 'react-device-detect'
 
 import { debounce, escapeRegexCharacters } from 'common/utilities'
 import './AutoSuggestQuestions.css'
-import { ICategoryRow, IQuestionKey, IQuestionRow } from 'categories/types';
+import { ICategoryRow, IQuestionKey, IQuestionRow, QuestionKey } from 'categories/types';
 
 
 interface ICatMy {
@@ -168,8 +168,8 @@ export class AutoSuggestQuestions extends React.Component<{
 			console.log('--------->>>>> getSuggestions')
 			var questionRows: IQuestionRow[] = await this.searchQuestions(escapedValue, 10);
 			questionRows.forEach((questionRow: IQuestionRow) => {
-				const { topId, id, parentId, title, numOfAssignedAnswers, isSelected, rootId } = questionRow;
-				const questionKey = { topId, id }
+				const { topId, id, parentId, title, numOfAssignedAnswers, isSelected } = questionRow;
+				const questionKey = new QuestionKey(questionRow).questionKey!;
 				if (!questionKeys.includes(questionKey)) {
 					questionKeys.push(questionKey);
 
@@ -177,7 +177,6 @@ export class AutoSuggestQuestions extends React.Component<{
 					const row: IQuestionRow = {
 						topId,
 						id,
-						rootId,
 						parentId,
 						numOfAssignedAnswers,
 						title,
@@ -335,7 +334,7 @@ export class AutoSuggestQuestions extends React.Component<{
 	protected onSuggestionSelected(event: React.FormEvent<any>, data: Autosuggest.SuggestionSelectedEventData<IQuestionRow>): void {
 		const question: IQuestionRow = data.suggestion;
 		// alert(`Selected question is ${question.questionId} (${question.text}).`);
-		this.props.onSelectQuestion({ topId: question.parentId, id: question.id }, this.state.value);
+		this.props.onSelectQuestion({ topId: question.topId, parentId: question.parentId, id: question.id }, this.state.value);
 	}
 
 	/*

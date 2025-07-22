@@ -84,7 +84,6 @@ export interface IQuestionRow extends IRecord {
 	parentId: string | null;
 	categoryTitle?: string;
 	isSelected?: boolean;
-	rootId: string
 }
 
 export interface IQuestion extends IQuestionRow {
@@ -98,9 +97,9 @@ export interface IQuestion extends IQuestionRow {
 }
 
 export interface ICategoryKey {
-	workspace?: string;
+	workspace: string;
 	topId: string;
-	id: string | null;
+	id: string;
 }
 
 export interface ICategoryKeyExpanded extends ICategoryKey {
@@ -118,8 +117,8 @@ export interface ICategoryKeyExtended extends ICategoryKey {
 
 
 export interface IQuestionKey {
-	parentId?: string;
-	topId: string | null;   // ona day we are going to enable question
+	parentId: null | string;
+	topId?: string;   // ona day we are going to enable question
 	id: string;
 }
 
@@ -131,7 +130,6 @@ export interface IVariation {
 export interface ICategoryRowDto extends IRecordDto {
 	Id: string;
 	Kind: number;
-	ParentId: string | null;
 	Title: string;
 	Link: string | null;
 	Header: string;
@@ -177,9 +175,9 @@ export const IsCategory = (obj: any): boolean => typeof obj === 'object' && obj 
 
 export class CategoryRowDto {
 	constructor(categoryRow: ICategoryRow) {
-		const { partitionKey, id, parentId, modified } = categoryRow;
+		const { topId, id, parentId, modified } = categoryRow;
 		this.categoryRowDto = {
-			PartitionKey: partitionKey,
+			TopId: topId,
 			Id: id,
 			ParentId: parentId,
 			Title: '',
@@ -201,12 +199,11 @@ export class CategoryRowDto {
 
 export class CategoryRow {
 	constructor(categoryRowDto: ICategoryRowDto) {
-		const { Workspace, TopId, Id, ParentId, Kind, Title, Link, Header, Variations, Level,
+		const { TopId, Id, ParentId, Kind, Title, Link, Header, Variations, Level,
 			HasSubCategories, SubCategoryRowDtos,
 			NumOfQuestions, QuestionRowDtos,
 			IsExpanded } = categoryRowDto;
 		this.categoryRow = {
-			workspace: Workspace,
 			topId: TopId,
 			id: Id,
 			parentId: ParentId,
@@ -216,10 +213,10 @@ export class CategoryRow {
 			titlesUpTheTree: '', // traverse up the tree, until root
 			variations: Variations,
 			hasSubCategories: HasSubCategories!,
-			categoryRows: SubCategoryRowDtos.map(dto => new CategoryRow({ ...dto, RootId }).categoryRow),
+			categoryRows: SubCategoryRowDtos.map(dto => new CategoryRow({ ...dto, TopId }).categoryRow),
 			numOfQuestions: NumOfQuestions,
 			questionRows: QuestionRowDtos
-				? QuestionRowDtos.map(dto => new QuestionRow({ ...dto, RootId: RootId ?? undefined }).questionRow)
+				? QuestionRowDtos.map(dto => new QuestionRow({ ...dto, TopId: TopId ?? undefined }).questionRow)
 				: [],
 			level: Level,
 			kind: Kind,
@@ -231,11 +228,10 @@ export class CategoryRow {
 
 export class QuestionRow {
 	constructor(rowDto: IQuestionRowDto) { //, parentId: string) {
-		const { PartitionKey, Id, ParentId, NumOfAssignedAnswers, Title, CategoryTitle, Created, Modified, Included, RootId } = rowDto;
+		const { TopId, Id, ParentId, NumOfAssignedAnswers, Title, CategoryTitle, Created, Modified, Included } = rowDto;
 		this.questionRow = {
-			partitionKey: PartitionKey,
+			topId: TopId,
 			id: Id,
-			rootId: RootId!,
 			parentId: ParentId,
 			numOfAssignedAnswers: NumOfAssignedAnswers ?? 0,
 			title: Title,
@@ -252,16 +248,17 @@ export class QuestionRow {
 
 export class QuestionRowDto {
 	constructor(row: IQuestionRow) { //, parentId: string) {
+		const { topId, parentId, id, numOfAssignedAnswers, created, modified, isSelected } = row;
 		this.questionRowDto = {
-			PartitionKey: row.partitionKey,
-			Id: row.id,
-			ParentId: row.parentId ?? '',
-			NumOfAssignedAnswers: row.numOfAssignedAnswers ?? 0,
+			TopId: topId,
+			Id: id,
+			ParentId: parentId ?? '',
+			NumOfAssignedAnswers: numOfAssignedAnswers ?? 0,
 			Title: '',
 			CategoryTitle: '',
-			Created: new WhoWhen2Dto(row.created!).whoWhenDto!,
-			Modified: new WhoWhen2Dto(row.modified).whoWhenDto!,
-			Included: row.isSelected
+			Created: new WhoWhen2Dto(created!).whoWhenDto!,
+			Modified: new WhoWhen2Dto(modified).whoWhenDto!,
+			Included: isSelected
 		}
 	}
 	questionRowDto: IQuestionRowDto
@@ -272,8 +269,8 @@ export class CategoryKey {
 	constructor(cat: ICategoryRow | ICategory | ICategoryKeyExtended) {
 		this.categoryKey = cat
 			? {
-				workspace: cat.workspace,
 				topId: cat.topId,
+				parentId: cat.parentId,
 				id: cat.id
 			}
 			: null
@@ -285,7 +282,7 @@ export class CategoryKey {
 
 export class Category {
 	constructor(dto: ICategoryDto) {
-		const { PartitionKey, Id, Kind, RootId, ParentId, Title, Link, Header, Level, Variations, NumOfQuestions,
+		const { TopId, Id, Kind, ParentId, Title, Link, Header, Level, Variations, NumOfQuestions,
 			HasSubCategories, SubCategoryRowDtos, Created, Modified, QuestionRowDtos, IsExpanded, Doc1 } = dto;
 
 		const categoryRows = SubCategoryRowDtos
@@ -297,10 +294,9 @@ export class Category {
 			: [];
 
 		this.category = {
-			partitionKey: PartitionKey,
+			topId: TopId,
 			id: Id,
 			kind: Kind,
-			topId: RootId!,
 			parentId: ParentId!,
 			title: Title,
 			link: Link,
@@ -324,9 +320,9 @@ export class Category {
 
 export class CategoryDto {
 	constructor(category: ICategory) {
-		const { partitionKey, id, kind, parentId, title, link, header, level, variations, created, modified, doc1 } = category;
+		const { topId, id, kind, parentId, title, link, header, level, variations, created, modified, doc1 } = category;
 		this.categoryDto = {
-			PartitionKey: partitionKey,
+			TopId: topId,
 			Id: id,
 			Kind: kind,
 			ParentId: parentId,
@@ -357,9 +353,8 @@ export class Question {
 			: [];
 		// TODO possible to call base class construtor
 		this.question = {
-			rootId: '', // TODO will be set later
+			topId: '', // TODO will be set later
 			parentId: dto.ParentId,
-			partitionKey: dto.PartitionKey,
 			id: dto.Id,
 			title: dto.Title,
 			categoryTitle: dto.CategoryTitle,
@@ -383,9 +378,9 @@ export class QuestionKey {
 	constructor(question: IQuestionRow | IQuestion | undefined) {
 		this.questionKey = question
 			? {
-				topId: question.partitionKey,
+				topId: question.topId,
+				parentId: question.parentId ?? null,
 				id: question.id,
-				parentId: question.parentId ?? undefined
 			}
 			: null
 	}
@@ -394,10 +389,10 @@ export class QuestionKey {
 
 export class QuestionDto {
 	constructor(question: IQuestion) {
-		const { partitionKey, id, parentId, title, source, status, created, modified,
+		const { topId, id, parentId, title, source, status, created, modified,
 			numOfAssignedAnswers, numOfRelatedFilters } = question;
 		this.questionDto = {
-			PartitionKey: partitionKey,
+			TopId: topId,
 			Id: id,
 			ParentId: parentId ?? 'null',  // TODO proveri
 			Title: title,
@@ -415,10 +410,7 @@ export class QuestionDto {
 }
 
 export interface IQuestionRowDto extends IRecordDto {
-	PartitionKey: string;
 	Id: string;
-	RootId?: string,
-	ParentId: string;
 	NumOfAssignedAnswers?: number,
 	Title: string;
 	CategoryTitle?: string;
@@ -491,7 +483,7 @@ export interface IExpandInfo {
 
 export interface IParentInfo {
 	//execute?: (method: string, endpoint: string) => Promise<any>,
-	// partitionKey: string | null,
+	// topId: string | null,
 	// parentId: string | null,
 	//categoryKey: ICategoryKey,
 	categoryRow: ICategoryRow,
@@ -550,12 +542,12 @@ export interface ICategoriesContext {
 	//////////////
 	// questions
 	loadCategoryQuestions: (catParams: ILoadCategoryQuestions) => void;  //(parentInfo: IParentInfo) => void,
-	addQuestion: (categoryKey: ICategoryKey, rootId: string) => Promise<any>;
+	addQuestion: (categoryKey: ICategoryKey, topId: string) => Promise<any>;
 	cancelAddQuestion: () => Promise<any>;
 	createQuestion: (question: IQuestion, fromModal: boolean) => Promise<any>;
 	viewQuestion: (questionRow: IQuestionRow) => void;
 	editQuestion: (questionRow: IQuestionRow) => void;
-	updateQuestion: (rootId: string, oldParentId: string, question: IQuestion, categoryChanged: boolean) => Promise<any>;
+	updateQuestion: (oldParentId: string, question: IQuestion, categoryChanged: boolean) => Promise<any>;
 	assignQuestionAnswer: (action: 'Assign' | 'UnAssign', questionKey: IQuestionKey, answerKey: IAnswerKey, assigned: IWhoWhen) => Promise<any>;
 	deleteQuestion: (questionRow: IQuestionRow) => void;
 }
@@ -766,7 +758,7 @@ export type CategoriesPayload = {
 
 	[ActionTypes.ADD_SUB_CATEGORY]: {
 		categoryRow?: ICategoryRow;
-		rootId: string,
+		topId: string,
 		categoryKey: ICategoryKey,
 		level: number
 	}

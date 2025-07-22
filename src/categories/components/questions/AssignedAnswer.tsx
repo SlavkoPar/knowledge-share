@@ -21,7 +21,7 @@ interface IProps {
 const AssignedAnswer = ({ questionTitle, assignedAnswer, isDisabled, unAssignAnswer }: IProps) => {
 
     const { questionKey, answerKey, answerTitle: title, created } = assignedAnswer;
-    const { partitionKey, id } = answerKey;
+    const { topId, id } = answerKey;
 
     const { time, nickName } = created;
     const emailFromClient = localStorage.getItem('emailFromClient');

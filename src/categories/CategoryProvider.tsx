@@ -38,7 +38,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
   const { loadAndCacheAllCategoryRows, getCat, setNodesReloaded } = useGlobalContext()
   const globalState = useGlobalState();
   const { dbp, categoryRows, authUser, canEdit } = globalState;
-  const { nickName } = authUser;
+  const { nickName, workspace } = authUser;
 
   const [state, dispatch] = useReducer(CategoryReducer, initialCategoriesState);
   const { formMode, activeCategory, activeQuestion } = state;
@@ -112,7 +112,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
       const { keyExpanded: categoryKeyExpanded } = state;
       try {
         dispatch({ type: ActionTypes.SET_TOP_ROWS_LOADING, payload: {} });
-        const url = `${protectedResources.KnowledgeAPI.endpointCategoryRow}/null/null`;
+        const url = `${protectedResources.KnowledgeAPI.endpointCategoryRow}/${workspace}/null/null`;
         console.log('CategoryProvider loadTopRows url:', url)
         console.time();
         await Execute("GET", url)
@@ -122,7 +122,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
               dto.IsExpanded = categoryKeyExpanded
                 ? dto.Id === categoryKeyExpanded.id
                 : false;
-              dto.RootId = dto.Id;
+              dto.TopId = dto.Id;
               return new CategoryRow(dto).categoryRow;
             })
             dispatch({ type: ActionTypes.SET_TOP_ROWS, payload: { topRows } });
@@ -141,13 +141,12 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
     async (catKeyExp: ICategoryKeyExpanded, fromChatBotDlg: string = 'false'): Promise<any> => {
       return new Promise(async (resolve) => {
         try {
-          let { id, partitionKey } = catKeyExp;
+          let { id, topId } = catKeyExp;
           console.assert(id);
-          if (id && partitionKey === '') {
+          if (id) {
             const categoryRow: ICategoryRow | undefined = categoryRows.get(id);
             if (categoryRow) {
-              catKeyExp.partitionKey = categoryRow.partitionKey;
-              partitionKey = categoryRow.partitionKey;
+              catKeyExp.topId = categoryRow.topId;
             }
             else {
               alert('reload all categoryRow:' + id)
@@ -157,7 +156,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
           dispatch({ type: ActionTypes.NODE_OPENING, payload: { fromChatBotDlg: fromChatBotDlg === 'true' } })
           // ---------------------------------------------------------------------------
           console.time();
-          const url = `${protectedResources.KnowledgeAPI.endpointCategoryRow}/${partitionKey}/${id}/true`;
+          const url = `${protectedResources.KnowledgeAPI.endpointCategoryRow}/${workspace}/${topId}/${id}/true`;
           await Execute("GET", url)
             .then(async (categoryRowDtoEx: ICategoryRowDtoEx) => {
               //dispatch({ type: ActionTypes.CLEAN_SUB_TREE, payload: { categoryKey: categoryKey! } });
@@ -190,11 +189,11 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
 
   // get category With subcategoryRows and questionRows
   const getCategory = async (categoryKey: ICategoryKey, includeQuestionId: string | null): Promise<any> => {
-    const { workspace: partitionKey, id } = categoryKey;
+    const { topId, id } = categoryKey;
     console.log({ categoryKey, includeQuestionId })
     return new Promise(async (resolve) => {
       try {
-        const url = `${protectedResources.KnowledgeAPI.endpointCategory}/${partitionKey}/${id}/${PAGE_SIZE}/${includeQuestionId}`;
+        const url = `${protectedResources.KnowledgeAPI.endpointCategory}/${workspace}/${topId}/${id}/${PAGE_SIZE}/${includeQuestionId}`;
         console.time()
         await Execute("GET", url)
           .then((categoryDtoEx: ICategoryDtoEx) => {
@@ -215,19 +214,19 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
     })
   }
 
-  const getCategoryRow = async (rootId: string, categoryKey: ICategoryKey, hidrate: boolean = false, includeQuestionId: string | null = null): Promise<any> => {
-    const { workspace: partitionKey, id } = categoryKey;
+  const getCategoryRow = async (categoryKey: ICategoryKey, hidrate: boolean = false, includeQuestionId: string | null = null): Promise<any> => {
+    const { topId, id } = categoryKey;
     console.log({ categoryKey, includeQuestionId })
     return new Promise(async (resolve) => {
       try {
-        const url = `${protectedResources.KnowledgeAPI.endpointCategoryRow}/${partitionKey}/${id}/${hidrate}/${PAGE_SIZE}/${includeQuestionId}`;
+        const url = `${protectedResources.KnowledgeAPI.endpointCategoryRow}/${workspace}/${topId}/${id}/${hidrate}/${PAGE_SIZE}/${includeQuestionId}`;
         console.time()
         await Execute("GET", url)
           .then((categoryRowDtoEx: ICategoryRowDtoEx) => {
             console.timeEnd();
             const { categoryRowDto, msg } = categoryRowDtoEx;
             if (categoryRowDto) {
-              categoryRowDto.RootId = rootId;
+              categoryRowDto.TopId = topId;
               resolve(new CategoryRow(categoryRowDto).categoryRow);
             }
             else {
@@ -243,14 +242,14 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
   }
 
   const expandCategory = useCallback(
-    async ({ topId: rootId, categoryKey, includeQuestionId, newCategoryRow, newQuestion, formMode }: IExpandInfo): Promise<any> => {
+    async ({ topId: topId, categoryKey, includeQuestionId, newCategoryRow, newQuestion, formMode }: IExpandInfo): Promise<any> => {
       try {
         const { keyExpanded: categoryKeyExpanded } = state;
         const { questionId } = categoryKeyExpanded!;
 
         dispatch({ type: ActionTypes.SET_ROW_EXPANDING, payload: {} });
 
-        const categoryRow: ICategoryRow | Error = await getCategoryRow(rootId, categoryKey, true, includeQuestionId); // to reload Category
+        const categoryRow: ICategoryRow | Error = await getCategoryRow(categoryKey, true, includeQuestionId); // to reload Category
         if (categoryRow instanceof Error) {
           dispatch({ type: ActionTypes.SET_ERROR, payload: { error: categoryRow } });
           console.error({ cat: categoryRow })
@@ -283,18 +282,18 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
 
   const collapseCategory = useCallback(
     async (categoryRow: ICategoryRow) => {
-      const { topId: rootId } = categoryRow;
+      const { topId: topId } = categoryRow;
       const categoryKey = new CategoryKey(categoryRow).categoryKey!;
       try {
         dispatch({ type: ActionTypes.SET_ROW_COLLAPSING, payload: {} });
-        const categoryRow: ICategoryRow | Error = await getCategoryRow(rootId!, categoryKey); // no subCategoryRows and no questionRows
+        const categoryRow: ICategoryRow | Error = await getCategoryRow(categoryKey); // no subCategoryRows and no questionRows
         // .then(async (category: ICategory) => {
         if (categoryRow instanceof Error) {
           dispatch({ type: ActionTypes.SET_ERROR, payload: { error: categoryRow } });
           console.error({ cat: categoryRow })
         }
         else {
-          categoryRow.topId = rootId;
+          categoryRow.topId = topId;
           categoryRow.isExpanded = false;
           dispatch({ type: ActionTypes.SET_ROW_COLLAPSED, payload: { categoryRow } });
           return categoryKey;
@@ -310,19 +309,18 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
   const addSubCategory = useCallback(
     async (categoryRow: ICategoryRow) => {
       try {
-        const { topId: rootId, partitionKey, id, level, isExpanded, categoryRows } = categoryRow;
-        const categoryKey: ICategoryKey = { workspace: partitionKey, id };
+        const { topId, parentId, id, level, isExpanded, categoryRows } = categoryRow;
+        const categoryKey: ICategoryKey = { topId, parentId, id };
         const newCategoryRow: ICategoryRow = {
           ...initialCategory,
-          topId: rootId,
-          partitionKey: 'newCategoryId',
+          topId: 'newCategoryId',
           id: 'newCategoryId', // backEnd will generate id
           parentId: id,
           level,
           title: 'new Category'
         }
         const expandInfo: IExpandInfo = {
-          topId: rootId!,
+          topId: topId!,
           categoryKey,
           formMode: FormMode.AddingCategory,
           newCategoryRow
@@ -359,11 +357,11 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
   const cancelAddCategory = useCallback(
     async () => {
       try {
-        const { topId: rootId, partitionKey, parentId } = activeCategory!;
-        const categoryKey: ICategoryKey = { workspace: partitionKey, id: parentId };
+        const { topId, id, parentId } = activeCategory!;
+        const categoryKey: ICategoryKey = { topId, parentId, id }; // TODO proveri
 
         const expandInfo: IExpandInfo = {
-          topId: rootId!,
+          topId: topId!,
           categoryKey,
           formMode: FormMode.None
         }
@@ -381,26 +379,26 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
 
   const createCategory = useCallback(
     async (category: ICategory) => {
-      const { partitionKey, id, parentId, variations, title, kind, modified, topId: rootId } = category;
+      const { topId, id, parentId, variations, title, kind, modified } = category;
       dispatch({ type: ActionTypes.SET_LOADING_CATEGORY, payload: {} });
       try {
         const categoryDto = new CategoryDto(category).categoryDto;
         console.log("categoryDto", { categoryDto })
-        const url = `${protectedResources.KnowledgeAPI.endpointCategory}`;
+        const url = `${protectedResources.KnowledgeAPI.endpointCategory}/${workspace}`;
         console.time()
         await Execute("POST", url, categoryDto, id)
           .then(async (categoryDtoEx: ICategoryDtoEx) => {   //  | null
             console.timeEnd();
             const { categoryDto } = categoryDtoEx;
             if (categoryDto) {
-              categoryDto.RootId = rootId!;
+              categoryDto.TopId = topId!;
               const category = new Category(categoryDto).category;
               console.log('Category successfully created', { category })
               await loadAndCacheAllCategoryRows()
                 .then(async (done: boolean) => {
-                  const parentCategoryKey: ICategoryKey = { workspace: parentId, id: parentId };
+                  const parentCategoryKey: ICategoryKey = { topId, parentId, id: parentId! };
                   const expandInfo: IExpandInfo = {
-                    topId: rootId!,
+                    topId: topId!,
                     categoryKey: parentCategoryKey,
                     formMode: FormMode.AddingCategory
                   }
@@ -458,11 +456,11 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
         dispatch({ type: ActionTypes.SET_CATEGORY_TO_EDIT, payload: { categoryRow: category } });
       }
       else {
-        const parentGroupKey = { partitionKey: parentId, id: parentId }
+        const parentKey: ICategoryKey = { topId, parentId, id: parentId }
         // get acurate info from server (children will be collapsed)
         const expandInfo: IExpandInfo = {
           topId: topId!,
-          categoryKey: parentGroupKey,
+          categoryKey: parentKey,
           formMode: FormMode.EditingCategory
         }
         await expandCategory(expandInfo).then(() => {
@@ -476,11 +474,11 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
 
   const updateCategory = useCallback(
     async (category: ICategory, closeForm: boolean) => {
-      const { partitionKey, id, variations, title, kind, modified, topId: rootId } = category;
+      const { topId, id, variations, title, kind, modified } = category;
       dispatch({ type: ActionTypes.SET_LOADING_CATEGORY, payload: {} });
       try {
         const categoryDto = new CategoryDto(category).categoryDto;
-        const url = protectedResources.KnowledgeAPI.endpointCategory;
+        const url = `${protectedResources.KnowledgeAPI.endpointCategory}/${workspace}`;
         console.time()
         await Execute("PUT", url, categoryDto)
           .then((response: ICategoryDtoEx | Response) => {
@@ -493,9 +491,9 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
               const { categoryDto, msg } = response as ICategoryDtoEx;
               if (categoryDto) {
                 const category = new Category(categoryDto).category;
-                const { id, partitionKey } = category;
+                const { topId, id } = category;
                 category.isExpanded = false;
-                category.topId = rootId;
+                category.topId = topId;
                 dispatch({ type: ActionTypes.SET_CATEGORY_UPDATED, payload: { categoryRow: category } });
                 if (closeForm) {
                   dispatch({ type: ActionTypes.CLOSE_CATEGORY_FORM, payload: {} })
@@ -517,10 +515,10 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
   const deleteCategory = useCallback(async (categoryRow: ICategoryRow) => {
     //dispatch({ type: ActionTypes.SET_CATEGORY_LOADING, payload: { id, loading: false } });
     try {
-      const { partitionKey, id, parentId, topId: rootId } = categoryRow;
-      const parentCategoryKey: ICategoryKey = { workspace: parentId, id: parentId };
+      const { topId, id, parentId } = categoryRow;
+      const parentCategoryKey: ICategoryKey = { topId, parentId, id };
       const categoryDto = new CategoryRowDto(categoryRow).categoryRowDto;
-      const url = protectedResources.KnowledgeAPI.endpointCategory;
+      const url = `{protectedResources.KnowledgeAPI.endpointCategory}/${workspace}`;
       console.time()
       await Execute("DELETE", url, categoryDto)    //Modified: {  Time: new Date(), NickName: globalState.authUser.nickName }
         .then(async (response: ICategoryDtoEx | Response) => {
@@ -539,7 +537,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
               await loadAndCacheAllCategoryRows()
                 .then(async (done: boolean) => {
                   const expandInfo: IExpandInfo = {
-                    topId: rootId!,
+                    topId: topId!,
                     categoryKey: parentCategoryKey,
                     formMode: FormMode.None
                   }
@@ -599,10 +597,10 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
   const PAGE_SIZE = 12;
   const loadCategoryQuestions = useCallback(async ({ categoryKey, startCursor, includeQuestionId }: ILoadCategoryQuestions): Promise<any> => {
     try {
-      const { workspace: partitionKey, id } = categoryKey;
+      const { topId, parentId, id } = categoryKey;
       dispatch({ type: ActionTypes.SET_CATEGORY_QUESTIONS_LOADING, payload: { loadingQuestion: true } })
       try {
-        const url = `${protectedResources.KnowledgeAPI.endpointQuestion}/${partitionKey}/${id}/${startCursor}/${PAGE_SIZE}/${includeQuestionId}`;
+        const url = `${protectedResources.KnowledgeAPI.endpointQuestion}/${workspace}/${topId}/${id}/${startCursor}/${PAGE_SIZE}/${includeQuestionId}`;
         console.time()
         console.log('>>>>>>>>>>>>loadCategoryQuestions URL:', { url }, { includeQuestionId })
         await Execute!("GET", url).then((categoryDtoEx: ICategoryDtoEx) => {
@@ -644,23 +642,22 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
 
 
   const addQuestion = useCallback(
-    async (categoryKey: ICategoryKey, rootId: string) => {
+    async (categoryKey: ICategoryKey, topId: string) => {
       try {
-        //const { rootId, partitionKey, id, questionRows } = categoryRow;
-        //const categoryKey: ICategoryKey = {partitionKey, id};
-        const { workspace: partitionKey, id } = categoryKey;
+        //const { topId, id, questionRows } = categoryRow;
+        //const categoryKey: ICategoryKey = {topId, id};
+        const { topId, id } = categoryKey;
         const cat: ICategoryRow | undefined = await getCat(id!);
         const newQuestion: IQuestionRow = {
           ...initialQuestion,
-          rootId,
+          topId,
           id: 'generateId', // backEnd will generate id
           title: 'new Question',
-          partitionKey: id ?? '',
           parentId: id
         }
 
         const expandInfo: IExpandInfo = {
-          topId: rootId,
+          topId: topId,
           categoryKey,
           formMode: FormMode.AddingQuestion,
           newCategoryRow: undefined,
@@ -690,10 +687,10 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
   const cancelAddQuestion = useCallback(
     async () => {
       try {
-        const { rootId, partitionKey, parentId } = activeQuestion!;
-        const categoryKey: ICategoryKey = { workspace: partitionKey, id: parentId };
+        const { topId, parentId } = activeQuestion!;
+        const categoryKey: ICategoryKey = { topId, parentId, id: parentId! };
         const expandInfo: IExpandInfo = {
-          topId: rootId,
+          topId: topId,
           categoryKey,
           formMode: FormMode.None
         }
@@ -711,13 +708,13 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
 
   const createQuestion = useCallback(
     async (question: IQuestion) => {
-      const { partitionKey, id, title, modified, parentId, rootId } = question;
+      const { topId, id, title, modified, parentId } = question;
       // TODO
       dispatch({ type: ActionTypes.SET_LOADING_CATEGORY, payload: {} });
       try {
         question.created!.nickName = nickName;
         const questionDto = new QuestionDto(question).questionDto;
-        const url = `${protectedResources.KnowledgeAPI.endpointQuestion}`;
+        const url = `${protectedResources.KnowledgeAPI.endpointQuestion}/${workspace}`;
         console.time()
         console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> createQuestion', questionDto)
         await Execute("POST", url, questionDto)
@@ -728,14 +725,14 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
               const { questionDto } = questionDtoEx;
               if (questionDto) {
                 const question = new Question(questionDto).question;
-                question.rootId = rootId;
+                question.topId = topId;
                 console.log('Question successfully created')
                 //dispatch({ type: ActionTypes.CLOSE_QUESTION_FORM })
                 await loadAndCacheAllCategoryRows() // numOfQuestions changed
                   .then(async (done: boolean) => {
-                    const parentCategoryKey: ICategoryKey = { workspace: parentId, id: parentId };
+                    const parentCategoryKey: ICategoryKey = { topId, parentId, id: parentId! };
                     const expandInfo: IExpandInfo = {
-                      topId: rootId,
+                      topId: topId,
                       categoryKey: parentCategoryKey,
                       formMode: FormMode.EditingQuestion
                     }
@@ -755,13 +752,13 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
 
 
   const updateQuestion = useCallback(
-    async (rootId: string, oldParentId: string, newQuestion: IQuestion, categoryChanged: boolean) => {
+    async (oldParentId: string, newQuestion: IQuestion, categoryChanged: boolean) => {
       const { topId, id, title, modified, parentId } = newQuestion;
       // dispatch({ type: ActionTypes.SET_CATEGORY_LOADING, payload: { id: parentId!, loading: false } });
       try {
         newQuestion.modified!.nickName = nickName;
         const questionDto = new QuestionDto(newQuestion).questionDto;
-        const url = `${protectedResources.KnowledgeAPI.endpointQuestion}`;
+        const url = `${protectedResources.KnowledgeAPI.endpointQuestion}/${workspace}`;
         console.time()
         questionDto.oldParentId = oldParentId;
         console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> updateQuestion', questionDto)
@@ -773,22 +770,23 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
             if (questionDto) {
               questionRet = new Question(questionDto).question!;
               console.log('Question successfully updated: ', questionRet)
-              const { partitionKey, parentId } = questionRet;
+              const { topId, parentId } = questionRet;
               if (categoryChanged) {
                 // nema koristi
                 // dispatch({ type: ActionTypes.SET_QUESTION, payload: { question: questionRet } })
                 const { topId, parentId, id } = questionRet;
                 const keyExpanded: ICategoryKeyExpanded = {
                   topId,
-                  id: parentId,
+                  parentId, // proveri
+                  id: parentId!,
                   questionId: id // keep the same question
                 }
                 dispatch({ type: ActionTypes.FORCE_OPEN_NODE, payload: { keyExpanded } })
               }
               else {
-                const parentCategoryKey: ICategoryKey = { topId, id: parentId };
+                const parentCategoryKey: ICategoryKey = { topId, parentId, id: parentId! }; // proveri
                 const expandInfo: IExpandInfo = {
-                  topId: rootId,
+                  topId: topId,
                   categoryKey: parentCategoryKey,
                   formMode: FormMode.EditingQuestion
                 }
@@ -812,11 +810,11 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
 
   const deleteQuestion = useCallback(
     async (questionRow: IQuestionRow) => {
-      const { partitionKey, id, title, modified, parentId, rootId } = questionRow;
+      const { id, title, modified, parentId, topId } = questionRow;
       dispatch({ type: ActionTypes.SET_LOADING_CATEGORY, payload: {} });
       try {
         const questionDto = new QuestionRowDto(questionRow).questionRowDto;
-        const url = `${protectedResources.KnowledgeAPI.endpointQuestion}`;
+        const url = `${protectedResources.KnowledgeAPI.endpointQuestion}/${workspace}`;
         console.time()
         await Execute("DELETE", url, questionDto)
           .then(async (questionDtoEx: IQuestionDtoEx) => {
@@ -830,9 +828,9 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
               //dispatch({ type: ActionTypes.CLOSE_QUESTION_FORM })
               await loadAndCacheAllCategoryRows(); // reload
               */
-              const parentCategoryKey: ICategoryKey = { workspace: parentId, id: parentId };
+              const parentCategoryKey: ICategoryKey = { topId, parentId, id: parentId! }; // proveri
               const expandInfo: IExpandInfo = {
-                topId: rootId,
+                topId: topId,
                 categoryKey: parentCategoryKey,
                 formMode: FormMode.None
               }
@@ -856,8 +854,8 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
   const getQuestion = async (questionKey: IQuestionKey): Promise<any> => {
     return new Promise(async (resolve) => {
       try {
-        const { topId: partitionKey, id } = questionKey;
-        const url = `${protectedResources.KnowledgeAPI.endpointQuestion}/${partitionKey}/${id}`;
+        const { topId: topId, id } = questionKey;
+        const url = `${protectedResources.KnowledgeAPI.endpointQuestion}/${workspace}/${topId}/${id}`;
         console.time()
         await Execute("GET", url)
           .then((questionDtoEx: IQuestionDtoEx) => {
@@ -903,7 +901,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
     }
     const { question, msg } = questionEx;
     if (question) {
-      question.rootId = questionRow.rootId;
+      question.topId = questionRow.topId;
       dispatch({ type: ActionTypes.SET_QUESTION_TO_VIEW, payload: { question } });
     }
     else
@@ -912,8 +910,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
 
 
   const editQuestion = useCallback(async (questionRow: IQuestionRow) => {
-    const { partitionKey, id, parentId, rootId } = questionRow;
-    const questionKey: IQuestionKey = { topId: partitionKey, id };
+    const questionKey: IQuestionKey = new QuestionKey(questionRow).questionKey!;
     if (formMode === FormMode.AddingQuestion) {
       await cancelAddQuestion();
     }
@@ -925,7 +922,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
     const { question, msg } = questionEx;
     if (question) {
       // we don't reload categoryRows, just use isSelected from activeQuestion
-      question.rootId = questionRow.rootId;
+      question.topId = questionRow.topId;
       dispatch({ type: ActionTypes.SET_QUESTION_TO_EDIT, payload: { question } });
     }
     else
@@ -949,7 +946,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
       }
       let question: IQuestion | null = null;
       const dto = new AssignedAnswerDto(assignedAnwser).assignedAnswerDto;
-      const url = `${protectedResources.KnowledgeAPI.endpointQuestionAnswer}/${action}`;
+      const url = `${protectedResources.KnowledgeAPI.endpointQuestionAnswer}/${workspace}/${action}`;
       console.time()
       await Execute("POST", url, dto)
         .then(async (questionDtoEx: IQuestionDtoEx) => {
@@ -991,7 +988,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
 
 
   const contextValue: ICategoriesContext = {
-    state, openNode: openNode, loadTopRows,
+    state, openNode, loadTopRows,
     addSubCategory, cancelAddCategory, createCategory,
     viewCategory, editCategory, updateCategory, deleteCategory, deleteCategoryVariation,
     expandCategory, collapseCategory,

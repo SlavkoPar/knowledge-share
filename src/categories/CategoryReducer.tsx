@@ -2,10 +2,9 @@ import { Reducer } from 'react'
 import { ActionTypes, ICategoriesState, ICategory, IQuestion, CategoriesActions, ILocStorage, ICategoryKey, ICategoryKeyExtended, IQuestionRow, Question, IQuestionRowDto, IQuestionKey, CategoryKey, QuestionKey, ICategoryDto, QuestionRow, ICategoryRow, CategoryRow, actionStoringToLocalStorage, ICategoryRowDto, FormMode, IsCategory } from "categories/types";
 
 export const initialQuestion: IQuestion = {
-  partitionKey: '',
-  id: 'will be given by DB',
-  rootId: '',
+  topId: '',
   parentId: '',
+  id: 'will be given by DB',
   categoryTitle: '',
   title: '',
   assignedAnswers: [],
@@ -18,7 +17,8 @@ export const initialQuestion: IQuestion = {
 }
 
 export const initialCategory: ICategory = {
-  partitionKey: 'null',
+  topId: 'null',
+  parentId: 'null',
   id: '',
   kind: 0,
   title: '',
@@ -26,8 +26,6 @@ export const initialCategory: ICategory = {
   header: '',
   level: 0,
   variations: [],
-  topId: '',
-  parentId: 'null',
   hasSubCategories: false,
   categoryRows: [],
   questionRows: [],
@@ -48,7 +46,8 @@ export const initialState: ICategoriesState = {
   nodeOpened: false,
 
   keyExpanded: {
-    topId: "REMOTECTRLS",
+    topId: "MTS",
+    parentId: "REMOTECTRLS",
     id: "REMOTECTRLS",
     questionId: "qqqqqq111"
   },
@@ -148,21 +147,21 @@ export const CategoryReducer: Reducer<ICategoriesState, CategoriesActions> = (st
   // Action that modify Tree
   // Actually part topCategoryRows of state
   if (modifyTree) {
-    const { topId: rootId, id } = categoryRow!;
-    if (id === rootId) {
+    const { topId: topId, id } = categoryRow!;
+    if (id === topId) {
       // actually topCategoryRows is from previous state
-      newTopCategoryRows = topCategoryRows.map(c => c.id === rootId
+      newTopCategoryRows = topCategoryRows.map(c => c.id === topId
         ? new DeepClone(categoryRow!).categoryRow
         : new DeepClone(c).categoryRow
       );
     }
     else {
       // actually topCategoryRows is from previous state
-      const topRow: ICategoryRow = topCategoryRows.find(c => c.id === rootId)!;
+      const topRow: ICategoryRow = topCategoryRows.find(c => c.id === topId)!;
       DeepClone.idToSet = id;
       DeepClone.newCategoryRow = categoryRow!;
       const newTopRow = new DeepClone(topRow).categoryRow;
-      newTopCategoryRows = topCategoryRows.map(c => c.id === rootId
+      newTopCategoryRows = topCategoryRows.map(c => c.id === topId
         ? newTopRow
         : new DeepClone(c).categoryRow
       );
@@ -303,13 +302,12 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
     }
 
     case ActionTypes.ADD_SUB_CATEGORY: {
-      const { categoryKey, level, rootId } = action.payload;
-      const { workspace: partitionKey, id } = categoryKey;
+      const { categoryKey, level } = action.payload;
+      const { topId, id } = categoryKey;
       const category: ICategory = {
         ...initialCategory,
-        topId: rootId,
+        topId: topId,
         level,
-        partitionKey: partitionKey!,
         parentId: id
       }
       return {
@@ -336,8 +334,7 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
     case ActionTypes.SET_CATEGORY: {
       const { categoryRow } = action.payload; // category doesn't contain  inAdding 
       console.assert(IsCategory(categoryRow));
-      const { partitionKey, id, parentId, topId: rootId } = categoryRow;
-      const categoryKey = { partitionKey, id }
+      const categoryKey = new CategoryKey(categoryRow).categoryKey!;
       return {
         ...state,
         // keep mode
@@ -357,14 +354,15 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
 
     case ActionTypes.SET_ROW_EXPANDED: {
       const { categoryRow, formMode } = action.payload;
-      const { partitionKey: rowPartitionkey, id: rowId } = categoryRow;
+      const { topId: rowTopId, parentId: rowParentId, id: rowId } = categoryRow;
       let { keyExpanded } = state;
       if (keyExpanded) {
-        const { partitionKey, id, questionId } = keyExpanded;
+        const { topId, id, questionId } = keyExpanded;
         keyExpanded = {
-          partitionKey: rowPartitionkey,
+          topId: rowTopId,
+          parentId: rowParentId,
           id: rowId,
-          questionId: rowPartitionkey === partitionKey && rowId === id
+          questionId: rowTopId === topId && rowId === id
             ? questionId
             : null
         }
@@ -392,8 +390,8 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
 
     case ActionTypes.SET_ROW_COLLAPSED: {
       const { categoryRow } = action.payload; // category doesn't contain  inAdding 
-      const { partitionKey, id } = categoryRow;
-      const categoryKey = { partitionKey, id }
+      const { topId, id } = categoryRow;
+      const categoryKey = { topId, id }
       return {
         ...state,
         // keep mode
@@ -410,7 +408,7 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
       console.assert(IsCategory(categoryRow))
       const category: ICategory = categoryRow as ICategory;
       const activeCategory: ICategory = { ...category, isExpanded: false }
-      const { partitionKey, id, parentId, topId: rootId } = category;
+      const { topId, id, parentId } = category;
       return {
         ...state,
         formMode: FormMode.ViewingCategory,
@@ -429,7 +427,7 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
       // TODO what about instanceof?
       const category: ICategory = categoryRow as ICategory;
       const activeCategory: ICategory = { ...category, isExpanded: false }
-      const { partitionKey, id, parentId, topId: rootId } = category;
+      const { topId, id, parentId } = category;
       return {
         ...state,
         formMode: FormMode.EditingCategory,
@@ -449,7 +447,7 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
 
     case ActionTypes.CATEGORY_QUESTIONS_LOADED: {
       const { categoryRow } = action.payload;
-      const { id, topId: rootId, questionRows, hasMoreQuestions } = categoryRow;
+      const { id, topId: topId, questionRows, hasMoreQuestions } = categoryRow;
       return {
         ...state,
         loadingQuestions: false
@@ -483,10 +481,10 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
     case ActionTypes.ADD_QUESTION: {
       const { categoryInfo } = action.payload;
       const { categoryKey, level } = categoryInfo;
-      const { partitionKey, id } = categoryKey;
+      const { topId, id } = categoryKey;
       const question: IQuestion = {
         ...initialQuestion,
-        partitionKey: id ?? '',
+        topId: id ?? '',
         parentId: id,
         inAdding: true
       }
@@ -591,7 +589,7 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
 
     case ActionTypes.SET_QUESTION_TO_VIEW: {
       const { question } = action.payload;
-      const { partitionKey, id, parentId } = question;
+      const { topId, id, parentId } = question;
       const { keyExpanded: categoryKeyExpanded } = state;
       return {
         ...state,
@@ -606,14 +604,14 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
 
     case ActionTypes.SET_QUESTION_TO_EDIT: {
       const { question } = action.payload;
-      const { partitionKey, id, parentId } = question;
+      const { topId, id, parentId } = question;
       const { keyExpanded: categoryKeyExpanded } = state;
       return {
         ...state,
         // categoryKeyExpanded: categoryKeyExpanded
         //   ? { ...categoryKeyExpanded, questionId: categoryKeyExpanded.id === parentId ? id : null }
         //   : null,
-        //categoryKeyExpanded: { partitionKey: parentId, id: parentId, questionId: id },
+        //categoryKeyExpanded: { topId: parentId, id: parentId, questionId: id },
         activeQuestion: question,
         formMode: FormMode.EditingQuestion,
         loadingQuestion: false
@@ -675,7 +673,7 @@ export class DeepClone {
   static idToSet: string;
   static newCategoryRow: ICategoryRow;
   constructor(categoryRow: ICategoryRow) {
-    const { partitionKey, id, topId: rootId, parentId, title, link, kind, header, level, variations, numOfQuestions,
+    const { topId, id, parentId, title, link, kind, header, level, variations, numOfQuestions,
       hasSubCategories, categoryRows: subCategories, created, modified, questionRows, isExpanded } = categoryRow;
 
     const subCats = subCategories.map((cat: ICategoryRow) => {
@@ -688,11 +686,10 @@ export class DeepClone {
     });
 
     this.categoryRow = {
-      partitionKey,
+      topId,
+      parentId,
       id,
       kind,
-      topId: rootId,
-      parentId,
       title,
       link,
       header,

@@ -31,8 +31,8 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
     const { state, openNode, loadTopRows } = useCategoryContext();
     const {
         topRows, topRowsLoading, topRowsLoaded,
-        keyExpanded: categoryKeyExpanded, categoryId_questionId_done,
-        nodeOpening: categoryNodeOpening, nodeOpened: categoryNodeOpened,
+        keyExpanded, categoryId_questionId_done,
+        nodeOpening, nodeOpened,
         activeCategory,
         activeQuestion,
         formMode,
@@ -56,14 +56,15 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
     const dispatch = useCategoryDispatch();
 
     const onSelectQuestion = async (questionKey: IQuestionKey) => {
-        //navigate(`/categories/${questionKey.partitionKey}_${questionKey.id}`)
+        //navigate(`/categories/${questionKey.topId}_${questionKey.id}`)
         dispatch({ type: ActionTypes.SET_QUESTION_SELECTED, payload: { questionKey } })
     }
 
     const [catKeyExpanded, setCatKeyExpanded] = useState<ICategoryKeyExpanded>({
         topId: '', // null
-        id: null,
-        questionId: categoryKeyExpanded ? categoryKeyExpanded.questionId : null
+        parentId: null,
+        id: '',
+        questionId: keyExpanded ? keyExpanded.questionId : null
     })
 
     const categoryRow: ICategoryRow = {
@@ -86,7 +87,7 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
 
     useEffect(() => {
         (async () => {
-            if (!categoryNodeOpening && topRows.length > 0) {
+            if (!nodeOpening && topRows.length > 0) {
                 if (categoryId_questionId) {
                     if (categoryId_questionId === 'add_question') {
                         const sNewQuestion = localStorage.getItem('New_Question');
@@ -98,39 +99,39 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
                             return null;
                         }
                     }
-                    else if (categoryId_questionId !== categoryId_questionId_done) { //} && !categoryNodeOpened) {
+                    else if (categoryId_questionId !== categoryId_questionId_done) { //} && !nodeOpened) {
                         const arr = categoryId_questionId.split('_');
                         const categoryId = arr[0];
                         const questionId = arr[1];
-                        const keyExp = { partitionKey: categoryId, id: categoryId, questionId: questionId === 'null' ? null : questionId }
+                        const keyExp: ICategoryKeyExpanded = { topId:'nadji', parentId: 'isto', id: categoryId, questionId: questionId === 'null' ? null : questionId }
                         // setCatKeyExpanded(keyExp);
                         console.log('zovem openNode 1111111111111111111)', { categoryId_questionId }, { categoryId_questionId_done })
                         await openNode(keyExp, fromChatBotDlg ?? 'false')
                             .then(() => { return null; });
                     }
                 }
-                else if (categoryKeyExpanded && !categoryNodeOpened) {
-                    console.log('zovem openNode 2222222222222)', { categoryKeyExpanded }, { categoryNodeOpened })
-                    await openNode(categoryKeyExpanded)
+                else if (keyExpanded && !nodeOpened) {
+                    console.log('zovem openNode 2222222222222)', { keyExpanded }, { nodeOpened })
+                    await openNode(keyExpanded)
                         .then(() => { return null; });
                 }
             }
         })()
-    }, [categoryKeyExpanded, categoryNodeOpening, categoryNodeOpened, openNode, categoryId_questionId, categoryId_questionId_done, topRowsLoaded])
+    }, [keyExpanded, nodeOpening, nodeOpened, openNode, categoryId_questionId, categoryId_questionId_done, topRowsLoaded])
 
     useEffect(() => {
         setLastRouteVisited(`/categories`);
     }, [setLastRouteVisited])
 
     if (categoryId_questionId !== 'add_question') {
-        if (/*categoryKeyExpanded ||*/ (categoryId_questionId && categoryId_questionId !== categoryId_questionId_done)) {
-            console.log("zzzzzz loading...", { categoryKeyExpanded, categoryId_questionId, categoryId_questionId_done })
+        if (/*keyExpanded ||*/ (categoryId_questionId && categoryId_questionId !== categoryId_questionId_done)) {
+            console.log("zzzzzz loading...", { keyExpanded, categoryId_questionId, categoryId_questionId_done })
             return <div>loading...</div>
         }
     }
 
     console.log('===>>> Categories !!!!!!!!!!!!!!!!!')
-    //if (!categoryNodeOpened)
+    //if (!nodeOpened)
     if (topRows.length === 0)
         return null
 
@@ -199,7 +200,7 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
 
             {(loadingCategories || loadingQuestions) &&
                 <div className="d-flex justify-content-center align-items-center" style={{ position: 'absolute', top: '40%', left: '20%' }}>
-                    <div className={`spinner-border ${loadingQuestions?'question':'category'}-spinner`} role="status">
+                    <div className={`spinner-border ${loadingQuestions ? 'question' : 'category'}-spinner`} role="status">
                         <span className="visually-hidden">Loading...</span>
                     </div>
                 </div>

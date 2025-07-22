@@ -74,7 +74,6 @@ export class RelatedFilter {
 }
 
 export interface IAnswerRow extends IRecord {
-	topId: string;
 	id: string;
 	title: string;
 	link?: string;
@@ -90,13 +89,13 @@ export interface IAnswer extends IAnswerRow {
 }
 
 export interface IGroupKey {
-	partitionKey: string | null;
-	id: string | null;
+	workspace: string;
+	topId: string;
+	id: string;
+	parentId: string | null
 }
 
-export interface IGroupKeyExpanded { //extends IGroupKey {
-	partitionKey: string | null;
-	id: string | null;
+export interface IGroupKeyExpanded extends IGroupKey {
 	answerId: string | null;
 }
 
@@ -111,8 +110,6 @@ export interface IGroupKeyExtended extends IGroupKey {
 
 
 export interface IAnswerKey {
-	parentId?: string;
-	partitionKey: string | null;   // ona day we are going to enable answer
 	id: string;
 }
 
@@ -122,10 +119,8 @@ export interface IVariation {
 }
 
 export interface IGroupRowDto extends IRecordDto {
-	PartitionKey: string;
 	Id: string;
 	Kind: number;
-	RootId?: string;
 	ParentId: string | null;
 	Title: string;
 	Link: string | null;
@@ -145,10 +140,8 @@ export interface IGroupDto extends IGroupRowDto {
 }
 
 export interface IGroupRow extends IRecord {
-	topId: string; // | null is a valid value so you can store data with null value in indexeddb 
 	id: string;
 	kind: number;
-	rootId: string | null;
 	parentId: string | null; // | null is a valid value so you can store data with null value in indexeddb 
 	title: string;
 	link: string | null;
@@ -174,9 +167,9 @@ export const IsGroup = (obj: any): boolean => typeof obj === 'object' && obj !==
 
 export class GroupRowDto {
 	constructor(groupRow: IGroupRow) {
-		const { topId: partitionKey, id, parentId, modified } = groupRow;
+		const { topId, id, parentId, modified } = groupRow;
 		this.groupRowDto = {
-			PartitionKey: partitionKey,
+			TopId: topId!,
 			Id: id,
 			ParentId: parentId,
 			Title: '',
@@ -198,12 +191,12 @@ export class GroupRowDto {
 
 export class GroupRow {
 	constructor(groupRowDto: IGroupRowDto) {
-		const { PartitionKey, Id, RootId, ParentId, Kind, Title, Link, Header, Variations, Level,
+		const { Id, TopId, ParentId, Kind, Title, Link, Header, Variations, Level,
 			HasSubGroups, GroupRowDtos,
 			NumOfAnswers, AnswerRowDtos,
 			IsExpanded } = groupRowDto;
 		this.groupRow = {
-			topId: PartitionKey,
+			topId: TopId!,
 			id: Id,
 			parentId: ParentId,
 			title: Title,
@@ -212,15 +205,14 @@ export class GroupRow {
 			titlesUpTheTree: '', // traverse up the tree, until root
 			variations: Variations,
 			hasSubGroups: HasSubGroups!,
-			groupRows: GroupRowDtos.map(dto => new GroupRow({ ...dto, RootId }).groupRow),
+			groupRows: GroupRowDtos.map(dto => new GroupRow({ ...dto, TopId }).groupRow),
 			numOfAnswers: NumOfAnswers,
 			answerRows: AnswerRowDtos
-				? AnswerRowDtos.map(dto => new AnswerRow({ ...dto, RootId: RootId ?? undefined }).answerRow)
+				? AnswerRowDtos.map(dto => new AnswerRow({ ...dto}).answerRow) //, TopId! }).answerRow)
 				: [],
 			level: Level,
 			kind: Kind,
-			isExpanded: IsExpanded,
-			rootId: RootId ?? null
+			isExpanded: IsExpanded
 		}
 	}
 	groupRow: IGroupRow;
@@ -228,11 +220,10 @@ export class GroupRow {
 
 export class AnswerRow {
 	constructor(rowDto: IAnswerRowDto) { //, parentId: string) {
-		const { TopId: PartitionKey, Id, ParentId, Title, Link, GroupTitle, Created, Modified, Included, RootId } = rowDto;
+		const { TopId, Id, ParentId, Title, Link, GroupTitle, Created, Modified, Included } = rowDto;
 		this.answerRow = {
-			topId: PartitionKey,
+			topId: TopId,
 			id: Id,
-			rootId: RootId!,
 			parentId: ParentId,
 			title: Title,
 			link: Link,
@@ -269,7 +260,7 @@ export class GroupKey {
 	constructor(cat: IGroupRow | IGroup | IGroupKeyExtended) {
 		this.groupKey = cat
 			? {
-				partitionKey: cat.topId,
+				topId: cat.topId,
 				id: cat.id
 			}
 			: null
@@ -281,7 +272,7 @@ export class GroupKey {
 
 export class Group {
 	constructor(dto: IGroupDto) {
-		const { PartitionKey, Id, Kind, RootId, ParentId, Title, Link, Header, Level, Variations, NumOfAnswers,
+		const { TopId, Id, Kind,  ParentId, Title, Link, Header, Level, Variations, NumOfAnswers,
 			HasSubGroups, GroupRowDtos, Created, Modified, AnswerRowDtos, IsExpanded, Doc1 } = dto;
 
 		const subGroupRows = GroupRowDtos
@@ -293,10 +284,9 @@ export class Group {
 			: [];
 
 		this.group = {
-			topId: PartitionKey,
+			topId: TopId!, //?
 			id: Id,
 			kind: Kind,
-			rootId: RootId!,
 			parentId: ParentId!,
 			title: Title,
 			link: Link,
@@ -322,7 +312,7 @@ export class GroupDto {
 	constructor(group: IGroup) {
 		const { topId, id, kind, parentId, title, link, header, level, variations, created, modified, doc1 } = group;
 		this.groupDto = {
-			TopId: topId,
+			TopId: topId!, // ?
 			Id: id,
 			Kind: kind,
 			ParentId: parentId,
@@ -369,7 +359,7 @@ export class AnswerKey {
 	constructor(answer: IAnswerRow | IAnswer | undefined) {
 		this.answerKey = answer
 			? {
-				partitionKey: answer.topId,
+				topId: answer.topId,
 				id: answer.id,
 				parentId: answer.parentId ?? undefined
 			}
@@ -399,7 +389,6 @@ export class AnswerDto {
 export interface IAnswerRowDto extends IRecordDto {
 	TopId: string;
 	Id: string;
-	RootId?: string,
 	ParentId: string;
 	Title: string;
 	Link: string;
@@ -454,7 +443,7 @@ export interface IGroupInfo {
 }
 
 export interface IExpandInfo {
-	rootId: string;
+	topId: string;
 	groupKey: IGroupKey;
 	formMode: FormMode;
 	includeAnswerId?: string;
@@ -464,7 +453,7 @@ export interface IExpandInfo {
 
 export interface IParentInfo {
 	//execute?: (method: string, endpoint: string) => Promise<any>,
-	// partitionKey: string | null,
+	// topId: string | null,
 	// parentId: string | null,
 	//groupKey: IGroupKey,
 	groupRow: IGroupRow,
@@ -522,12 +511,12 @@ export interface IGroupsContext {
 	//////////////
 	// answers
 	loadGroupAnswers: (catParams: ILoadGroupAnswers) => void;  //(parentInfo: IParentInfo) => void,
-	addAnswer: (groupKey: IGroupKey, rootId: string) => Promise<any>;
+	addAnswer: (groupKey: IGroupKey, topId: string) => Promise<any>;
 	cancelAddAnswer: () => Promise<any>;
 	createAnswer: (answer: IAnswer, fromModal: boolean) => Promise<any>;
 	viewAnswer: (answerRow: IAnswerRow) => void;
 	editAnswer: (answerRow: IAnswerRow) => void;
-	updateAnswer: (rootId: string, oldParentGroup: string, answer: IAnswer, groupChanged: boolean) => Promise<any>;
+	updateAnswer: (topId: string, oldParentGroup: string, answer: IAnswer, groupChanged: boolean) => Promise<any>;
 	deleteAnswer: (answerRow: IAnswerRow) => void;
 }
 
@@ -667,7 +656,7 @@ export type GroupsPayload = {
 
 	[ActionTypes.ADD_SUB_GROUP]: {
 		groupRow?: IGroupRow;
-		rootId: string,
+		topId: string,
 		groupKey: IGroupKey,
 		level: number
 	}
