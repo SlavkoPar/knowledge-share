@@ -2,9 +2,10 @@ import { Reducer } from 'react'
 import { ActionTypes, ICategoriesState, ICategory, IQuestion, CategoriesActions, ILocStorage, ICategoryKey, ICategoryKeyExtended, IQuestionRow, Question, IQuestionRowDto, IQuestionKey, CategoryKey, QuestionKey, ICategoryDto, QuestionRow, ICategoryRow, CategoryRow, actionStoringToLocalStorage, ICategoryRowDto, FormMode, IsCategory } from "categories/types";
 
 export const initialQuestion: IQuestion = {
-  topId: '',
-  parentId: '',
-  id: 'will be given by DB',
+ 	topId: '',
+	id: '',
+	parentId: null,
+  questionId: 'will be given by DB',
   categoryTitle: '',
   title: '',
   assignedAnswers: [],
@@ -51,6 +52,8 @@ export const initialState: ICategoriesState = {
     id: "REMOTECTRLS",
     questionId: "qqqqqq111"
   },
+  
+
   categoryId_questionId_done: undefined,
 
   activeCategory: null,
@@ -85,12 +88,12 @@ if ('localStorage' in window) {
   const s = localStorage.getItem('CATEGORIES_STATE');
   if (s !== null) {
     const locStorage = JSON.parse(s);
-    const { lastCategoryKeyExpanded } = locStorage!;
-    const categoryNodeOpened = lastCategoryKeyExpanded ? false : true;
+    const { keyExpanded } = locStorage!;
+    const nodeOpened = keyExpanded ? false : true;
     initialCategoriesState = {
       ...initialCategoriesState,
-      keyExpanded: { ...lastCategoryKeyExpanded },
-      nodeOpened: categoryNodeOpened
+      keyExpanded: { ...keyExpanded },
+      nodeOpened
     }
     console.log('initialCategoriesState nakon citanja iz memorije', initialCategoriesState);
   }
@@ -147,7 +150,7 @@ export const CategoryReducer: Reducer<ICategoriesState, CategoriesActions> = (st
   // Action that modify Tree
   // Actually part topCategoryRows of state
   if (modifyTree) {
-    const { topId: topId, id } = categoryRow!;
+    const { topId, id } = categoryRow!;
     if (id === topId) {
       // actually topCategoryRows is from previous state
       newTopCategoryRows = topCategoryRows.map(c => c.id === topId
@@ -180,9 +183,10 @@ export const CategoryReducer: Reducer<ICategoriesState, CategoriesActions> = (st
 
 
   if (actionStoringToLocalStorage.includes(action.type)) {
-    const { keyExpanded: categoryKeyExpanded } = newState;
+    const { keyExpanded } = newState;
     const locStorage: ILocStorage = {
-      lastCategoryKeyExpanded: categoryKeyExpanded
+      lastKeyExpanded: keyExpanded,
+      lastQuestionId: null
     }
     localStorage.setItem('CATEGORIES_STATE', JSON.stringify(locStorage));
   }
@@ -218,13 +222,13 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
 
     case ActionTypes.NODE_OPENING: {
       const { fromChatBotDlg } = action.payload;
-      const { keyExpanded: categoryKeyExpanded, activeCategory, activeQuestion } = state;
+      const { keyExpanded, activeCategory, activeQuestion } = state;
       return {
         ...state,
         nodeOpening: true,
         loadingCategories: true,
         nodeOpened: false,
-        keyExpanded: fromChatBotDlg ? null : { ...categoryKeyExpanded! },
+        keyExpanded: fromChatBotDlg ? null : { ...keyExpanded! },
         activeCategory: fromChatBotDlg ? null : activeCategory,
         activeQuestion: fromChatBotDlg ? null : activeQuestion
       }
@@ -339,7 +343,7 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
         ...state,
         // keep mode
         loadingCategory: false,
-        keyExpanded: { ...categoryKey, questionId: null },
+        //keyExpanded: { ...categoryKey },
         activeCategory: categoryRow,
         activeQuestion: null
       }
@@ -357,14 +361,12 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
       const { topId: rowTopId, parentId: rowParentId, id: rowId } = categoryRow;
       let { keyExpanded } = state;
       if (keyExpanded) {
-        const { topId, id, questionId } = keyExpanded;
+        const { topId, id } = keyExpanded;
         keyExpanded = {
           topId: rowTopId,
           parentId: rowParentId,
           id: rowId,
-          questionId: rowTopId === topId && rowId === id
-            ? questionId
-            : null
+          questionId: null
         }
       }
       // Do not work with categoryRow, 
@@ -391,12 +393,12 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
     case ActionTypes.SET_ROW_COLLAPSED: {
       const { categoryRow } = action.payload; // category doesn't contain  inAdding 
       const { topId, id } = categoryRow;
-      const categoryKey = { topId, id }
+      const categoryKey = new CategoryKey(categoryRow).categoryKey
       return {
         ...state,
         // keep mode
         loadingCategories: false,
-        keyExpanded: null, //{ ...categoryKey, questionId: null },
+        keyExpanded: { ...categoryKey, questionId: null },
         activeCategory: null,
         activeQuestion: null
       }
@@ -413,7 +415,7 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
         ...state,
         formMode: FormMode.ViewingCategory,
         loadingCategory: false,
-        keyExpanded: state.keyExpanded ? { ...state.keyExpanded, questionId: null } : null,
+        //keyExpanded: { ...state.keyExpanded, questionId: null },
         activeCategory,
         activeQuestion: null
       };
@@ -590,13 +592,11 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
     case ActionTypes.SET_QUESTION_TO_VIEW: {
       const { question } = action.payload;
       const { topId, id, parentId } = question;
-      const { keyExpanded: categoryKeyExpanded } = state;
+      const { keyExpanded } = state;
       return {
         ...state,
         formMode: FormMode.ViewingQuestion,
-        keyExpanded: categoryKeyExpanded
-          ? { ...categoryKeyExpanded, questionId: categoryKeyExpanded.id === parentId ? id : null }
-          : null,
+        keyExpanded,
         activeQuestion: question,
         loadingQuestion: false
       }
@@ -605,7 +605,7 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
     case ActionTypes.SET_QUESTION_TO_EDIT: {
       const { question } = action.payload;
       const { topId, id, parentId } = question;
-      const { keyExpanded: categoryKeyExpanded } = state;
+      const { keyExpanded } = state;
       return {
         ...state,
         // categoryKeyExpanded: categoryKeyExpanded

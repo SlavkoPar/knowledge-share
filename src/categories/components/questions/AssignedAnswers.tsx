@@ -6,7 +6,7 @@ import { useGlobalContext } from "global/GlobalProvider";
 import AssignedAnswer from "./AssignedAnswer";
 import { AutoSuggestAnswers } from 'groups/AutoSuggestAnswers'
 import { IWhoWhen } from "global/types";
-import { IAnswer, IAnswerKey } from "groups/types";
+import { AnswerKey, IAnswer, IAnswerKey } from "groups/types";
 import { initialAnswer } from 'groups/GroupReducer'
 import AddAnswer from "categories/components/questions/AddAnswer"
 
@@ -47,9 +47,7 @@ const AssignedAnswers = ({ questionKey, questionTitle, assignedAnswers, isDisabl
 
     const onAnswerCreated = async (answer: IAnswer | null) => {
         if (answer) {
-            const { topId: topId, id } = answer;
-            const answerKey = { topId, id }
-            await onSelectAnswer(answerKey);
+            await onSelectAnswer(new AnswerKey(answer).answerKey!);
         }
         handleClose()
     }

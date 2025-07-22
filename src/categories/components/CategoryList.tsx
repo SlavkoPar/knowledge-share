@@ -8,10 +8,8 @@ const CategoryList = ({ title, categoryRow, level, isExpanded }: IParentInfo) =>
 
     const { state } = useCategoryContext();
     const { keyExpanded } = state;
+    const { topId, id, questionId } = keyExpanded ?? { topId: '', id: '', questionId: null };
 
-    const { topId, id, questionId } = keyExpanded
-        ? keyExpanded
-        : { topId: null, id: null, questionId: null };
     const { categoryRows } = categoryRow;
     //console.log('<<<<<<<<<CategoryList', categoryRow.id, categoryRows )
 

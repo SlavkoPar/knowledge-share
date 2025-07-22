@@ -8,10 +8,9 @@ import QuestionRow from "categories/components/questions/QuestionRow";
 //const QuestionList = ({ title, categoryRow, level }: IParentInfo) => {
 const QuestionList = ({ level, categoryRow }: { level: number, categoryRow: ICategoryRow }) => {
   const { state, loadCategoryQuestions } = useCategoryContext();
-  const { keyExpanded: categoryKeyExpanded, loadingQuestion: questionLoading, error, activeQuestion } = state;
-  const { topId, id, questionId } = categoryKeyExpanded
-    ? categoryKeyExpanded
-    : { topId: null, id: null, questionId: null };
+  const { keyExpanded, loadingQuestion, error, activeQuestion } = state;
+  const { topId, id, questionId } = keyExpanded!;
+    //? keyExpanded
 
   const { questionRows } = categoryRow;
 
@@ -50,7 +49,7 @@ const QuestionList = ({ level, categoryRow }: { level: number, categoryRow: ICat
 
 
   const [infiniteRef, { rootRef }] = useInfiniteScroll({
-    loading: questionLoading,
+    loading: loadingQuestion,
     hasNextPage: hasMoreQuestions!,
     onLoadMore: loadMore,
     disabled: Boolean(error),
@@ -58,7 +57,7 @@ const QuestionList = ({ level, categoryRow }: { level: number, categoryRow: ICat
   });
 
   console.log("QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQuestionList", id, questionRows)
-  // if (questionLoading)
+  // if (loadingQuestion)
   //   return <div> ... loading</div>
 
   return (

@@ -3,7 +3,7 @@ import React, { createContext, useContext, useReducer, useCallback, Dispatch } f
 
 import {
   ActionTypes, ICategory, IQuestion, ICategoriesContext, IFromUserAssignedAnswer,
-  ICategoryDto, ICategoryDtoEx, ICategoryDtoListEx, ICategoryKey, ICategoryKeyExtended, ICategoryKeyExpanded,
+  ICategoryDto, ICategoryDtoEx, ICategoryDtoListEx, ICategoryKey, ICategoryKeyExtended, 
   CategoryKey, Category, CategoryDto,
   IQuestionDto, IQuestionDtoEx, IQuestionEx, IQuestionRowDto, IQuestionKey, IQuestionRow,
   Question, QuestionDto, QuestionRow,
@@ -37,8 +37,8 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
 
   const { loadAndCacheAllCategoryRows, getCat, setNodesReloaded } = useGlobalContext()
   const globalState = useGlobalState();
-  const { dbp, categoryRows, authUser, canEdit } = globalState;
-  const { nickName, workspace } = authUser;
+  const { workspace, dbp, categoryRows, authUser, canEdit } = globalState;
+  const { nickName } = authUser;
 
   const [state, dispatch] = useReducer(CategoryReducer, initialCategoriesState);
   const { formMode, activeCategory, activeQuestion } = state;
@@ -122,7 +122,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
               dto.IsExpanded = categoryKeyExpanded
                 ? dto.Id === categoryKeyExpanded.id
                 : false;
-              dto.TopId = dto.Id;
+              //dto.TopId = dto.QuestionId;
               return new CategoryRow(dto).categoryRow;
             })
             dispatch({ type: ActionTypes.SET_TOP_ROWS, payload: { topRows } });
@@ -138,7 +138,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
 
 
   const openNode = useCallback(
-    async (catKeyExp: ICategoryKeyExpanded, fromChatBotDlg: string = 'false'): Promise<any> => {
+    async (catKeyExp: IQuestionKey, fromChatBotDlg: string = 'false'): Promise<any> => {
       return new Promise(async (resolve) => {
         try {
           let { id, topId } = catKeyExp;
@@ -244,8 +244,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
   const expandCategory = useCallback(
     async ({ topId: topId, categoryKey, includeQuestionId, newCategoryRow, newQuestion, formMode }: IExpandInfo): Promise<any> => {
       try {
-        const { keyExpanded: categoryKeyExpanded } = state;
-        const { questionId } = categoryKeyExpanded!;
+        const { keyExpanded } = state;
 
         dispatch({ type: ActionTypes.SET_ROW_EXPANDING, payload: {} });
 
@@ -775,7 +774,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
                 // nema koristi
                 // dispatch({ type: ActionTypes.SET_QUESTION, payload: { question: questionRet } })
                 const { topId, parentId, id } = questionRet;
-                const keyExpanded: ICategoryKeyExpanded = {
+                const keyExpanded: IQuestionKey = {
                   topId,
                   parentId, // proveri
                   id: parentId!,

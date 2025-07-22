@@ -6,7 +6,7 @@ import QPlus from 'assets/QPlus.png';
 import { ListGroup, Button, Badge } from "react-bootstrap";
 
 import { useGlobalState } from 'global/GlobalProvider'
-import { ActionTypes, ICategoryInfo, ICategoryKey, ICategoryKeyExpanded, ICategoryRow, FormMode, IExpandInfo, CategoryKey } from "categories/types";
+import { ActionTypes, ICategoryInfo, ICategoryKey, IQuestionKey, ICategoryRow, FormMode, IExpandInfo, CategoryKey } from "categories/types";
 import { useCategoryContext, useCategoryDispatch } from 'categories/CategoryProvider'
 import { useHover } from 'hooks/useHover';
 import { ICategory } from 'categories/types'
@@ -25,7 +25,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
     const categoryKey: ICategoryKey = new CategoryKey(categoryRow).categoryKey!;
 
     // const [categoryKey] = useState<ICategoryKey>({ topId, id }); // otherwise reloads
-    // const [catKeyExpanded] = useState<ICategoryKeyExpanded>({ topId, id, questionId }); // otherwise reloads
+    // const [catKeyExpanded] = useState<IQuestionKey>({ topId, id, questionId }); // otherwise reloads
 
     const { canEdit, isDarkMode, variant, bg, authUser } = useGlobalState();
 

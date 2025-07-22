@@ -5,7 +5,6 @@ import { ICategoryRow } from 'categories/types';
 import { IGroupRow } from 'groups/types';
 
 const initialAuthUser: IAuthUser = {
-    workspace: "DEMO",
     nickName: '',
     name: '',
     email: '',
@@ -15,6 +14,7 @@ const initialAuthUser: IAuthUser = {
 
 const initGlobalState: IGlobalState = {
     dbp: null,
+    workspace: "DEMO",
     authUser: initialAuthUser,
     isAuthenticated: false,
     everLoggedIn: true,
@@ -136,13 +136,13 @@ const reducer: Reducer<IGlobalState, GlobalActions> = (state, action) => {
             return {
                 ...state,
                 authUser: {
-                    workspace: 'DEMO',
                     nickName,
                     name,
                     email: '',
                     color: 'blue',
                     everLoggedIn: true,
                 },
+                workspace: 'DEMO',
                 canEdit: true, //user.parentRole !== ROLES.VIEWER,
                 isOwner: true, //user.parentRole === ROLES.OWNER,
                 isAuthenticated: true,

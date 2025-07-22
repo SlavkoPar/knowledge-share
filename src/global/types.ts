@@ -10,23 +10,25 @@ export interface IWhoWhen {
 }
 
 export interface IRecord {
-	topId: string,
 	created?: IWhoWhen;
 	modified?: IWhoWhen;
 }
-
 
 export interface IWhoWhenDto {
 	Time: Date,
 	NickName: string
 }
 
-export interface IRecordDto {
-	Workspace: string;
-	TopId: string,
-	ParentId: string | null;
+export interface IDto {
 	Created?: IWhoWhenDto;
 	Modified?: IWhoWhenDto;
+}
+
+export interface IDtoKey extends IDto {
+	Workspace?: string; // will be set during fetch
+	TopId: string,
+	Id: string,
+	ParentId: string | null;
 }
 
 export class Dto2WhoWhen {
@@ -92,7 +94,6 @@ export class HistoryDto {
 
 
 export interface IAuthUser {
-	workspace: string,
 	color?: string,
 	nickName: string,
 	name: string;
@@ -132,6 +133,7 @@ export enum ROLES {
 
 export interface IGlobalState {
 	isAuthenticated: boolean | null;
+	workspace: string;
 	dbp: IDBPDatabase | null;
 	everLoggedIn: boolean;
 	authUser: IAuthUser;

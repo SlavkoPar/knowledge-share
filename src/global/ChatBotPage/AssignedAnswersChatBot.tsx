@@ -46,8 +46,8 @@ const AssignedAnswersChatBot = ({ questionId, questionTitle, assignedAnswers, is
 
     const onAnswerCreated = async (answer: IAnswer | null) => {
         if (answer) {
-            const { topId: topId, id } = answer;
-            const answerKey = { topId, id }
+            const { topId, id, parentId, answerId } = answer;
+            const answerKey = { topId, id, parentId, answerId }
             await onSelectQuestionAnswer(answerKey);
         }
         handleClose()

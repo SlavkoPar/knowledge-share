@@ -1,4 +1,4 @@
-import { ActionMap, IWhoWhen, IRecord, IRecordDto, Dto2WhoWhen, WhoWhen2Dto, IWhoWhenDto } from 'global/types';
+import { ActionMap, IWhoWhen, IRecord, IDto, Dto2WhoWhen, WhoWhen2Dto, IWhoWhenDto, IDtoKey } from 'global/types';
 import { IAnswerKey } from 'groups/types';
 
 export enum FormMode {
@@ -24,111 +24,8 @@ export interface IFromUserAssignedAnswer {
 	createdBy: string
 }
 
-/////////////////////////////////////
-// Question Related Filters
 
-export interface IRelatedFilter {
-	questionKey: IQuestionKey | null;
-	filter: string;
-	numOfUsages: number;
-	created: IWhoWhen | null;
-	lastUsed: IWhoWhen | null;
-}
-
-export interface IRelatedFilterDto {
-	QuestionKey: IQuestionKey | null;
-	Filter: string;
-	NumOfUsages: number;
-	Created: IWhoWhenDto | null;
-	LastUsed: IWhoWhenDto | null;
-}
-
-export interface IRelatedFilterDtoEx {
-	relatedFilterDto: IRelatedFilterDto | null;
-	msg: string;
-}
-
-
-export class RelatedFilterDto {
-	constructor(relatedFilter: IRelatedFilter) {
-		const { questionKey, filter, numOfUsages, created, lastUsed } = relatedFilter;
-		this.relatedFilterDto = {
-			QuestionKey: questionKey,
-			Filter: filter,
-			Created: created ? new WhoWhen2Dto(created).whoWhenDto! : null,
-			LastUsed: lastUsed ? new WhoWhen2Dto(lastUsed).whoWhenDto! : null,
-			NumOfUsages: numOfUsages
-		}
-	}
-	relatedFilterDto: IRelatedFilterDto;
-}
-
-export class RelatedFilter {
-	constructor(dto: IRelatedFilterDto) {
-		const { QuestionKey, Filter, Created, LastUsed, NumOfUsages } = dto;
-		this.relatedFilter = {
-			questionKey: QuestionKey,
-			filter: Filter,
-			created: Created ? new Dto2WhoWhen(Created).whoWhen! : null,
-			lastUsed: LastUsed ? new Dto2WhoWhen(LastUsed).whoWhen! : null,
-			numOfUsages: NumOfUsages
-		}
-	}
-	relatedFilter: IRelatedFilter;
-}
-
-export interface IQuestionRow extends IRecord {
-	id: string;
-	title: string;
-	numOfAssignedAnswers: number;
-	parentId: string | null;
-	categoryTitle?: string;
-	isSelected?: boolean;
-}
-
-export interface IQuestion extends IQuestionRow {
-	assignedAnswers: IAssignedAnswer[];
-	relatedFilters: IRelatedFilter[]
-	numOfRelatedFilters: number,
-	source: number;
-	status: number;
-	fromUserAssignedAnswer?: IFromUserAssignedAnswer[];
-	categoryTitle?: string;
-}
-
-export interface ICategoryKey {
-	workspace: string;
-	topId: string;
-	id: string;
-}
-
-export interface ICategoryKeyExpanded extends ICategoryKey {
-	questionId: string | null;
-}
-
-export interface ILocStorage {
-	lastCategoryKeyExpanded: ICategoryKeyExpanded | null
-}
-
-
-export interface ICategoryKeyExtended extends ICategoryKey {
-	title: string;
-}
-
-
-export interface IQuestionKey {
-	parentId: null | string;
-	topId?: string;   // ona day we are going to enable question
-	id: string;
-}
-
-
-export interface IVariation {
-	name: string;
-}
-
-export interface ICategoryRowDto extends IRecordDto {
-	Id: string;
+export interface ICategoryRowDto extends IDtoKey {
 	Kind: number;
 	Title: string;
 	Link: string | null;
@@ -147,10 +44,15 @@ export interface ICategoryDto extends ICategoryRowDto {
 	Doc1: string;
 }
 
-export interface ICategoryRow extends IRecord {
+
+export interface ICategoryKey extends IRecord {
+	topId: string,
 	id: string;
+	parentId: string | null;
+}
+
+export interface ICategoryRow extends ICategoryKey {
 	kind: number;
-	parentId: string | null; // | null is a valid value so you can store data with null value in indexeddb 
 	title: string;
 	link: string | null;
 	header: string;
@@ -168,10 +70,10 @@ export interface ICategory extends ICategoryRow {
 	doc1: string, // some document optionally, used in Category, but not not in CategoryRow
 }
 
-// ICategory rather than ICategoryRow
-export const IsCategory = (obj: any): boolean => typeof obj === 'object' && obj !== null &&
-	obj.hasOwnProperty('doc1') && typeof obj.doc1 === 'string';
 
+export interface ICategoryKeyExtended extends ICategoryKey {
+	title: string;
+}
 
 export class CategoryRowDto {
 	constructor(categoryRow: ICategoryRow) {
@@ -226,13 +128,100 @@ export class CategoryRow {
 	categoryRow: ICategoryRow;
 }
 
+
+/////////////////////////////////////
+// Question
+
+export interface IQuestionKey extends ICategoryKey {
+	questionId: string | null;
+}
+
+export interface IQuestionRow extends IQuestionKey {
+	title: string;
+	numOfAssignedAnswers: number;
+	categoryTitle?: string;
+	isSelected?: boolean;
+}
+
+export interface IQuestion extends IQuestionRow {
+	assignedAnswers: IAssignedAnswer[];
+	relatedFilters: IRelatedFilter[]
+	numOfRelatedFilters: number,
+	source: number;
+	status: number;
+	fromUserAssignedAnswer?: IFromUserAssignedAnswer[];
+	categoryTitle?: string;
+}
+
+export interface IRelatedFilter {
+	questionKey: IQuestionKey | null;
+	filter: string;
+	numOfUsages: number;
+	created: IWhoWhen | null;
+	lastUsed: IWhoWhen | null;
+}
+
+export interface IRelatedFilterDto {
+	QuestionKey: IQuestionKey | null;
+	Filter: string;
+	NumOfUsages: number;
+	Created: IWhoWhenDto | null;
+	LastUsed: IWhoWhenDto | null;
+}
+
+export interface IRelatedFilterDtoEx {
+	relatedFilterDto: IRelatedFilterDto | null;
+	msg: string;
+}
+
+
+export class RelatedFilterDto {
+	constructor(relatedFilter: IRelatedFilter) {
+		const { questionKey, filter, numOfUsages, created, lastUsed } = relatedFilter;
+		this.relatedFilterDto = {
+			QuestionKey: questionKey,
+			Filter: filter,
+			Created: created ? new WhoWhen2Dto(created).whoWhenDto! : null,
+			LastUsed: lastUsed ? new WhoWhen2Dto(lastUsed).whoWhenDto! : null,
+			NumOfUsages: numOfUsages
+		}
+	}
+	relatedFilterDto: IRelatedFilterDto;
+}
+
+export class RelatedFilter {
+	constructor(dto: IRelatedFilterDto) {
+		const { QuestionKey, Filter, Created, LastUsed, NumOfUsages } = dto;
+		this.relatedFilter = {
+			questionKey: QuestionKey,
+			filter: Filter,
+			created: Created ? new Dto2WhoWhen(Created).whoWhen! : null,
+			lastUsed: LastUsed ? new Dto2WhoWhen(LastUsed).whoWhen! : null,
+			numOfUsages: NumOfUsages
+		}
+	}
+	relatedFilter: IRelatedFilter;
+}
+
+
+export interface IVariation {
+	name: string;
+}
+
+// ICategory rather than ICategoryRow
+export const IsCategory = (obj: any): boolean => typeof obj === 'object' && obj !== null &&
+	obj.hasOwnProperty('doc1') && typeof obj.doc1 === 'string';
+
+
+
 export class QuestionRow {
 	constructor(rowDto: IQuestionRowDto) { //, parentId: string) {
-		const { TopId, Id, ParentId, NumOfAssignedAnswers, Title, CategoryTitle, Created, Modified, Included } = rowDto;
+		const { TopId, Id, ParentId, QuestionId, NumOfAssignedAnswers, Title, CategoryTitle, Created, Modified, Included } = rowDto;
 		this.questionRow = {
 			topId: TopId,
 			id: Id,
 			parentId: ParentId,
+			questionId: QuestionId,
 			numOfAssignedAnswers: NumOfAssignedAnswers ?? 0,
 			title: Title,
 			categoryTitle: CategoryTitle,
@@ -253,6 +242,7 @@ export class QuestionRowDto {
 			TopId: topId,
 			Id: id,
 			ParentId: parentId ?? '',
+			QuestionId: id,
 			NumOfAssignedAnswers: numOfAssignedAnswers ?? 0,
 			Title: '',
 			CategoryTitle: '',
@@ -267,22 +257,20 @@ export class QuestionRowDto {
 
 export class CategoryKey {
 	constructor(cat: ICategoryRow | ICategory | ICategoryKeyExtended) {
-		this.categoryKey = cat
-			? {
-				topId: cat.topId,
-				parentId: cat.parentId,
-				id: cat.id
-			}
-			: null
+		this.categoryKey = {
+			topId: cat.topId,
+			parentId: cat.parentId,
+			id: cat.id
+		}
 	}
-	categoryKey: ICategoryKey | null;
+	categoryKey: ICategoryKey;
 }
 
 
 
 export class Category {
 	constructor(dto: ICategoryDto) {
-		const { TopId, Id, Kind, ParentId, Title, Link, Header, Level, Variations, NumOfQuestions,
+		const { TopId, Id, ParentId, Kind, Title, Link, Header, Level, Variations, NumOfQuestions,
 			HasSubCategories, SubCategoryRowDtos, Created, Modified, QuestionRowDtos, IsExpanded, Doc1 } = dto;
 
 		const categoryRows = SubCategoryRowDtos
@@ -296,8 +284,8 @@ export class Category {
 		this.category = {
 			topId: TopId,
 			id: Id,
-			kind: Kind,
 			parentId: ParentId!,
+			kind: Kind,
 			title: Title,
 			link: Link,
 			header: Header,
@@ -320,7 +308,7 @@ export class Category {
 
 export class CategoryDto {
 	constructor(category: ICategory) {
-		const { topId, id, kind, parentId, title, link, header, level, variations, created, modified, doc1 } = category;
+		const { topId, id,parentId,  kind, title, link, header, level, variations, created, modified, doc1 } = category;
 		this.categoryDto = {
 			TopId: topId,
 			Id: id,
@@ -353,9 +341,10 @@ export class Question {
 			: [];
 		// TODO possible to call base class construtor
 		this.question = {
-			topId: '', // TODO will be set later
-			parentId: dto.ParentId,
+			topId: dto.TopId, // TODO will be set later
 			id: dto.Id,
+			parentId: dto.ParentId,
+			questionId: dto.QuestionId,
 			title: dto.Title,
 			categoryTitle: dto.CategoryTitle,
 			assignedAnswers,
@@ -381,6 +370,7 @@ export class QuestionKey {
 				topId: question.topId,
 				parentId: question.parentId ?? null,
 				id: question.id,
+				questionId: question.questionId
 			}
 			: null
 	}
@@ -389,11 +379,12 @@ export class QuestionKey {
 
 export class QuestionDto {
 	constructor(question: IQuestion) {
-		const { topId, id, parentId, title, source, status, created, modified,
+		const { topId, id, parentId, questionId, title, source, status, created, modified,
 			numOfAssignedAnswers, numOfRelatedFilters } = question;
 		this.questionDto = {
 			TopId: topId,
 			Id: id,
+			QuestionId: questionId!,
 			ParentId: parentId ?? 'null',  // TODO proveri
 			Title: title,
 			//AssignedAnswerDtos: question.assignedAnswers.map((a: IAssignedAnswer) => new AssignedAnswerDto(a).assignedAnswerDto),
@@ -409,8 +400,8 @@ export class QuestionDto {
 	questionDto: IQuestionDto;
 }
 
-export interface IQuestionRowDto extends IRecordDto {
-	Id: string;
+export interface IQuestionRowDto extends IDtoKey {
+	QuestionId: string;
 	NumOfAssignedAnswers?: number,
 	Title: string;
 	CategoryTitle?: string;
@@ -501,7 +492,7 @@ export interface ICategoriesState {
 	topRows: ICategoryRow[];
 	topRowsLoading: boolean;
 	topRowsLoaded: boolean;
-	keyExpanded: ICategoryKeyExpanded | null;
+	keyExpanded: IQuestionKey | null; // ICategoryKey + questionId
 	categoryId_questionId_done?: string;
 	nodeOpening: boolean;
 	nodeOpened: boolean;
@@ -516,7 +507,8 @@ export interface ICategoriesState {
 }
 
 export interface ILocStorage {
-	lastCategoryKeyExpanded: ICategoryKeyExpanded | null;
+	lastKeyExpanded: ICategoryKey | null;
+	lastQuestionId: string | null;
 }
 
 export interface ILoadCategoryQuestions {
@@ -527,7 +519,7 @@ export interface ILoadCategoryQuestions {
 
 export interface ICategoriesContext {
 	state: ICategoriesState,
-	openNode: (keyExpanded: ICategoryKeyExpanded, fromChatBotDlg?: string) => Promise<any>;
+	openNode: (keyExpanded: IQuestionKey, fromChatBotDlg?: string) => Promise<any>;
 	loadTopRows: () => Promise<any>,
 	addSubCategory: (categoryRow: ICategoryRow) => Promise<any>;
 	cancelAddCategory: () => Promise<any>;
@@ -733,13 +725,13 @@ export type CategoriesPayload = {
 	[ActionTypes.NODE_OPENING]: {
 		categoryRow?: ICategoryRow;
 		fromChatBotDlg: boolean;
-		//categoryKeyExpanded: ICategoryKeyExpanded
+		//categoryKeyExpanded: IQuestionKey
 	};
 
 	[ActionTypes.SET_NODE_OPENED]: {
 		// categoryNodesUpTheTree: ICategoryKeyExtended[]; /// we could have used Id only
 		categoryRow: ICategoryRow;
-		keyExpanded: ICategoryKeyExpanded;
+		keyExpanded: IQuestionKey;
 		//questionId: string | null,
 		fromChatBotDlg: boolean;
 	};
@@ -847,7 +839,7 @@ export type CategoriesPayload = {
 
 	[ActionTypes.FORCE_OPEN_NODE]: {
 		categoryRow?: ICategoryRow,
-		keyExpanded: ICategoryKeyExpanded
+		keyExpanded: IQuestionKey
 	};
 
 

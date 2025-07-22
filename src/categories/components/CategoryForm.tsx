@@ -4,7 +4,7 @@ import { useFormik } from "formik";
 import { Form, CloseButton, Row, Stack, Dropdown } from "react-bootstrap";
 import { CreatedModifiedForm } from "common/CreateModifiedForm"
 import { FormButtons } from "common/FormButtons"
-import { FormMode, ActionTypes, ICategoryFormProps, ICategory, IVariation, ICategoryKey, ICategoryKeyExpanded, CategoryRow, CategoryKey } from "categories/types";
+import { FormMode, ActionTypes, ICategoryFormProps, ICategory, IVariation, ICategoryKey, IQuestionKey, CategoryRow, CategoryKey } from "categories/types";
 
 import { useCategoryDispatch } from "categories/CategoryProvider";
 import QuestionList from "categories/components/questions/QuestionList";
@@ -25,7 +25,7 @@ const CategoryForm = ({ inLine, formMode, category, questionId, submitForm, chil
 
   const { topId, id, title, variations, questionRows, kind } = category;
   const categoryKey: ICategoryKey = new CategoryKey(category).categoryKey!;
-  //const categoryKeyExpanded: ICategoryKeyExpanded = { topId, id, questionId };
+  //const categoryKeyExpanded: IQuestionKey = { topId, id, questionId };
 
   if (!document.getElementById('div-details')) {
 
@@ -106,9 +106,9 @@ const CategoryForm = ({ inLine, formMode, category, questionId, submitForm, chil
           <Stack direction="horizontal" gap={1}>
             <div className="px-0"><Form.Label>Variations:</Form.Label></div>
             <div className="px-1 border border-1 border-secondary rounded">
-              <VariationList 
+              <VariationList
                 categoryKey={categoryKey}
-                variations={variations.map(variation => ({ name: variation } as IVariation))} 
+                variations={variations.map(variation => ({ name: variation } as IVariation))}
               />
             </div>
             <div className="ps-2"><Form.Label>Kind:</Form.Label></div>

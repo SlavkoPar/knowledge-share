@@ -7,8 +7,8 @@ import CategoryForm from "categories/components/CategoryForm";
 
 const ViewCategory = ({ inLine }: { inLine: boolean }) => {
     const { state } = useCategoryContext();
-    const { activeCategory, keyExpanded: categoryKeyExpanded } = state;
-    const { questionId } = categoryKeyExpanded!;
+    const { activeCategory, keyExpanded } = state;
+    const { questionId } = keyExpanded!;
     return (
         <CategoryForm
             inLine={inLine}

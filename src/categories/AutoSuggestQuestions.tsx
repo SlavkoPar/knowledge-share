@@ -168,7 +168,7 @@ export class AutoSuggestQuestions extends React.Component<{
 			console.log('--------->>>>> getSuggestions')
 			var questionRows: IQuestionRow[] = await this.searchQuestions(escapedValue, 10);
 			questionRows.forEach((questionRow: IQuestionRow) => {
-				const { topId, id, parentId, title, numOfAssignedAnswers, isSelected } = questionRow;
+				const { topId, id, parentId, questionId, title, numOfAssignedAnswers, isSelected } = questionRow;
 				const questionKey = new QuestionKey(questionRow).questionKey!;
 				if (!questionKeys.includes(questionKey)) {
 					questionKeys.push(questionKey);
@@ -178,6 +178,7 @@ export class AutoSuggestQuestions extends React.Component<{
 						topId,
 						id,
 						parentId,
+						questionId,
 						numOfAssignedAnswers,
 						title,
 						categoryTitle: '',
@@ -333,8 +334,9 @@ export class AutoSuggestQuestions extends React.Component<{
 
 	protected onSuggestionSelected(event: React.FormEvent<any>, data: Autosuggest.SuggestionSelectedEventData<IQuestionRow>): void {
 		const question: IQuestionRow = data.suggestion;
+		const { topId, id, parentId, questionId} = question;
 		// alert(`Selected question is ${question.questionId} (${question.text}).`);
-		this.props.onSelectQuestion({ topId: question.topId, parentId: question.parentId, id: question.id }, this.state.value);
+		this.props.onSelectQuestion({ topId, parentId, id, questionId }, this.state.value);
 	}
 
 	/*

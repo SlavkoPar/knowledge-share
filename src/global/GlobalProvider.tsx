@@ -21,7 +21,11 @@ import {
   IQuestion, IQuestionDto, IQuestionDtoEx, IQuestionEx, IQuestionKey, Question, IAssignedAnswer,
   ICategoryRowDto, ICategoryRow, CategoryRow
 } from "categories/types";
-import { Group, IGroup, IGroupDto, IGroupKey, IAnswer, IAnswerDto, IAnswerKey, IAnswerRow, IAnswerRowDto, Answer, IGroupRow, IGroupRowDto, GroupRow } from "groups/types";
+
+import {
+  Group, IGroup, IGroupDto, IGroupKey, IAnswer, IAnswerDto, IAnswerKey, IAnswerRow, IAnswerRowDto, Answer,
+  IGroupRow, IGroupRowDto, GroupRow
+} from "groups/types";
 
 import { IUser } from 'global/types';
 
@@ -44,7 +48,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
   // we reset changes, and again we use initialGlobalState
   // so, don't use globalDispatch inside of inner Provider, like Categories Provider
   const [globalState, dispatch] = useReducer(globalReducer, initialGlobalState);
-  const { workspace } = globalState.authUser;
+  const { workspace, authUser } = globalState;
 
   console.log('--------> GlobalProvider')
 
@@ -123,7 +127,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
             const categoryRows = new Map<string, ICategoryRow>();
             console.timeEnd();
             catRowDtos.forEach((rowDto: ICategoryRowDto) =>
-            categoryRows.set(rowDto.Id, new CategoryRow(rowDto).categoryRow));
+              categoryRows.set(rowDto.Id, new CategoryRow(rowDto).categoryRow));
             categoryRows.forEach(cat => {
               let { id, parentId, title, variations, hasSubCategories, level, kind } = cat;
               let titlesUpTheTree = id;
@@ -204,12 +208,13 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
           console.log('questionRowDtos:', { dtos: dtosEx }, protectedResources.KnowledgeAPI.endpointCategory);
           console.timeEnd();
           if (questionRowDtos) {
-            const list: IQuestionRow[] = questionRowDtos.map((dto: IQuestionRowDto) => {
-              const { TopId, Id, ParentId, Title, NumOfAssignedAnswers, Included } = dto;
+            const questionRows: IQuestionRow[] = questionRowDtos.map((dto: IQuestionRowDto) => {
+              const { TopId, Id, QuestionId, ParentId, Title, NumOfAssignedAnswers, Included } = dto;
               return {
                 topId: TopId,
                 id: Id,
                 parentId: ParentId,
+                questionId: QuestionId,
                 title: Title,
                 categoryTitle: '',
                 numOfAssignedAnswers: NumOfAssignedAnswers ?? 0,
@@ -225,7 +230,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
             //   categoryTitle: '',
             //   isSelected: q.Included !== undefined
             // }))
-            resolve(list);
+            resolve(questionRows);
           }
           else {
             // reject()

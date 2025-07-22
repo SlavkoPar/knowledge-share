@@ -6,7 +6,7 @@ import { isMobile } from 'react-device-detect'
 
 import { debounce, escapeRegexCharacters } from 'common/utilities'
 import './AutoSuggestAnswers.css'
-import { IAnswerKey, IAnswerRow, IGroupRow } from 'groups/types';
+import { AnswerKey, IAnswerKey, IAnswerRow, IGroupRow } from 'groups/types';
 
 
 interface IGroupMy {
@@ -171,10 +171,10 @@ export class AutoSuggestAnswers extends React.Component<{
 			console.log('--------->>>>> getSuggestions')
 			var answerRows: IAnswerRow[] = await this.searchAnswers(escapedValue, 20);
 			answerRows.forEach((row: IAnswerRow) => {
-				const { id, topId, parentId, title, isSelected } = row;
-
+				const { id, topId, parentId, answerId, title, isSelected } = row;
 				if (!this.alreadyAssigned.includes(id)) {
-					const answerKey = { topId, id }
+					const answerKey = new AnswerKey(row).answerKey!;
+					
 					if (!answerKeys.includes(answerKey)) {
 						answerKeys.push(answerKey);
 
@@ -183,6 +183,7 @@ export class AutoSuggestAnswers extends React.Component<{
 							topId,
 							id,
 							parentId,
+							answerId,
 							title,
 							groupTitle: '',
 							isSelected
@@ -339,8 +340,10 @@ export class AutoSuggestAnswers extends React.Component<{
 
 	protected onSuggestionSelected(event: React.FormEvent<any>, data: Autosuggest.SuggestionSelectedEventData<IAnswerRow>): void {
 		const answer: IAnswerRow = data.suggestion;
+		const {topId, id, parentId, answerId} = answer;
+
 		// alert(`Selected answer is ${answer.answerId} (${answer.text}).`);
-		this.props.onSelectAnswer({ topId: answer.parentId, id: answer.id }, this.state.value);
+		this.props.onSelectAnswer({ topId, parentId, id, answerId }, this.state.value);
 	}
 
 	/*
