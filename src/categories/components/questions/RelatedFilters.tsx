@@ -16,7 +16,7 @@ interface IProps {
 const RelatedFilters = ({ questionKey, questionTitle, relatedFilters }: IProps) => {
 
     const { globalState } = useGlobalContext();
-    const { authUser, isDarkMode, variant, groupRows: shortGroups } = globalState;
+    const { authUser, isDarkMode, variant, allGroupRows: shortGroups } = globalState;
 
     //const [relatedFilters2, setAssignFilters2] = useState<IRelatedFilter[]>([]);
 

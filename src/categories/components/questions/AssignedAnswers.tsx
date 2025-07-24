@@ -20,7 +20,7 @@ interface IProps {
 const AssignedAnswers = ({ questionKey, questionTitle, assignedAnswers, isDisabled }: IProps) => {
 
     const { globalState, searchAnswers, loadAndCacheAllGroupRows } = useGlobalContext();
-    const { authUser, isDarkMode, variant, groupRows, groupRowsLoaded } = globalState;
+    const { authUser, isDarkMode, variant, allGroupRows: groupRows, groupRowsLoaded } = globalState;
 
     //const [assignedAnswers2, setAssignAnswers2] = useState<IAssignedAnswer[]>([]);
 

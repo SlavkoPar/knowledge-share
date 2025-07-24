@@ -48,7 +48,7 @@ const ChatBotPage: React.FC = () => {
 	const [hasMoreAnswers, setHasMoreAnswers] = useState<boolean>(false);
 
 	const { getCatsByKind, getQuestion, addHistory, addHistoryFilter, getAnswersRated, searchQuestions, setLastRouteVisited } = useGlobalContext();
-	const { dbp, canEdit, authUser, isDarkMode, variant, bg, categoryRows: cats, categoryRowsLoaded: catsLoaded, lastRouteVisited } = useGlobalState();
+	const { dbp, canEdit, authUser, isDarkMode, variant, bg, allCategoryRows: cats, categoryRowsLoaded: catsLoaded, lastRouteVisited } = useGlobalState();
 
 	const setParentId = (cat: ICategory) => {
 		alert(cat.title)

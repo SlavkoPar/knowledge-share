@@ -3,9 +3,8 @@ import { ActionTypes, ICategoriesState, ICategory, IQuestion, CategoriesActions,
 
 export const initialQuestion: IQuestion = {
  	topId: '',
-	id: '',
 	parentId: null,
-  questionId: 'will be given by DB',
+  id: 'will be given by DB',
   categoryTitle: '',
   title: '',
   assignedAnswers: [],
@@ -48,7 +47,7 @@ export const initialState: ICategoriesState = {
 
   keyExpanded: {
     topId: "MTS",
-    parentId: "REMOTECTRLS",
+    parentId: null,
     id: "REMOTECTRLS",
     questionId: "qqqqqq111"
   },

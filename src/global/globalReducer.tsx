@@ -24,9 +24,9 @@ const initGlobalState: IGlobalState = {
     variant: 'dark',
     bg: 'dark',
     loading: false,
-    categoryRows: new Map<string, ICategoryRow>(),
+    allCategoryRows: new Map<string, ICategoryRow>(),
     categoryRowsLoaded: undefined,
-    groupRows: new Map<string, IGroupRow>(),
+    allGroupRows: new Map<string, IGroupRow>(),
     groupRowsLoaded: undefined,
     nodesReLoaded: false,
     lastRouteVisited: '/categories'
@@ -185,20 +185,19 @@ const reducer: Reducer<IGlobalState, GlobalActions> = (state, action) => {
         }
 
         case GlobalActionTypes.SET_ALL_CATEGORY_ROWS: {
-            const { categoryRows } = action.payload;
+            const { allCategoryRows } = action.payload;
             return {
                 ...state,
-                categoryRows,
+                allCategoryRows: allCategoryRows,
                 categoryRowsLoaded: Date.now()
             };
         }
 
         case GlobalActionTypes.SET_ALL_GROUP_ROWS: {
-            const { groupRows: shortGroups } = action.payload;
-            console.log("loadShortGroups SET_ALL_SHORT_GROUPS", shortGroups)
+            const { allGroupRows } = action.payload;
             return {
                 ...state,
-                groupRows: shortGroups,
+                allGroupRows,
                 groupRowsLoaded: Date.now()
             };
         }

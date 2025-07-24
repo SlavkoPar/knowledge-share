@@ -3,7 +3,7 @@ import React, { createContext, useContext, useReducer, useCallback, Dispatch } f
 
 import {
   ActionTypes, ICategory, IQuestion, ICategoriesContext, IFromUserAssignedAnswer,
-  ICategoryDto, ICategoryDtoEx, ICategoryDtoListEx, ICategoryKey, ICategoryKeyExtended, 
+  ICategoryDto, ICategoryDtoEx, ICategoryDtoListEx, ICategoryKey, ICategoryKeyExtended,
   CategoryKey, Category, CategoryDto,
   IQuestionDto, IQuestionDtoEx, IQuestionEx, IQuestionRowDto, IQuestionKey, IQuestionRow,
   Question, QuestionDto, QuestionRow,
@@ -17,7 +17,8 @@ import {
   QuestionKey,
   FormMode,
   CategoryRowDto,
-  IExpandInfo
+  IExpandInfo,
+  ICategoryKeyExpanded
 } from 'categories/types';
 
 import { initialCategoriesState, CategoryReducer, initialQuestion, initialCategory } from 'categories/CategoryReducer';
@@ -37,7 +38,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
 
   const { loadAndCacheAllCategoryRows, getCat, setNodesReloaded } = useGlobalContext()
   const globalState = useGlobalState();
-  const { workspace, dbp, categoryRows, authUser, canEdit } = globalState;
+  const { workspace, dbp, allCategoryRows, authUser, canEdit } = globalState;
   const { nickName } = authUser;
 
   const [state, dispatch] = useReducer(CategoryReducer, initialCategoriesState);
@@ -109,18 +110,18 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
 
   const loadTopRows = useCallback(async () => {
     return new Promise(async (resolve) => {
-      const { keyExpanded: categoryKeyExpanded } = state;
+      const { keyExpanded } = state;
       try {
         dispatch({ type: ActionTypes.SET_TOP_ROWS_LOADING, payload: {} });
-        const url = `${protectedResources.KnowledgeAPI.endpointCategoryRow}/${workspace}/null/null`;
+        const url = `${protectedResources.KnowledgeAPI.endpointCategoryRow}/${workspace}/null`;
         console.log('CategoryProvider loadTopRows url:', url)
         console.time();
         await Execute("GET", url)
           .then((dtos: ICategoryRowDto[]) => {
             console.timeEnd();
             const topRows = dtos!.map((dto: ICategoryRowDto) => {
-              dto.IsExpanded = categoryKeyExpanded
-                ? dto.Id === categoryKeyExpanded.id
+              dto.IsExpanded = keyExpanded
+                ? dto.Id === keyExpanded.id
                 : false;
               //dto.TopId = dto.QuestionId;
               return new CategoryRow(dto).categoryRow;
@@ -138,13 +139,13 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
 
 
   const openNode = useCallback(
-    async (catKeyExp: IQuestionKey, fromChatBotDlg: string = 'false'): Promise<any> => {
+    async (catKeyExp: ICategoryKeyExpanded, fromChatBotDlg: string = 'false'): Promise<any> => {
       return new Promise(async (resolve) => {
         try {
-          let { id, topId } = catKeyExp;
+          let { topId, id, parentId } = catKeyExp;
           console.assert(id);
           if (id) {
-            const categoryRow: ICategoryRow | undefined = categoryRows.get(id);
+            const categoryRow: ICategoryRow | undefined = allCategoryRows.get(id);
             if (categoryRow) {
               catKeyExp.topId = categoryRow.topId;
             }
@@ -156,7 +157,8 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
           dispatch({ type: ActionTypes.NODE_OPENING, payload: { fromChatBotDlg: fromChatBotDlg === 'true' } })
           // ---------------------------------------------------------------------------
           console.time();
-          const url = `${protectedResources.KnowledgeAPI.endpointCategoryRow}/${workspace}/${topId}/${id}/true`;
+          const query = new CategoryKey(catKeyExp).toQuery(workspace);
+          const url = `${protectedResources.KnowledgeAPI.endpointCategoryRow}?${query}`;
           await Execute("GET", url)
             .then(async (categoryRowDtoEx: ICategoryRowDtoEx) => {
               //dispatch({ type: ActionTypes.CLEAN_SUB_TREE, payload: { categoryKey: categoryKey! } });
@@ -215,18 +217,17 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
   }
 
   const getCategoryRow = async (categoryKey: ICategoryKey, hidrate: boolean = false, includeQuestionId: string | null = null): Promise<any> => {
-    const { topId, id } = categoryKey;
-    console.log({ categoryKey, includeQuestionId })
+    const query = new CategoryKey(categoryKey).toQuery(workspace);
     return new Promise(async (resolve) => {
       try {
-        const url = `${protectedResources.KnowledgeAPI.endpointCategoryRow}/${workspace}/${topId}/${id}/${hidrate}/${PAGE_SIZE}/${includeQuestionId}`;
+        const url = `${protectedResources.KnowledgeAPI.endpointCategoryRow}/${hidrate}/${PAGE_SIZE}/${includeQuestionId}?${query}`;
         console.time()
         await Execute("GET", url)
           .then((categoryRowDtoEx: ICategoryRowDtoEx) => {
             console.timeEnd();
             const { categoryRowDto, msg } = categoryRowDtoEx;
             if (categoryRowDto) {
-              categoryRowDto.TopId = topId;
+              //categoryRowDto.TopId = topId;
               resolve(new CategoryRow(categoryRowDto).categoryRow);
             }
             else {
@@ -242,12 +243,10 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
   }
 
   const expandCategory = useCallback(
-    async ({ topId: topId, categoryKey, includeQuestionId, newCategoryRow, newQuestion, formMode }: IExpandInfo): Promise<any> => {
+    async ({ topId, categoryKey, includeQuestionId, newCategoryRow, newQuestion, formMode }: IExpandInfo): Promise<any> => {
       try {
         const { keyExpanded } = state;
-
         dispatch({ type: ActionTypes.SET_ROW_EXPANDING, payload: {} });
-
         const categoryRow: ICategoryRow | Error = await getCategoryRow(categoryKey, true, includeQuestionId); // to reload Category
         if (categoryRow instanceof Error) {
           dispatch({ type: ActionTypes.SET_ERROR, payload: { error: categoryRow } });
@@ -774,11 +773,11 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
                 // nema koristi
                 // dispatch({ type: ActionTypes.SET_QUESTION, payload: { question: questionRet } })
                 const { topId, parentId, id } = questionRet;
-                const keyExpanded: IQuestionKey = {
+                const keyExpanded: ICategoryKeyExpanded = {
                   topId,
-                  parentId, // proveri
+                  parentId: '', // proveri
                   id: parentId!,
-                  questionId: id // keep the same question
+                  questionId: id
                 }
                 dispatch({ type: ActionTypes.FORCE_OPEN_NODE, payload: { keyExpanded } })
               }
@@ -853,8 +852,8 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
   const getQuestion = async (questionKey: IQuestionKey): Promise<any> => {
     return new Promise(async (resolve) => {
       try {
-        const { topId: topId, id } = questionKey;
-        const url = `${protectedResources.KnowledgeAPI.endpointQuestion}/${workspace}/${topId}/${id}`;
+        const query = new QuestionKey(questionKey).toQuery(workspace);
+        const url = `${protectedResources.KnowledgeAPI.endpointQuestion}?${query}`;
         console.time()
         await Execute("GET", url)
           .then((questionDtoEx: IQuestionDtoEx) => {

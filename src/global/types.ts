@@ -144,9 +144,9 @@ export interface IGlobalState {
 	bg: string,
 	loading: boolean;
 	error?: Error;
-	categoryRows: Map<string, ICategoryRow>;
+	allCategoryRows: Map<string, ICategoryRow>;
 	categoryRowsLoaded?: number;
-	groupRows: Map<string, IGroupRow>;
+	allGroupRows: Map<string, IGroupRow>;
 	groupRowsLoaded?: number;
 	nodesReLoaded: boolean; // categoryNodeLoaded || groupNodeLoaded  ( to prevent showing of ChatBotDlg)
 	lastRouteVisited: string
@@ -266,11 +266,11 @@ export type GlobalPayload = {
 	[GlobalActionTypes.DARK_MODE]: undefined;
 
 	[GlobalActionTypes.SET_ALL_CATEGORY_ROWS]: {
-		categoryRows: Map<string, ICategoryRow>
+		allCategoryRows: Map<string, ICategoryRow>
 	};
 
 	[GlobalActionTypes.SET_ALL_GROUP_ROWS]: {
-		groupRows: Map<string, IGroupRow>
+		allGroupRows: Map<string, IGroupRow>
 	};
 
 	[GlobalActionTypes.SET_NODES_RELOADED]: undefined;

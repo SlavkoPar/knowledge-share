@@ -124,23 +124,23 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
         const url = `${protectedResources.KnowledgeAPI.endpointCategoryRow}/${workspace}`;
         await Execute("GET", url, null)
           .then((catRowDtos: ICategoryRowDto[]) => {   //  | Response
-            const categoryRows = new Map<string, ICategoryRow>();
+            const allCategoryRows = new Map<string, ICategoryRow>();
             console.timeEnd();
             catRowDtos.forEach((rowDto: ICategoryRowDto) =>
-              categoryRows.set(rowDto.Id, new CategoryRow(rowDto).categoryRow));
-            categoryRows.forEach(cat => {
+              allCategoryRows.set(rowDto.Id, new CategoryRow(rowDto).categoryRow));
+            allCategoryRows.forEach(cat => {
               let { id, parentId, title, variations, hasSubCategories, level, kind } = cat;
               let titlesUpTheTree = id;
               let parentCat = parentId;
               while (parentCat) {
-                const cat2 = categoryRows.get(parentCat)!;
+                const cat2 = allCategoryRows.get(parentCat)!;
                 titlesUpTheTree = cat2!.id + ' / ' + titlesUpTheTree;
                 parentCat = cat2.parentId;
               }
               cat.titlesUpTheTree = titlesUpTheTree;
-              categoryRows.set(id, cat);
+              allCategoryRows.set(id, cat);
             })
-            dispatch({ type: GlobalActionTypes.SET_ALL_CATEGORY_ROWS, payload: { categoryRows } });
+            dispatch({ type: GlobalActionTypes.SET_ALL_CATEGORY_ROWS, payload: { allCategoryRows } });
             resolve(true)
           });
       }
@@ -164,27 +164,27 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
         await Execute("GET", url, null)
           .then((rowDtos: IGroupRowDto[]) => {   //  | Response
             console.log('loadAndCacheAllGroupRows', protectedResources.KnowledgeAPI.endpointGroupRow)
-            const groupRows = new Map<string, IGroupRow>();
+            const allGroupRows = new Map<string, IGroupRow>();
             console.timeEnd();
             // if (groupDtos instanceof Response) {
             //   throw (groupDtos);
             // }
             //const data: IGroupDto[] = groupDtos;
-            rowDtos.forEach((rowDto: IGroupRowDto) => groupRows.set(rowDto.Id, new GroupRow(rowDto).groupRow));
+            rowDtos.forEach((rowDto: IGroupRowDto) => allGroupRows.set(rowDto.Id, new GroupRow(rowDto).groupRow));
             //
-            groupRows.forEach(groupRow => {
+            allGroupRows.forEach(groupRow => {
               let { topId: topId, id, parentId, title, variations, hasSubGroups, level, kind } = groupRow;
               let titlesUpTheTree = id;
               let parentGrp = parentId;
               while (parentGrp) {
-                const groupRow2 = groupRows.get(parentGrp)!;
+                const groupRow2 = allGroupRows.get(parentGrp)!;
                 titlesUpTheTree = groupRow2!.id + ' / ' + titlesUpTheTree;
                 parentGrp = groupRow2.parentId;
               }
               groupRow.titlesUpTheTree = titlesUpTheTree;
-              groupRows.set(id, groupRow);
+              allGroupRows.set(id, groupRow);
             })
-            dispatch({ type: GlobalActionTypes.SET_ALL_GROUP_ROWS, payload: { groupRows } });
+            dispatch({ type: GlobalActionTypes.SET_ALL_GROUP_ROWS, payload: { allGroupRows } });
             resolve(true)
           });
       }
@@ -209,12 +209,11 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
           console.timeEnd();
           if (questionRowDtos) {
             const questionRows: IQuestionRow[] = questionRowDtos.map((dto: IQuestionRowDto) => {
-              const { TopId, Id, QuestionId, ParentId, Title, NumOfAssignedAnswers, Included } = dto;
+              const { TopId, ParentId, Id, Title, NumOfAssignedAnswers, Included } = dto;
               return {
                 topId: TopId,
-                id: Id,
                 parentId: ParentId,
-                questionId: QuestionId,
+                id: Id,
                 title: Title,
                 categoryTitle: '',
                 numOfAssignedAnswers: NumOfAssignedAnswers ?? 0,
@@ -254,7 +253,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
       await loadAndCacheAllGroupRows();
     }
     try {
-      const { groupRows } = globalState;
+      const { allGroupRows: groupRows } = globalState;
       let parentHeader = "";
       console.log('globalState.groupRows', { groupRows }, groupId)
       const subGroupRows: IGroupRow[] = [];
@@ -291,12 +290,12 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
       dispatch({ type: GlobalActionTypes.SET_ERROR, payload: { error } });
       return { groupRows: [], parentHeader: 'Kiks' };
     }
-  }, [globalState.groupRows]);
+  }, [globalState.allGroupRows]);
 
 
   //const searchAnswers = useCallback(async (execute: (method: string, endpoint: string) => Promise<any>, filter: string, count: number): Promise<any> => {
   const searchAnswers = async (filter: string, count: number): Promise<any> => {
-    const { groupRows: shortGroups } = globalState;
+    const { allGroupRows: shortGroups } = globalState;
     return new Promise(async (resolve) => {
       try {
         console.time();
@@ -393,7 +392,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
 
   const getCatsByKind = async (kind: number): Promise<ICategoryRow[]> => {
     try {
-      const { categoryRows: cats } = globalState;
+      const { allCategoryRows: cats } = globalState;
       const categories: ICategoryRow[] = [];
       cats.forEach((c, id) => {
         if (c.kind === kind) {
@@ -428,7 +427,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
 
   const getCatsByLevel = async (kind: number): Promise<ICategoryRow[]> => {
     try {
-      const { categoryRows: cats } = globalState;
+      const { allCategoryRows: cats } = globalState;
       const categories: ICategoryRow[] = [];
       cats.forEach((c, id) => {
         if (c.kind === kind) {
@@ -462,7 +461,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
 
   const getSubCats = useCallback(async (categoryId: string | null) => {
     try {
-      const { categoryRows: cats } = globalState;
+      const { allCategoryRows: cats } = globalState;
       let parentHeader = "";
       console.log('globalState.cats', { cats }, categoryId)
       const subCats: ICategoryRow[] = [];
@@ -495,11 +494,11 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
       dispatch({ type: GlobalActionTypes.SET_ERROR, payload: { error } });
       return { subCats: [], parentHeader: 'Kiks subCats' }
     }
-  }, [globalState.categoryRows]);
+  }, [globalState.allCategoryRows]);
 
   const getCat = useCallback(async (id: string): Promise<ICategoryRow | undefined> => {
     try {
-      const { categoryRows } = globalState;
+      const { allCategoryRows: categoryRows } = globalState;
       const cat: ICategoryRow | undefined = categoryRows.get(id);  // globalState.cats is Map<string, ICat>
       return cat;
     }
@@ -508,7 +507,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
       dispatch({ type: GlobalActionTypes.SET_ERROR, payload: { error } });
     }
     return undefined;
-  }, [globalState.categoryRows]);
+  }, [globalState.allCategoryRows]);
 
 
   const health = () => {
@@ -581,7 +580,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
 
   const globalGetGroupRow = useCallback(async (id: string): Promise<IGroupRow | undefined> => {
     try {
-      const { groupRows } = globalState;
+      const { allGroupRows: groupRows } = globalState;
       const groupRow: IGroupRow | undefined = groupRows.get(id);  // globalState.cats is Map<string, ICat>
       return groupRow!;
     }
@@ -590,12 +589,12 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
       dispatch({ type: GlobalActionTypes.SET_ERROR, payload: { error } });
     }
     return undefined;
-  }, [globalState.groupRows]);
+  }, [globalState.allGroupRows]);
 
 
   const getGroupRowsByKind = async (kind: number): Promise<IGroupRow[]> => {
     try {
-      const { groupRows: shortGroups } = globalState;
+      const { allGroupRows: shortGroups } = globalState;
       const groups: IGroupRow[] = [];
       shortGroups.forEach((c, id) => {
         if (c.kind === kind) {

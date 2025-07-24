@@ -45,13 +45,17 @@ export interface ICategoryDto extends ICategoryRowDto {
 }
 
 
-export interface ICategoryKey extends IRecord {
+export interface ICategoryKey { //extends IRecord {
 	topId: string,
 	id: string;
 	parentId: string | null;
 }
 
-export interface ICategoryRow extends ICategoryKey {
+export interface ICategoryKeyExpanded extends ICategoryKey {
+	questionId: string | null;
+}
+
+export interface ICategoryRow extends ICategoryKey, IRecord {
 	kind: number;
 	title: string;
 	link: string | null;
@@ -132,11 +136,13 @@ export class CategoryRow {
 /////////////////////////////////////
 // Question
 
-export interface IQuestionKey extends ICategoryKey {
-	questionId: string | null;
+export interface IQuestionKey { 
+	topId: string,
+	parentId: string | null;
+	id: string;
 }
 
-export interface IQuestionRow extends IQuestionKey {
+export interface IQuestionRow extends IQuestionKey, IRecord {
 	title: string;
 	numOfAssignedAnswers: number;
 	categoryTitle?: string;
@@ -216,12 +222,11 @@ export const IsCategory = (obj: any): boolean => typeof obj === 'object' && obj 
 
 export class QuestionRow {
 	constructor(rowDto: IQuestionRowDto) { //, parentId: string) {
-		const { TopId, Id, ParentId, QuestionId, NumOfAssignedAnswers, Title, CategoryTitle, Created, Modified, Included } = rowDto;
+		const { TopId, ParentId, Id, NumOfAssignedAnswers, Title, CategoryTitle, Created, Modified, Included } = rowDto;
 		this.questionRow = {
 			topId: TopId,
-			id: Id,
 			parentId: ParentId,
-			questionId: QuestionId,
+			id: Id,
 			numOfAssignedAnswers: NumOfAssignedAnswers ?? 0,
 			title: Title,
 			categoryTitle: CategoryTitle,
@@ -240,9 +245,8 @@ export class QuestionRowDto {
 		const { topId, parentId, id, numOfAssignedAnswers, created, modified, isSelected } = row;
 		this.questionRowDto = {
 			TopId: topId,
-			Id: id,
 			ParentId: parentId ?? '',
-			QuestionId: id,
+			Id: id,
 			NumOfAssignedAnswers: numOfAssignedAnswers ?? 0,
 			Title: '',
 			CategoryTitle: '',
@@ -256,14 +260,23 @@ export class QuestionRowDto {
 
 
 export class CategoryKey {
-	constructor(cat: ICategoryRow | ICategory | ICategoryKeyExtended) {
+	constructor(cat: IQuestionKey | ICategoryRow | ICategory | ICategoryKeyExtended) {
 		this.categoryKey = {
 			topId: cat.topId,
-			parentId: cat.parentId,
-			id: cat.id
+			id: cat.id,
+			parentId: cat.parentId
 		}
 	}
 	categoryKey: ICategoryKey;
+	toQuery = (workspace: string) => {
+		const { topId, id, parentId } = this.categoryKey;
+		return [
+			`catKey.workspace=${encodeURIComponent(workspace)}`,
+			`catKey.topId=${encodeURIComponent(topId)}`,
+			`catKey.id=${encodeURIComponent(id)}`,
+			`catKey.parentId=${encodeURIComponent(parentId ?? 'null')}`
+		].join('&')
+	};
 }
 
 
@@ -308,7 +321,7 @@ export class Category {
 
 export class CategoryDto {
 	constructor(category: ICategory) {
-		const { topId, id,parentId,  kind, title, link, header, level, variations, created, modified, doc1 } = category;
+		const { topId, id, parentId, kind, title, link, header, level, variations, created, modified, doc1 } = category;
 		this.categoryDto = {
 			TopId: topId,
 			Id: id,
@@ -342,9 +355,8 @@ export class Question {
 		// TODO possible to call base class construtor
 		this.question = {
 			topId: dto.TopId, // TODO will be set later
-			id: dto.Id,
 			parentId: dto.ParentId,
-			questionId: dto.QuestionId,
+			id: dto.Id,
 			title: dto.Title,
 			categoryTitle: dto.CategoryTitle,
 			assignedAnswers,
@@ -364,28 +376,33 @@ export class Question {
 }
 
 export class QuestionKey {
-	constructor(question: IQuestionRow | IQuestion | undefined) {
-		this.questionKey = question
-			? {
-				topId: question.topId,
-				parentId: question.parentId ?? null,
-				id: question.id,
-				questionId: question.questionId
-			}
-			: null
+	constructor(question: IQuestionRow | IQuestion | IQuestionKey) { //| undefined) {
+		this.questionKey = {
+			topId: question.topId,
+			parentId: question.parentId ?? null,
+			id: question.id
+		}
 	}
-	questionKey: IQuestionKey | null;
+	questionKey: IQuestionKey;
+	toQuery = (workspace: string) => {
+		const { topId, parentId, id } = this.questionKey;
+		return [
+			`qKey.workspace=${encodeURIComponent(workspace)}`,
+			`qKey.topId=${encodeURIComponent(topId)}`,
+			`qKey.parentId=${encodeURIComponent(parentId ?? 'null')}`,
+			`qKey.id=${encodeURIComponent(id)}`
+		].join('&')
+	};
 }
 
 export class QuestionDto {
 	constructor(question: IQuestion) {
-		const { topId, id, parentId, questionId, title, source, status, created, modified,
+		const { topId, parentId, id, title, source, status, created, modified,
 			numOfAssignedAnswers, numOfRelatedFilters } = question;
 		this.questionDto = {
 			TopId: topId,
-			Id: id,
-			QuestionId: questionId!,
 			ParentId: parentId ?? 'null',  // TODO proveri
+			Id: id,
 			Title: title,
 			//AssignedAnswerDtos: question.assignedAnswers.map((a: IAssignedAnswer) => new AssignedAnswerDto(a).assignedAnswerDto),
 			NumOfAssignedAnswers: numOfAssignedAnswers,
@@ -401,7 +418,6 @@ export class QuestionDto {
 }
 
 export interface IQuestionRowDto extends IDtoKey {
-	QuestionId: string;
 	NumOfAssignedAnswers?: number,
 	Title: string;
 	CategoryTitle?: string;
@@ -492,7 +508,7 @@ export interface ICategoriesState {
 	topRows: ICategoryRow[];
 	topRowsLoading: boolean;
 	topRowsLoaded: boolean;
-	keyExpanded: IQuestionKey | null; // ICategoryKey + questionId
+	keyExpanded: ICategoryKeyExpanded | null; // ICategoryKey + questionId
 	categoryId_questionId_done?: string;
 	nodeOpening: boolean;
 	nodeOpened: boolean;
@@ -519,7 +535,7 @@ export interface ILoadCategoryQuestions {
 
 export interface ICategoriesContext {
 	state: ICategoriesState,
-	openNode: (keyExpanded: IQuestionKey, fromChatBotDlg?: string) => Promise<any>;
+	openNode: (keyExpanded: ICategoryKeyExpanded, fromChatBotDlg?: string) => Promise<any>;
 	loadTopRows: () => Promise<any>,
 	addSubCategory: (categoryRow: ICategoryRow) => Promise<any>;
 	cancelAddCategory: () => Promise<any>;
@@ -731,7 +747,7 @@ export type CategoriesPayload = {
 	[ActionTypes.SET_NODE_OPENED]: {
 		// categoryNodesUpTheTree: ICategoryKeyExtended[]; /// we could have used Id only
 		categoryRow: ICategoryRow;
-		keyExpanded: IQuestionKey;
+		keyExpanded: ICategoryKeyExpanded;
 		//questionId: string | null,
 		fromChatBotDlg: boolean;
 	};
@@ -839,7 +855,7 @@ export type CategoriesPayload = {
 
 	[ActionTypes.FORCE_OPEN_NODE]: {
 		categoryRow?: ICategoryRow,
-		keyExpanded: IQuestionKey
+		keyExpanded: ICategoryKeyExpanded
 	};
 
 

@@ -3,7 +3,7 @@ import { Container, Row, Col, Button } from "react-bootstrap";
 
 import { useParams } from 'react-router-dom';
 
-import { ActionTypes, ICategoryKey, IQuestionKey, ICategory, ICategoryRow, FormMode, IsCategory } from "./types";
+import { ActionTypes, ICategoryKey, IQuestionKey, ICategory, ICategoryRow, FormMode, IsCategory, ICategoryKeyExpanded } from "./types";
 
 import { useGlobalContext, useGlobalState } from 'global/GlobalProvider';
 
@@ -44,7 +44,7 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
     } = state;
 
     const { setLastRouteVisited, searchQuestions } = useGlobalContext();
-    const { isDarkMode, authUser, categoryRows } = useGlobalState();
+    const { isDarkMode, authUser, allCategoryRows: categoryRows } = useGlobalState();
 
     const [modalShow, setModalShow] = useState(false);
     const handleClose = () => {
@@ -61,7 +61,7 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
         dispatch({ type: ActionTypes.SET_QUESTION_SELECTED, payload: { questionKey } })
     }
 
-    const [catKeyExpanded, setCatKeyExpanded] = useState<IQuestionKey>({
+    const [catKeyExpanded, setCatKeyExpanded] = useState<ICategoryKeyExpanded>({
         topId: '', // null
         parentId: null,
         id: '',
@@ -104,7 +104,7 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
                         const arr = categoryId_questionId.split('_');
                         const categoryId = arr[0];
                         const questionId = arr[1];
-                        const keyExp: IQuestionKey = { topId: 'nadji', parentId: 'isto', id: categoryId, questionId: questionId === 'null' ? null : questionId }
+                        const keyExp: ICategoryKeyExpanded = { topId: 'nadji', parentId: 'isto', id: categoryId, questionId: questionId === 'null' ? null : questionId }
                         // setCatKeyExpanded(keyExp);
                         console.log('zovem openNode 1111111111111111111)', { categoryId_questionId }, { categoryId_questionId_done })
                         await openNode(keyExp, fromChatBotDlg ?? 'false')
@@ -113,7 +113,7 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
                 }
                 else if (keyExpanded && !nodeOpened) {
                     console.log('zovem openNode 2222222222222)', { keyExpanded }, { nodeOpened })
-                    await openNode(catKeyExpanded)
+                    await openNode(keyExpanded)
                         .then(() => { return null; });
                 }
             }
