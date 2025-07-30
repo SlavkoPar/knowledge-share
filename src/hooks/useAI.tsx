@@ -6,8 +6,9 @@ import { IAnswer, IAnswerKey } from "groups/types";
 import { IWhoWhen } from "global/types";
 
 export interface IChatBotAnswer {
-  questionKey: IQuestionKey;
-  answerKey: IAnswerKey;
+  questionKey?: IQuestionKey;
+  topId: string;
+  id: string;
   answerTitle: string;
   answerLink: string | null;
   created: IWhoWhen,
@@ -16,14 +17,14 @@ export interface IChatBotAnswer {
 
 class ChatBotAnswer {
   constructor(assignedAnswer: IAssignedAnswer) {
-    const { questionKey, answerKey, answerTitle, answerLink, created, modified } = assignedAnswer;
+    const { topId, id, answerTitle, answerLink, created, modified } = assignedAnswer;
     this.chatBotAnswer = {
-      questionKey,
-      answerKey,
-      answerTitle, // : .answerTitle ?? '',
-      answerLink,
-      created: assignedAnswer.created,
-      modified: assignedAnswer.modified
+      topId,
+      id,
+      answerTitle: answerTitle ?? '',
+      answerLink: answerLink ?? '',
+      created: assignedAnswer.created!,
+      modified: assignedAnswer.modified!
     }
   }
   chatBotAnswer: IChatBotAnswer

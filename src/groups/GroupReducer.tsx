@@ -5,7 +5,6 @@ export const initialAnswer: IAnswer = {
   topId: '',
   id: 'will be given by DB',
   parentId: '',
-  answerId: '',
   groupTitle: '',
   title: '',
   link: '',

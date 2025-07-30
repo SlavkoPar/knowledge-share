@@ -13,7 +13,7 @@ import { ICategory, IQuestion, IQuestionEx, IQuestionKey, QuestionKey, ICategory
 import { IWhoWhen, IHistory, USER_ANSWER_ACTION, IHistoryFilterDto } from 'global/types';
 import AssignedAnswersChatBot from 'global/ChatBotPage/AssignedAnswersChatBot';
 import { IChatBotAnswer, INewQuestion, INextAnswer, useAI } from './hooks/useAI'
-import { IAnswer } from 'groups/types';
+import { AnswerKey, IAnswer } from 'groups/types';
 //import AnswerList from 'groups/components/answers/AnswerList';
 
 import Q from 'assets/Q.png';
@@ -232,7 +232,7 @@ const ChatBotPage: React.FC = () => {
 
 		const history: IHistory = {
 			questionKey: new QuestionKey(selectedQuestion!).questionKey!,
-			answerKey: chatBotAnswer!.answerKey,
+			assignedAnswerKey: { topId: chatBotAnswer!.topId, id: chatBotAnswer!.id },
 			userAction: USER_ANSWER_ACTION.Fixed,
 			created: {
 				nickName: authUser.nickName,
@@ -270,7 +270,7 @@ const ChatBotPage: React.FC = () => {
 		if (chatBotAnswer) {
 			const history: IHistory = {
 				questionKey: new QuestionKey(selectedQuestion!).questionKey!,
-				answerKey: chatBotAnswer.answerKey,
+				assignedAnswerKey: { topId: chatBotAnswer.topId, id: chatBotAnswer.id },
 				userAction: nextChatBotAnswer ? USER_ANSWER_ACTION.NotFixed : USER_ANSWER_ACTION.NotClicked,
 				created: {
 					nickName: authUser.nickName,
@@ -323,7 +323,7 @@ const ChatBotPage: React.FC = () => {
 		return (
 			<div
 				// id={answerId.toString()}   PPP
-				id={chatBotAnswer?.answerKey.id}
+				id={chatBotAnswer?.id} // argh
 				className={`${isDarkMode ? "dark" : "light"} mx-6 border border-1 rounded-1`}
 			>
 				<Row>

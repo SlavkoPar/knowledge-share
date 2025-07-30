@@ -7,6 +7,7 @@ import { isMobile } from 'react-device-detect'
 import { debounce, escapeRegexCharacters } from 'common/utilities'
 import './AutoSuggestAnswers.css'
 import { AnswerKey, IAnswerKey, IAnswerRow, IGroupRow } from 'groups/types';
+import { IAssignedAnswerKey } from 'categories/types';
 
 
 interface IGroupMy {
@@ -42,16 +43,16 @@ const AnswerAutosuggestMulti = Autosuggest as { new(): Autosuggest<IAnswerRow, I
 
 export class AutoSuggestAnswers extends React.Component<{
 	tekst: string | undefined,
-	onSelectAnswer: (answerKey: IAnswerKey, underFilter: string) => void,
-	alreadyAssigned?: string[],
-	groupRows: Map<string, IGroupRow>,
+	onSelectAnswer: (assignedAnswerKey: IAssignedAnswerKey, underFilter: string) => void,
+	alreadyAssigned?: IAssignedAnswerKey[],
+	allGroupRows: Map<string, IGroupRow>,
 	searchAnswers: (filter: string, count: number) => Promise<IAnswerRow[]>
 }, any> {
 	// region Fields
-	alreadyAssigned: string[];
+	alreadyAssigned: IAssignedAnswerKey[];
 	state: any;
 	isMob: boolean;
-	groupRows: Map<string, IGroupRow>;
+	allGroupRows: Map<string, IGroupRow>;
 	searchAnswers: (filter: string, count: number) => Promise<IAnswerRow[]>;
 	debouncedLoadSuggestions: (value: string) => void;
 	//inputAutosuggest: React.RefObject<HTMLInputElement>;
@@ -67,7 +68,7 @@ export class AutoSuggestAnswers extends React.Component<{
 		};
 		//this.inputAutosuggest = createRef<HTMLInputElement>();
 		this.alreadyAssigned = props.alreadyAssigned ?? [];
-		this.groupRows = props.groupRows;
+		this.allGroupRows = props.allGroupRows;
 		this.searchAnswers = props.searchAnswers;
 		this.isMob = isMobile;
 		this.loadSuggestions = this.loadSuggestions.bind(this);
@@ -144,7 +145,7 @@ export class AutoSuggestAnswers extends React.Component<{
 	private satisfyingGroups = (searchWords: string[]): IGroupIdTitle[] => {
 		const arr: IGroupIdTitle[] = [];
 		searchWords.filter(w => w.length >= 3).forEach(w => {
-			this.groupRows.forEach(async group => {
+			this.allGroupRows.forEach(async group => {
 				const parentId = group.id;
 				let j = 0;
 				// cat.words.forEach(catw => {
@@ -163,7 +164,7 @@ export class AutoSuggestAnswers extends React.Component<{
 		if (escapedValue === '') {
 			return [];
 		}
-		if (search.length < 2)
+		if (search.length < 3)
 			return [];
 		const groupAnswers = new Map<string | null, IAnswerRow[]>();
 		const answerKeys: IAnswerKey[] = [];
@@ -171,8 +172,8 @@ export class AutoSuggestAnswers extends React.Component<{
 			console.log('--------->>>>> getSuggestions')
 			var answerRows: IAnswerRow[] = await this.searchAnswers(escapedValue, 20);
 			answerRows.forEach((row: IAnswerRow) => {
-				const { id, topId, parentId, answerId, title, isSelected } = row;
-				if (!this.alreadyAssigned.includes(id)) {
+				const { id, topId, parentId, title, isSelected } = row;
+				if (!this.alreadyAssigned.includes({topId, id})) {
 					const answerKey = new AnswerKey(row).answerKey!;
 					
 					if (!answerKeys.includes(answerKey)) {
@@ -183,7 +184,6 @@ export class AutoSuggestAnswers extends React.Component<{
 							topId,
 							id,
 							parentId,
-							answerId,
 							title,
 							groupTitle: '',
 							isSelected
@@ -274,9 +274,9 @@ export class AutoSuggestAnswers extends React.Component<{
 					answerRows: []
 				};
 				if (id !== null) {
-					const group = this.groupRows.get(id);
+					const group = this.allGroupRows.get(id);
 					if (group) {
-						const { title, titlesUpTheTree/*, variations*/ } = group!;
+						const { title, titlesUpTheTree } = group!;
 						groupSection.groupTitle = title;
 						groupSection.parentGroupUp = titlesUpTheTree!;
 						//variationsss = variations;
@@ -340,10 +340,10 @@ export class AutoSuggestAnswers extends React.Component<{
 
 	protected onSuggestionSelected(event: React.FormEvent<any>, data: Autosuggest.SuggestionSelectedEventData<IAnswerRow>): void {
 		const answer: IAnswerRow = data.suggestion;
-		const {topId, id, parentId, answerId} = answer;
+		const {topId, id } = answer;
 
 		// alert(`Selected answer is ${answer.answerId} (${answer.text}).`);
-		this.props.onSelectAnswer({ topId, parentId, id, answerId }, this.state.value);
+		this.props.onSelectAnswer({ topId, id }, this.state.value);
 	}
 
 	/*

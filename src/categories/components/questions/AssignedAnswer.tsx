@@ -8,7 +8,7 @@ import { useHover } from 'hooks/useHover';
 import { useCategoryContext } from "categories/CategoryProvider";
 import { formatDate } from 'common/utilities'
 import React, { useState } from "react";
-import { IAnswerKey } from 'groups/types';
+import { IAnswer, IAnswerKey } from 'groups/types';
 import { IAssignedAnswer } from 'categories/types';
 
 interface IProps {
@@ -16,14 +16,13 @@ interface IProps {
     assignedAnswer: IAssignedAnswer,
     groupInAdding: boolean | undefined,
     isDisabled: boolean,
-    unAssignAnswer: (answerKey: IAnswerKey) => void
+    unAssignAnswer: (assignedAnswer: IAssignedAnswer) => void
 }
 const AssignedAnswer = ({ questionTitle, assignedAnswer, isDisabled, unAssignAnswer }: IProps) => {
 
-    const { questionKey, answerKey, answerTitle: title, created } = assignedAnswer;
-    const { topId, id } = answerKey;
+    const { topId, id, answerTitle, created } = assignedAnswer;
 
-    const { time, nickName } = created;
+    const { time, nickName } = created!;
     const emailFromClient = localStorage.getItem('emailFromClient');
 
     const rowTitle = `Created by: ${nickName}, ${formatDate(new Date(time))}`
@@ -37,7 +36,7 @@ const AssignedAnswer = ({ questionTitle, assignedAnswer, isDisabled, unAssignAns
     const alreadyAdding = false;
 
     const removeAnswer = () => {
-        unAssignAnswer(answerKey)
+        unAssignAnswer(assignedAnswer)
     };
 
     const edit = (id: number) => {
@@ -99,7 +98,7 @@ const AssignedAnswer = ({ questionTitle, assignedAnswer, isDisabled, unAssignAns
                 variant='link'
                 size="sm"
                 className="py-0 px-0 text-info"
-                onClick={() => emailFromClient ? setShowReply(true) : copyToClipboard(title!)}
+                onClick={() => emailFromClient ? setShowReply(true) : copyToClipboard(answerTitle!)}
             >
                 <FontAwesomeIcon
                     icon={emailFromClient ? faEnvelope : faCopy}
@@ -115,7 +114,7 @@ const AssignedAnswer = ({ questionTitle, assignedAnswer, isDisabled, unAssignAns
                 onClick={() => onSelectAnswer(id)}
                 disabled={alreadyAdding}
             >
-                {title}
+                {answerTitle}
             </Button>
 
             {canEdit && !alreadyAdding && hoverProps.isHovered && !isDisabled &&
@@ -154,7 +153,7 @@ const AssignedAnswer = ({ questionTitle, assignedAnswer, isDisabled, unAssignAns
                         <tbody>
                             <tr className="border-top-0"><td>To:</td><td>{emailFromClient}</td></tr>
                             <tr><td>Subject:</td><td>{questionTitle}</td></tr>
-                            <tr className="border-bottom-0"><td>Body:</td><td>{title}</td></tr>
+                            <tr className="border-bottom-0"><td>Body:</td><td>{answerTitle}</td></tr>
                         </tbody>
                     </table>
                 </Modal.Body>

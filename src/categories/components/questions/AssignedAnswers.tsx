@@ -1,6 +1,6 @@
 import React, { MouseEventHandler, useEffect, useState } from "react";
 import { Button, ListGroup, Modal } from "react-bootstrap";
-import { IAssignedAnswer, IQuestionKey } from "categories/types";
+import { IAssignedAnswer, IAssignedAnswerKey, IQuestionKey } from "categories/types";
 import { useCategoryContext } from "categories/CategoryProvider";
 import { useGlobalContext } from "global/GlobalProvider";
 import AssignedAnswer from "./AssignedAnswer";
@@ -20,7 +20,7 @@ interface IProps {
 const AssignedAnswers = ({ questionKey, questionTitle, assignedAnswers, isDisabled }: IProps) => {
 
     const { globalState, searchAnswers, loadAndCacheAllGroupRows } = useGlobalContext();
-    const { authUser, isDarkMode, variant, allGroupRows: groupRows, groupRowsLoaded } = globalState;
+    const { authUser, isDarkMode, variant, allGroupRows, groupRowsLoaded } = globalState;
 
     //const [assignedAnswers2, setAssignAnswers2] = useState<IAssignedAnswer[]>([]);
 
@@ -34,51 +34,50 @@ const AssignedAnswers = ({ questionKey, questionTitle, assignedAnswers, isDisabl
     const { state, assignQuestionAnswer } = useCategoryContext();
     const [showAssign, setShowAssign] = useState(false);
 
-    const onSelectAnswer = async (answerKey: IAnswerKey) => {
-        const assigned: IWhoWhen = {
-            time: new Date(),
-            nickName: globalState.authUser.nickName
-        }
+    const onSelectAnswer = async (assignedAnswerKey: IAssignedAnswerKey) => {
         // TODO in next version do not update MongoDB immediately, wait until users presses Save
         // User could have canceled question update
-        await assignQuestionAnswer('Assign', questionKey, answerKey, assigned);
+        await assignQuestionAnswer('Assign', questionKey, assignedAnswerKey);
         setShowAssign(false);
     }
 
     const onAnswerCreated = async (answer: IAnswer | null) => {
         if (answer) {
-            await onSelectAnswer(new AnswerKey(answer).answerKey!);
+            await onSelectAnswer({ topId: answer.topId, id: answer.id } as IAssignedAnswerKey);
         }
         handleClose()
     }
 
-    const unAssignAnswer = async (answerKey: IAnswerKey) => {
-        const unAssigned: IWhoWhen = {
-            time: new Date(),
-            nickName: globalState.authUser.nickName
-        }
-        await assignQuestionAnswer('UnAssign', questionKey, answerKey, unAssigned);
+    const unAssignAnswer = async (assignedAnswerKey: IAssignedAnswerKey) => {
+        // const unAssigned: IWhoWhen = {
+        //     time: new Date(),
+        //     nickName: globalState.authUser.nickName
+        // }
+        await assignQuestionAnswer('UnAssign', questionKey, assignedAnswerKey);
 
         // TODO in next version do not update MongoDB immediately, wait until users presses Save
         // User could have canceled question update
         //setShowAssign(false);
     }
 
-    const handleNewAnswer = () => {
+    const assignAnswer = async () => {
+        setShowAssign(true);
+    }
+
+    useEffect(() => {
         if (!groupRowsLoaded) {
             loadAndCacheAllGroupRows();
         }
-        setShowAssign(true);
-    }
+    }, [groupRowsLoaded, loadAndCacheAllGroupRows])
 
     return (
         <div className={'mx-0 my-0 border rounded-2 px-1 py-1 border border-info bg-info'} >
             <div>
                 <label className="text-muted bg-info fs-6">Assigned Answers</label>
-                <ListGroup as="ul" variant={variant} className='my-1' key={questionKey.id}>
+                <ListGroup as="ul" variant={variant} className='my-1' key="assigned-answers">
                     {assignedAnswers.map((assignedAnswer: IAssignedAnswer) =>
                         <AssignedAnswer
-                            key={assignedAnswer.answerKey.id}
+                            key={assignedAnswer.id}
                             questionTitle={questionTitle}
                             assignedAnswer={assignedAnswer}
                             groupInAdding={false}
@@ -99,7 +98,7 @@ const AssignedAnswers = ({ questionKey, questionTitle, assignedAnswers, isDisabl
                         style={{ border: '1px solid silver', fontSize: '12px' }}
                         variant={variant}
                         disabled={isDisabled}
-                        onClick={handleNewAnswer} // event.preventDefault()}
+                        onClick={assignAnswer} // event.preventDefault()}
                     >
                         Assign answer
                     </Button>
@@ -135,7 +134,6 @@ const AssignedAnswers = ({ questionKey, questionTitle, assignedAnswers, isDisabl
                 </Modal.Header>
                 <Modal.Body>
                     <AddAnswer
-                        answer={initialAnswer}
                         inLine={true}
                         closeModal={closeModal}
                         onAnswerCreated={onAnswerCreated}
@@ -160,14 +158,12 @@ const AssignedAnswers = ({ questionKey, questionTitle, assignedAnswers, isDisabl
                         alreadyAssigned={
                             assignedAnswers.length === 0
                                 ? []
-                                : assignedAnswers.map((a: IAssignedAnswer) => a.answerKey.id)
+                                : assignedAnswers.map((a: IAssignedAnswer) => ({ topId: a.topId, id: a.id } as IAssignedAnswerKey))
                         }
-                        groupRows={groupRows}
-                        onSelectAnswer={onSelectAnswer}
+                        allGroupRows={allGroupRows}
+                        onSelectAnswer={(assignedAnswerKey: IAssignedAnswerKey) => onSelectAnswer(assignedAnswerKey)}
                         searchAnswers={searchAnswers}
                     />
-
-
                 </Modal.Body>
             </Modal>
         </div >

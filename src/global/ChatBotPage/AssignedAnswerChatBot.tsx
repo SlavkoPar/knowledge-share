@@ -19,11 +19,11 @@ interface IProps {
 }
 const AssignedAnswerChatBot = ({ questionTitle, assignedAnswer, isDisabled, unAssignAnswer }: IProps) => {
 
-    const { questionKey, answerKey, answerTitle: title, created } = assignedAnswer;
-    const { topId, id } = answerKey;
+    const { topId, id, answerTitle, created } = assignedAnswer;
+    const answerKey: IAnswerKey = { topId, id, parentId: '' };
     const emailFromClient = localStorage.getItem('emailFromClient');
 
-    const rowTitle = `Created by: Pera, ${formatDate(new Date(created.time))}`
+    const rowTitle = `Created by: Pera, ${formatDate(new Date(created!.time))}`
 
     const { authUser, canEdit, isDarkMode, variant, bg, error } = useGlobalState();
 
@@ -94,7 +94,7 @@ const AssignedAnswerChatBot = ({ questionTitle, assignedAnswer, isDisabled, unAs
                 variant='link'
                 size="sm"
                 className="py-0 px-1 text-info"
-                onClick={() => emailFromClient ? setShowReply(true) : copyToClipboard(title!)}
+                onClick={() => emailFromClient ? setShowReply(true) : copyToClipboard(answerTitle!)}
             >
                 <FontAwesomeIcon
                     icon={emailFromClient ? faEnvelope : faCopy}
@@ -110,7 +110,7 @@ const AssignedAnswerChatBot = ({ questionTitle, assignedAnswer, isDisabled, unAs
                 onClick={() => onSelectAnswer(id)}
                 disabled={alreadyAdding}
             >
-                {title}
+                {answerTitle}
             </Button>
 
             {canEdit && !alreadyAdding && hoverProps.isHovered && !isDisabled &&
@@ -149,7 +149,7 @@ const AssignedAnswerChatBot = ({ questionTitle, assignedAnswer, isDisabled, unAs
                         <tbody>
                             <tr className="border-top-0"><td>To:</td><td>{emailFromClient}</td></tr>
                             <tr><td>Subject:</td><td>{questionTitle}</td></tr>
-                            <tr className="border-bottom-0"><td>Body:</td><td>{title}</td></tr>
+                            <tr className="border-bottom-0"><td>Body:</td><td>{answerTitle}</td></tr>
                         </tbody>
                     </table>
                 </Modal.Body>

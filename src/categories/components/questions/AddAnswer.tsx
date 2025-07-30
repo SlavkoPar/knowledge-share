@@ -4,18 +4,19 @@ import { useGlobalState } from 'global/GlobalProvider'
 //import AnswerForm from "groups/components/answers/AnswerForm"; PRE
 import { FormMode, IAnswer } from "groups/types";
 import { useCategoryContext } from "categories/CategoryProvider";
+import { initialAnswer } from "groups/GroupReducer";
 
 interface IProps {
-    answer: IAnswer,
     inLine: boolean,
     closeModal: () => void,
     onAnswerCreated: (answer: IAnswer) => void
 }
 
 // const Add = ({ kind, answer, inLine } : { kind: IKind, answer: IAnswer, inLine: boolean}) => {
-const AddAnswer = ({ answer, closeModal, onAnswerCreated }: IProps) => {
+const AddAnswer = ({ closeModal, onAnswerCreated }: IProps) => {
     const globalState = useGlobalState();
     const { nickName } = globalState.authUser;
+    const answer={...initialAnswer};
 
     //const { createAnswer } = useCategoryContext();
     const [formValues] = useState(answer)
@@ -36,7 +37,7 @@ const AddAnswer = ({ answer, closeModal, onAnswerCreated }: IProps) => {
     }
 
     return (
-        null //PRE
+        <span>Posle</span>
         // <AnswerForm
         //     answer={formValues}
         //     mode={FormMode.adding}
@@ -45,7 +46,7 @@ const AddAnswer = ({ answer, closeModal, onAnswerCreated }: IProps) => {
         //     showCloseButton={true}
         // >
         //     Create Answer
-        // </AnswerForm >
+        // </AnswerForm>
     )
 }
 

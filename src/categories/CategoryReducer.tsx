@@ -187,7 +187,9 @@ export const CategoryReducer: Reducer<ICategoriesState, CategoriesActions> = (st
       lastKeyExpanded: keyExpanded,
       lastQuestionId: null
     }
+    /* (privremeno)
     localStorage.setItem('CATEGORIES_STATE', JSON.stringify(locStorage));
+    */
   }
   return newState;
 }

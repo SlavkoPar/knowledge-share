@@ -46,8 +46,8 @@ const AssignedAnswersChatBot = ({ questionId, questionTitle, assignedAnswers, is
 
     const onAnswerCreated = async (answer: IAnswer | null) => {
         if (answer) {
-            const { topId, id, parentId, answerId } = answer;
-            const answerKey = { topId, id, parentId, answerId }
+            const { topId, id, parentId } = answer;
+            const answerKey = { topId, id, parentId }
             await onSelectQuestionAnswer(answerKey);
         }
         handleClose()
@@ -134,7 +134,6 @@ const AssignedAnswersChatBot = ({ questionId, questionTitle, assignedAnswers, is
                 </Modal.Header>
                 <Modal.Body>
                     <AddAnswer
-                        answer={initialAnswer}
                         inLine={true}
                         closeModal={closeModal}
                         onAnswerCreated={onAnswerCreated}

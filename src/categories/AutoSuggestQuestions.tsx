@@ -160,7 +160,7 @@ export class AutoSuggestQuestions extends React.Component<{
 		if (escapedValue === '') {
 			return [];
 		}
-		if (search.length < 2)
+		if (search.length < 3)
 			return [];
 		const catSection = new Map<string | null, IQuestionRow[]>();
 		const questionKeys: IQuestionKey[] = [];

@@ -1,5 +1,6 @@
 import { link } from 'fs';
 import { ActionMap, IWhoWhen, IRecord, IDtoKey, Dto2WhoWhen, WhoWhen2Dto, IWhoWhenDto } from 'global/types';
+import { IChatBotAnswer } from 'hooks/useAI';
 
 export enum FormMode {
 	None = 'None',
@@ -19,15 +20,16 @@ export enum FormMode {
 	ViewingVariation = 'ViewingVariation'
 }
 
+
 export interface IGroupRowDto extends IDtoKey {
 	Kind: number;
 	Title: string;
-	Link: string | null;
+	Link?: string;
 	Header: string;
-	Variations: string[];
+	Variations?: string[];
 	Level: number;
 	HasSubGroups: boolean;
-	GroupRowDtos: IGroupRowDto[];
+	GroupRowDtos?: IGroupRowDto[];
 	NumOfAnswers: number;
 	AnswerRowDtos?: IAnswerRowDto[];
 	HasMoreAnswers?: boolean;
@@ -38,13 +40,14 @@ export interface IGroupDto extends IGroupRowDto {
 	Doc1: string;
 }
 
-export interface IGroupKey extends IRecord {
+export interface IGroupKey { //extends IRecord {
 	topId: string,
 	id: string;
 	parentId: string | null;
 }
 
-export interface IGroupRow extends IGroupKey {
+
+export interface IGroupRow extends IGroupKey, IRecord {
 	kind: number;
 	title: string;
 	link: string | null;
@@ -102,12 +105,12 @@ export class GroupRow {
 			id: Id,
 			parentId: ParentId,
 			title: Title,
-			link: Link,
+			link: Link ?? '',
 			header: Header,
 			titlesUpTheTree: '', // traverse up the tree, until root
-			variations: Variations,
+			variations: Variations ?? [],
 			hasSubGroups: HasSubGroups!,
-			groupRows: GroupRowDtos.map(dto => new GroupRow({ ...dto, TopId }).groupRow),
+			groupRows: GroupRowDtos? GroupRowDtos.map(dto => new GroupRow({ ...dto, TopId }).groupRow) : [],
 			numOfAnswers: NumOfAnswers,
 			answerRows: AnswerRowDtos
 				? AnswerRowDtos.map(dto => new AnswerRow({ ...dto}).answerRow) //, TopId! }).answerRow)
@@ -120,9 +123,7 @@ export class GroupRow {
 	groupRow: IGroupRow;
 }
 
-
-export interface IAnswerRow extends IAnswerKey {
-	answerId: string;
+export interface IAnswerRow extends IAnswerKey, IRecord {
 	title: string;
 	link?: string;
 	parentId: string | null;
@@ -135,6 +136,9 @@ export interface IAnswer extends IAnswerRow {
 	status: number;
 	groupTitle?: string;
 }
+
+
+
 
 
 export interface IGroupKeyExpanded extends IGroupKey {
@@ -151,8 +155,15 @@ export interface IGroupKeyExtended extends IGroupKey {
 }
 
 
-export interface IAnswerKey extends IGroupKey {
-	answerId: string | null;
+export interface IAnswerKey { //} extends IGroupKey {
+	topId: string,
+	parentId: string | null;
+	id: string;
+}
+
+export interface IHistoryAnswerKey {
+	topId: string,
+	id: string;
 }
 
 
@@ -164,12 +175,11 @@ export interface IVariation {
 
 export class AnswerRow {
 	constructor(rowDto: IAnswerRowDto) { //, parentId: string) {
-		const { TopId, Id, ParentId, AnswerId, Title, Link, GroupTitle, Created, Modified, Included } = rowDto;
+		const { TopId, Id, ParentId, Title, Link, GroupTitle, Created, Modified, Included } = rowDto;
 		this.answerRow = {
 			topId: TopId,
 			id: Id,
 			parentId: ParentId,
-			answerId: AnswerId,
 			title: Title,
 			link: Link,
 			groupTitle: GroupTitle,
@@ -189,7 +199,6 @@ export class AnswerRowDto {
 			TopId: row.topId,
 			Id: row.id,
 			ParentId: row.parentId ?? '',
-			AnswerId: row.answerId,
 			Title: row.title,
 			Link: row.link ?? '',
 			GroupTitle: '',
@@ -235,7 +244,7 @@ export class Group {
 			kind: Kind,
 			parentId: ParentId!,
 			title: Title,
-			link: Link,
+			link: Link??null,
 			header: Header,
 			level: Level!,
 			variations: Variations ?? [],
@@ -257,13 +266,14 @@ export class Group {
 export class GroupDto {
 	constructor(group: IGroup) {
 		const { topId, id, kind, parentId, title, link, header, level, variations, created, modified, doc1 } = group;
+		
 		this.groupDto = {
 			TopId: topId!, // ?
 			Id: id,
 			Kind: kind,
 			ParentId: parentId,
 			Title: title,
-			Link: link,
+			Link: link??undefined,
 			Header: header ?? '',
 			Level: level,
 			HasSubGroups: true,
@@ -279,18 +289,18 @@ export class GroupDto {
 	groupDto: IGroupDto;
 }
 
+
 export class Answer {
 	constructor(dto: IAnswerDto) { //, parentId: string) {
 		// TODO possible to call base class construtor
-		const {TopId, Id, ParentId, AnswerId, Title, Link, GroupTitle, Source, Status, Included, Created, Modified}  = dto;
+		const {TopId, Id, ParentId, Title, Link, GroupTitle, Source, Status, Included, Created, Modified}  = dto;
 		this.answer = {
 			parentId: ParentId,
 			topId: TopId,
 			id: Id,
-			answerId: AnswerId,
 			title: Title,
 			link: Link,
-			groupTitle: GroupTitle,
+			groupTitle: GroupTitle?? 'nadji me',
 			source: Source ?? 0,
 			status: Status ?? 0,
 			isSelected: Included !== undefined,
@@ -304,13 +314,12 @@ export class Answer {
 }
 
 export class AnswerKey {
-	constructor(answer: IAnswerRow | IAnswer | undefined) {
+	constructor(answer: IAnswerRow | IAnswer) {
 		this.answerKey = answer
 			? {
 				topId: answer.topId,
 				id: answer.id,
-				parentId: answer.parentId ?? null,
-				answerId: answer.answerId
+				parentId: answer.parentId ?? null
 			}
 			: null
 	}
@@ -319,12 +328,11 @@ export class AnswerKey {
 
 export class AnswerDto {
 	constructor(answer: IAnswer) {
-		const { topId, id, parentId, answerId, title, link, source, status, created, modified } = answer;
+		const { topId, id, parentId, title, link, source, status, created, modified } = answer;
 		this.answerDto = {
 			TopId: topId,
 			Id: id,
 			ParentId: parentId ?? 'null',  // TODO proveri
-			AnswerId: answerId,
 			Title: title,
 			Link: link ?? '',
 			Source: source,
@@ -337,13 +345,17 @@ export class AnswerDto {
 }
 
 export interface IAnswerRowDto extends IDtoKey {
-	AnswerId: string,
 	Title: string;
-	Link: string;
+	Link?: string;
 	GroupTitle?: string;
 	Included?: boolean;
 	Source?: number;
 	Status?: number;
+}
+
+export interface IAnswerRowDtosEx {
+	answerRowDtos: IAnswerRowDto[];
+	msg: string;
 }
 
 export interface IAnswerDto extends IAnswerRowDto {

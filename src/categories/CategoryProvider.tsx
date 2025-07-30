@@ -18,7 +18,9 @@ import {
   FormMode,
   CategoryRowDto,
   IExpandInfo,
-  ICategoryKeyExpanded
+  ICategoryKeyExpanded,
+  IAssignedAnswerKey,
+  QuestionKeyDto
 } from 'categories/types';
 
 import { initialCategoriesState, CategoryReducer, initialQuestion, initialCategory } from 'categories/CategoryReducer';
@@ -929,22 +931,22 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
 
 
   // action: 'Assign' or 'UnAssign'
-  const assignQuestionAnswer = useCallback(async (action: 'Assign' | 'UnAssign', questionKey: IQuestionKey, answerKey: IAnswerKey, assigned: IWhoWhen): Promise<any> => {
+  const assignQuestionAnswer = useCallback(async (action: 'Assign' | 'UnAssign', questionKey: IQuestionKey, assignedAnswerKey: IAssignedAnswerKey): Promise<any> => {
     try {
-      const assignedAnwser: IAssignedAnswer = {
-        questionKey,
-        answerKey,
-        answerTitle: '',
-        answerLink: '',
+      var { topId, id } = assignedAnswerKey;
+      var assignedAnswer: IAssignedAnswer = {
+        topId,
+        id,
         created: {
           time: new Date(),
-          nickName: assigned.nickName
-        },
-        modified: null
+          nickName
+        }
       }
+      const dto = new AssignedAnswerDto(assignedAnswer).assignedAnswerDto;
+      dto.QuestionKeyDto = new QuestionKeyDto(questionKey).dto;
+      dto.QuestionKeyDto.Workspace = workspace;
       let question: IQuestion | null = null;
-      const dto = new AssignedAnswerDto(assignedAnwser).assignedAnswerDto;
-      const url = `${protectedResources.KnowledgeAPI.endpointQuestionAnswer}/${workspace}/${action}`;
+      const url = `${protectedResources.KnowledgeAPI.endpointQuestionAnswer}/${action}`;
       console.time()
       await Execute("POST", url, dto)
         .then(async (questionDtoEx: IQuestionDtoEx) => {

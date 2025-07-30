@@ -1,5 +1,5 @@
 import { ActionMap, IWhoWhen, IRecord, IDto, Dto2WhoWhen, WhoWhen2Dto, IWhoWhenDto, IDtoKey } from 'global/types';
-import { IAnswerKey } from 'groups/types';
+import { IAnswer, IAnswerKey } from 'groups/types';
 
 export enum FormMode {
 	None = 'None',
@@ -45,7 +45,7 @@ export interface ICategoryDto extends ICategoryRowDto {
 }
 
 
-export interface ICategoryKey { //extends IRecord {
+export interface ICategoryKey {
 	topId: string,
 	id: string;
 	parentId: string | null;
@@ -136,7 +136,7 @@ export class CategoryRow {
 /////////////////////////////////////
 // Question
 
-export interface IQuestionKey { 
+export interface IQuestionKey {
 	topId: string,
 	parentId: string | null;
 	id: string;
@@ -167,8 +167,29 @@ export interface IRelatedFilter {
 	lastUsed: IWhoWhen | null;
 }
 
+export interface IQuestionKeyDto {
+	Workspace?: string;
+	TopId: string,
+	ParentId: string | null;
+	Id: string;
+}
+
+export class QuestionKeyDto  {
+	constructor(key: IQuestionKey) { //, parentId: string) {
+		const { topId, parentId, id  } = key;
+		this.dto = {
+			TopId: topId,
+			ParentId: parentId,
+			Id: id
+		}
+	}
+	dto: IQuestionKeyDto
+}
+
+
+
 export interface IRelatedFilterDto {
-	QuestionKey: IQuestionKey | null;
+	QuestionKey?: IQuestionKey;
 	Filter: string;
 	NumOfUsages: number;
 	Created: IWhoWhenDto | null;
@@ -185,7 +206,7 @@ export class RelatedFilterDto {
 	constructor(relatedFilter: IRelatedFilter) {
 		const { questionKey, filter, numOfUsages, created, lastUsed } = relatedFilter;
 		this.relatedFilterDto = {
-			QuestionKey: questionKey,
+			QuestionKey: questionKey??undefined,
 			Filter: filter,
 			Created: created ? new WhoWhen2Dto(created).whoWhenDto! : null,
 			LastUsed: lastUsed ? new WhoWhen2Dto(lastUsed).whoWhenDto! : null,
@@ -199,7 +220,7 @@ export class RelatedFilter {
 	constructor(dto: IRelatedFilterDto) {
 		const { QuestionKey, Filter, Created, LastUsed, NumOfUsages } = dto;
 		this.relatedFilter = {
-			questionKey: QuestionKey,
+			questionKey: QuestionKey??null,
 			filter: Filter,
 			created: Created ? new Dto2WhoWhen(Created).whoWhen! : null,
 			lastUsed: LastUsed ? new Dto2WhoWhen(LastUsed).whoWhen! : null,
@@ -556,7 +577,7 @@ export interface ICategoriesContext {
 	viewQuestion: (questionRow: IQuestionRow) => void;
 	editQuestion: (questionRow: IQuestionRow) => void;
 	updateQuestion: (oldParentId: string, question: IQuestion, categoryChanged: boolean) => Promise<any>;
-	assignQuestionAnswer: (action: 'Assign' | 'UnAssign', questionKey: IQuestionKey, answerKey: IAnswerKey, assigned: IWhoWhen) => Promise<any>;
+	assignQuestionAnswer: (action: 'Assign' | 'UnAssign', questionKey: IQuestionKey, assignedAnswerKey: IAssignedAnswerKey) => Promise<any>;
 	deleteQuestion: (questionRow: IQuestionRow) => void;
 }
 
@@ -582,22 +603,28 @@ export interface IQuestionFormProps {
 /////////////////////////////////////////////////
 // Assigned Answers
 
-export interface IAssignedAnswer {
-	questionKey: IQuestionKey;
-	answerKey: IAnswerKey;
-	answerTitle: string;
-	answerLink: string;
-	created: IWhoWhen,
-	modified: IWhoWhen | null
+export interface IAssignedAnswerKey {
+	topId: string;
+	id: string;
 }
 
+
+export interface IAssignedAnswer extends IAssignedAnswerKey {
+	answerTitle?: string;
+	answerLink?: string;
+	created?: IWhoWhen,
+	modified?: IWhoWhen
+}
+
+
 export interface IAssignedAnswerDto {
-	QuestionKey: IQuestionKey;
-	AnswerKey: IAnswerKey;
+	QuestionKeyDto?: IQuestionKeyDto;
+	TopId: string;
+	Id: string;
 	AnswerTitle: string;
 	AnswerLink: string;
-	Created: IWhoWhenDto;
-	Modified: IWhoWhenDto | null;
+	Created?: IWhoWhenDto;
+	Modified?: IWhoWhenDto;
 }
 
 export interface IAssignedAnswerDtoEx {
@@ -607,14 +634,14 @@ export interface IAssignedAnswerDtoEx {
 
 export class AssignedAnswerDto {
 	constructor(assignedAnswer: IAssignedAnswer) {
-		const { questionKey, answerKey, answerTitle, answerLink, created, modified } = assignedAnswer;
+		const { topId, id, answerTitle, answerLink, created, modified } = assignedAnswer;
 		this.assignedAnswerDto = {
-			QuestionKey: questionKey,
-			AnswerKey: answerKey,
+			TopId: topId,
+			Id: id,
 			AnswerTitle: answerTitle ?? '',
 			AnswerLink: answerTitle ?? '',
-			Created: new WhoWhen2Dto(created).whoWhenDto!,
-			Modified: modified ? new WhoWhen2Dto(modified).whoWhenDto! : null
+			Created: new WhoWhen2Dto(created).whoWhenDto!
+			//Modified: new WhoWhen2Dto(modified).whoWhenDto
 		}
 	}
 	assignedAnswerDto: IAssignedAnswerDto;
@@ -622,14 +649,14 @@ export class AssignedAnswerDto {
 
 export class AssignedAnswer {
 	constructor(dto: IAssignedAnswerDto) {
-		const { QuestionKey, AnswerKey, AnswerTitle, AnswerLink, Created, Modified } = dto;
+		const { TopId, Id, AnswerTitle, AnswerLink, Created, Modified } = dto;
 		this.assignedAnswer = {
-			questionKey: QuestionKey,
-			answerKey: AnswerKey,
+			topId: TopId,
+			id: Id,
 			answerTitle: AnswerTitle,
 			answerLink: AnswerLink,
-			created: new Dto2WhoWhen(Created).whoWhen!,
-			modified: Modified ? new Dto2WhoWhen(Modified).whoWhen! : null
+			created: new Dto2WhoWhen(Created).whoWhen,
+			modified: new Dto2WhoWhen(Modified).whoWhen
 		}
 	}
 	assignedAnswer: IAssignedAnswer;

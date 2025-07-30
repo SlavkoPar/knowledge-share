@@ -242,7 +242,7 @@ const ChatBotDlg = ({ show, onHide }: IProps) => {
 
         const history: IHistory = {
             questionKey: new QuestionKey(selectedQuestion!).questionKey!,
-            answerKey: chatBotAnswer!.answerKey,
+            assignedAnswerKey: { topId: chatBotAnswer!.topId, id: chatBotAnswer!.id },
             userAction: USER_ANSWER_ACTION.Fixed,
             created: {
                 nickName: authUser.nickName,
@@ -278,7 +278,7 @@ const ChatBotDlg = ({ show, onHide }: IProps) => {
         if (chatBotAnswer) {
             const history: IHistory = {
                 questionKey: new QuestionKey(selectedQuestion!).questionKey!,
-                answerKey: chatBotAnswer.answerKey,
+                assignedAnswerKey: { topId: chatBotAnswer.topId, id: chatBotAnswer.id },
                 userAction: nextChatBotAnswer ? USER_ANSWER_ACTION.NotFixed : USER_ANSWER_ACTION.NotClicked,
                 created: {
                     nickName: authUser.nickName,
@@ -402,7 +402,7 @@ const ChatBotDlg = ({ show, onHide }: IProps) => {
         return (
             <div
                 // id={answerId.toString()}   PPP
-                id={chatBotAnswer?.answerKey.id}
+                id={chatBotAnswer?.id}
                 className={`${isDarkMode ? "dark" : "light"} mt-1 mx-1 border border-0 rounded-1`}
             >
                 {/* <Row>

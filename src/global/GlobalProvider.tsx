@@ -23,7 +23,7 @@ import {
 } from "categories/types";
 
 import {
-  Group, IGroup, IGroupDto, IGroupKey, IAnswer, IAnswerDto, IAnswerKey, IAnswerRow, IAnswerRowDto, Answer,
+  Group, IGroup, IGroupDto, IGroupKey, IAnswer, IAnswerDto, IAnswerKey, IAnswerRow, IAnswerRowDto, IAnswerRowDtosEx, Answer,
   IGroupRow, IGroupRowDto, GroupRow
 } from "groups/types";
 
@@ -160,7 +160,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
     return new Promise(async (resolve) => {
       try {
         console.time();
-        const url = protectedResources.KnowledgeAPI.endpointGroupRow;
+        const url = `${protectedResources.KnowledgeAPI.endpointGroupRow}/${workspace}`;
         await Execute("GET", url, null)
           .then((rowDtos: IGroupRowDto[]) => {   //  | Response
             console.log('loadAndCacheAllGroupRows', protectedResources.KnowledgeAPI.endpointGroupRow)
@@ -248,8 +248,8 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
 
 
   const getGroupRows = useCallback(async (groupId: string | null) => {
-    const { groupRowsLoaded: shortGroupsLoaded } = globalState;
-    if (!shortGroupsLoaded) {
+    const { groupRowsLoaded } = globalState;
+    if (!groupRowsLoaded) {
       await loadAndCacheAllGroupRows();
     }
     try {
@@ -293,16 +293,16 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
   }, [globalState.allGroupRows]);
 
 
-  //const searchAnswers = useCallback(async (execute: (method: string, endpoint: string) => Promise<any>, filter: string, count: number): Promise<any> => {
   const searchAnswers = async (filter: string, count: number): Promise<any> => {
-    const { allGroupRows: shortGroups } = globalState;
+    const { allGroupRows } = globalState;
     return new Promise(async (resolve) => {
       try {
         console.time();
         const filterEncoded = encodeURIComponent(filter);
-        const url = `${protectedResources.KnowledgeAPI.endpointAnswer}/${filterEncoded}/${count}/null`;
-        await Execute("GET", url).then((dtos: IAnswerRowDto[]) => {
-          console.log('ANSWERSSSSS', { answerRowDtos: dtos }, protectedResources.KnowledgeAPI.endpointGroup);
+        const url = `${protectedResources.KnowledgeAPI.endpointAnswer}/${workspace}/${filterEncoded}/${count}/nesto`;
+        await Execute("GET", url).then((answerRowDtosEx: IAnswerRowDtosEx) => {
+          const { answerRowDtos: dtos, msg} = answerRowDtosEx;
+          console.log('ANSWERSSSSS', { answerRowDtos: dtos }, url);
           console.timeEnd();
           if (dtos) {
             const list: IAnswerRow[] = dtos.map((rowDto: IAnswerRowDto) => {
@@ -321,7 +321,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
           }
           else {
             // reject()
-            console.log('no rows in search')
+            console.log('no rows in search' + msg)
           }
         })
       }

@@ -1,6 +1,6 @@
 // Define the Global State
-import { ICategory, ICategoryKey, ICategoryRow, ICategoryRowDto, IQuestion, IQuestionEx, IQuestionKey, IQuestionRow } from 'categories/types';
-import { IGroup, IGroupKey, IAnswerRow, IAnswer, IAnswerKey, IGroupRow } from 'groups/types';
+import { IAssignedAnswerKey, ICategory, ICategoryKey, ICategoryRow, ICategoryRowDto, IQuestion, IQuestionEx, IQuestionKey, IQuestionRow } from 'categories/types';
+import { IGroup, IGroupKey, IAnswerRow, IAnswer, IAnswerKey, IGroupRow, IHistoryAnswerKey } from 'groups/types';
 //import { IOption } from 'common/types';
 import { IDBPDatabase } from 'idb';
 
@@ -54,7 +54,7 @@ export class WhoWhen2Dto {
 			}
 		}
 	}
-	whoWhenDto: IWhoWhenDto | null = null;
+	whoWhenDto?: IWhoWhenDto = undefined;
 }
 
 
@@ -62,12 +62,8 @@ export class HistoryDto {
 	constructor(history: IHistory) {
 		this.historyDto = {
 			QuestionKey: history.questionKey,
-			AnswerKey: history.answerKey,
-			UserAction: history.userAction, // == USER_ANSWER_ACTION.
-			// 	? 2
-			// 	: history.userAction
-			// 		? 1
-			// 		: 0,
+			AssignedAnswerKey: history.assignedAnswerKey,
+			UserAction: history.userAction, 
 			Created: new WhoWhen2Dto(history.created).whoWhenDto!,
 		}
 	}
@@ -398,7 +394,7 @@ export enum USER_ANSWER_ACTION {
 export interface IHistory {
 	id?: number;
 	questionKey: IQuestionKey;
-	answerKey: IAnswerKey;
+	assignedAnswerKey: IAssignedAnswerKey;
 	userAction: USER_ANSWER_ACTION; // when client didn't click on 'Fixed' or 'Not fixed' buttons
 	created?: IWhoWhen
 }
@@ -407,7 +403,7 @@ export interface IHistoryDto {
 	PartitionKey?: string;
 	Id?: number;
 	QuestionKey: IQuestionKey;
-	AnswerKey: IAnswerKey;
+	AssignedAnswerKey: IAssignedAnswerKey;
 	UserAction: USER_ANSWER_ACTION; // when client didn't click on 'Fixed' or 'Not fixed' buttons
 	Created: IWhoWhenDto
 }
