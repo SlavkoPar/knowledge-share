@@ -4,7 +4,7 @@ import { ActionTypes, ICategoriesState, ICategory, IQuestion, CategoriesActions,
 export const initialQuestion: IQuestion = {
  	topId: '',
 	parentId: null,
-  id: 'will be given by DB',
+  id: 'generateId', //  at BackEnd
   categoryTitle: '',
   title: '',
   assignedAnswers: [],
@@ -313,7 +313,7 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
         ...initialCategory,
         topId: topId,
         level,
-        parentId: id
+        parentId: null
       }
       return {
         ...state,
@@ -422,7 +422,25 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
       };
     }
 
-    case ActionTypes.SET_CATEGORY_ADDED:
+    case ActionTypes.SET_CATEGORY_ADDED: {
+      const { categoryRow } = action.payload; // ICategory extends ICategoryRow
+      console.assert(IsCategory(categoryRow))
+      // TODO what about instanceof?
+      const category: ICategory = categoryRow as ICategory;
+      const activeCategory: ICategory = { ...category, isExpanded: false }
+      const { topId, id, parentId } = category;
+      const topRowsLoaded = parentId ? true : false;
+      return {
+        ...state,
+        formMode: FormMode.EditingCategory,
+        loadingCategory: false,
+        topRowsLoaded,
+        //categoryKeyExpanded: state.categoryKeyExpanded ? { ...state.categoryKeyExpanded, questionId: null } : null,
+        activeCategory,
+        activeQuestion: null
+      };
+    }
+
     case ActionTypes.SET_CATEGORY_TO_EDIT:   // doesn't modify Tree
     case ActionTypes.SET_CATEGORY_UPDATED: { // modifies Tree
       const { categoryRow } = action.payload; // ICategory extends ICategoryRow
@@ -501,8 +519,8 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
 
     case ActionTypes.CATEGORY_TITLE_CHANGED: {
       const { value, id } = action.payload;
-      const { topRows: topCategoryRows } = state;
-      const categoryRow: ICategoryRow | undefined = findCategory(topCategoryRows, id);
+      const { topRows } = state;
+      const categoryRow: ICategoryRow | undefined = findCategory(topRows, id);
       if (categoryRow) {
         categoryRow.title = value;
       }
@@ -513,8 +531,8 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
 
     case ActionTypes.QUESTION_TITLE_CHANGED: {
       const { categoryId, id, value } = action.payload;
-      const { topRows: topCategoryRows } = state;
-      const categoryRow: ICategoryRow | undefined = findCategory(topCategoryRows, categoryId);
+      const { topRows } = state;
+      const categoryRow: ICategoryRow | undefined = findCategory(topRows, categoryId);
       if (categoryRow) {
         categoryRow.questionRows.find(q => q.id === id)!.title = value;
       }

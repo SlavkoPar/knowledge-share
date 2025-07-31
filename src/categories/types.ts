@@ -74,7 +74,6 @@ export interface ICategory extends ICategoryRow {
 	doc1: string, // some document optionally, used in Category, but not not in CategoryRow
 }
 
-
 export interface ICategoryKeyExtended extends ICategoryKey {
 	title: string;
 }
@@ -175,9 +174,10 @@ export interface IQuestionKeyDto {
 }
 
 export class QuestionKeyDto  {
-	constructor(key: IQuestionKey) { //, parentId: string) {
+	constructor(key: IQuestionKey, Workspace: string) { //, parentId: string) {
 		const { topId, parentId, id  } = key;
 		this.dto = {
+			Workspace,
 			TopId: topId,
 			ParentId: parentId,
 			Id: id
@@ -341,9 +341,10 @@ export class Category {
 }
 
 export class CategoryDto {
-	constructor(category: ICategory) {
+	constructor(category: ICategory, Workspace: string) {
 		const { topId, id, parentId, kind, title, link, header, level, variations, created, modified, doc1 } = category;
 		this.categoryDto = {
+			Workspace,
 			TopId: topId,
 			Id: id,
 			Kind: kind,
@@ -500,7 +501,6 @@ export interface ICategoryInfo {
 }
 
 export interface IExpandInfo {
-	topId: string;
 	categoryKey: ICategoryKey;
 	formMode: FormMode;
 	includeQuestionId?: string;
@@ -571,7 +571,7 @@ export interface ICategoriesContext {
 	//////////////
 	// questions
 	loadCategoryQuestions: (catParams: ILoadCategoryQuestions) => void;  //(parentInfo: IParentInfo) => void,
-	addQuestion: (categoryKey: ICategoryKey, topId: string) => Promise<any>;
+	addQuestion: (categoryKey: ICategoryKey, isExpanded: boolean) => Promise<any>;
 	cancelAddQuestion: () => Promise<any>;
 	createQuestion: (question: IQuestion, fromModal: boolean) => Promise<any>;
 	viewQuestion: (questionRow: IQuestionRow) => void;

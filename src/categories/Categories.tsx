@@ -28,7 +28,7 @@ interface IProps {
 
 const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
     console.log("=== Categories", categoryId_questionId)
-    const { state, openNode, loadTopRows } = useCategoryContext();
+    const { state, openNode, loadTopRows, addSubCategory } = useCategoryContext();
     const {
         topRows, topRowsLoading, topRowsLoaded,
         keyExpanded,
@@ -163,8 +163,7 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
                             categoryKey: catKeyExpanded,
                             level: 1
                         }
-                    })
-                    }
+                    })}
                 >
                     Add Category
                 </Button>

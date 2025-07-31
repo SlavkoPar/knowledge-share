@@ -245,7 +245,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
   }
 
   const expandCategory = useCallback(
-    async ({ topId, categoryKey, includeQuestionId, newCategoryRow, newQuestion, formMode }: IExpandInfo): Promise<any> => {
+    async ({ categoryKey, includeQuestionId, newCategoryRow, newQuestion, formMode }: IExpandInfo): Promise<any> => {
       try {
         const { keyExpanded } = state;
         dispatch({ type: ActionTypes.SET_ROW_EXPANDING, payload: {} });
@@ -313,14 +313,13 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
         const categoryKey: ICategoryKey = { topId, parentId, id };
         const newCategoryRow: ICategoryRow = {
           ...initialCategory,
-          topId: 'newCategoryId',
-          id: 'newCategoryId', // backEnd will generate id
+          topId,
           parentId: id,
+          id: 'BackEnd will generate it',
           level,
           title: 'new Category'
         }
         const expandInfo: IExpandInfo = {
-          topId: topId!,
           categoryKey,
           formMode: FormMode.AddingCategory,
           newCategoryRow
@@ -361,7 +360,6 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
         const categoryKey: ICategoryKey = { topId, parentId, id }; // TODO proveri
 
         const expandInfo: IExpandInfo = {
-          topId: topId!,
           categoryKey,
           formMode: FormMode.None
         }
@@ -379,33 +377,43 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
 
   const createCategory = useCallback(
     async (category: ICategory) => {
-      const { topId, id, parentId, variations, title, kind, modified } = category;
+      const { id, parentId, variations, title, kind, modified } = category;
       dispatch({ type: ActionTypes.SET_LOADING_CATEGORY, payload: {} });
       try {
-        const categoryDto = new CategoryDto(category).categoryDto;
+        const categoryDto = new CategoryDto(category, workspace).categoryDto;
         console.log("categoryDto", { categoryDto })
-        const url = `${protectedResources.KnowledgeAPI.endpointCategory}/${workspace}`;
+        const url = `${protectedResources.KnowledgeAPI.endpointCategory}`; //
         console.time()
         await Execute("POST", url, categoryDto, id)
           .then(async (categoryDtoEx: ICategoryDtoEx) => {   //  | null
             console.timeEnd();
             const { categoryDto } = categoryDtoEx;
             if (categoryDto) {
-              categoryDto.TopId = topId!;
+              //categoryDto.TopId = topId!;
               const category = new Category(categoryDto).category;
               console.log('Category successfully created', { category })
               await loadAndCacheAllCategoryRows()
                 .then(async (done: boolean) => {
-                  const parentCategoryKey: ICategoryKey = { topId, parentId, id: parentId! };
-                  const expandInfo: IExpandInfo = {
-                    topId: topId!,
-                    categoryKey: parentCategoryKey,
-                    formMode: FormMode.AddingCategory
+                  if (category.parentId) {
+                    const parentCategoryKey: ICategoryKey = {
+                      topId: category.topId,
+                      parentId: "doesn't matter",
+                      id: category.parentId!
+                    };
+                    const expandInfo: IExpandInfo = {
+                      categoryKey: parentCategoryKey,
+                      formMode: FormMode.AddingCategory
+                    }
+                    await expandCategory(expandInfo).then(() => {
+                      dispatch({ type: ActionTypes.SET_CATEGORY_ADDED, payload: { categoryRow: category } }); // ICategory extends ICategory Row
+                    });
                   }
-                  await expandCategory(expandInfo).then(() => {
-                    //dispatch({ type: ActionTypes.SET_CATEGORY, payload: { categoryRow: category } }); // ICategory extends ICategory Row
+                  else {
+                    // topRow category with parentId null
+                    // null prop is not serialized at server
+                    category.parentId = null;
                     dispatch({ type: ActionTypes.SET_CATEGORY_ADDED, payload: { categoryRow: category } }); // ICategory extends ICategory Row
-                  });
+                  }
                 })
             }
           });
@@ -459,7 +467,6 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
         const parentKey: ICategoryKey = { topId, parentId, id: parentId }
         // get acurate info from server (children will be collapsed)
         const expandInfo: IExpandInfo = {
-          topId: topId!,
           categoryKey: parentKey,
           formMode: FormMode.EditingCategory
         }
@@ -477,36 +484,31 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
       const { topId, id, variations, title, kind, modified } = category;
       dispatch({ type: ActionTypes.SET_LOADING_CATEGORY, payload: {} });
       try {
-        const categoryDto = new CategoryDto(category).categoryDto;
-        const url = `${protectedResources.KnowledgeAPI.endpointCategory}/${workspace}`;
+        const categoryDto = new CategoryDto(category, workspace).categoryDto;
+        const url = `${protectedResources.KnowledgeAPI.endpointCategory}`;
         console.time()
         await Execute("PUT", url, categoryDto)
-          .then((response: ICategoryDtoEx | Response) => {
+          .then((categoryDtoEx: ICategoryDtoEx) => {
             console.timeEnd();
-            if (response instanceof Response) {
-              console.error(response);
-              dispatch({ type: ActionTypes.SET_ERROR, payload: { error: new Error('Server Error') } });
+            const { categoryDto, msg } = categoryDtoEx;
+            if (categoryDto) {
+              const category = new Category(categoryDto).category;
+              const { topId, id } = category;
+              category.isExpanded = false;
+              category.topId = topId;
+              dispatch({ type: ActionTypes.SET_CATEGORY_UPDATED, payload: { categoryRow: category } });
+              if (closeForm) {
+                dispatch({ type: ActionTypes.CLOSE_CATEGORY_FORM, payload: {} })
+              }
             }
             else {
-              const { categoryDto, msg } = response as ICategoryDtoEx;
-              if (categoryDto) {
-                const category = new Category(categoryDto).category;
-                const { topId, id } = category;
-                category.isExpanded = false;
-                category.topId = topId;
-                dispatch({ type: ActionTypes.SET_CATEGORY_UPDATED, payload: { categoryRow: category } });
-                if (closeForm) {
-                  dispatch({ type: ActionTypes.CLOSE_CATEGORY_FORM, payload: {} })
-                }
-              }
-              else {
-                dispatch({ type: ActionTypes.SET_ERROR, payload: { error: new Error(`Category ${id} not found!`) } });
-              }
+              dispatch({ type: ActionTypes.SET_ERROR, payload: { error: new Error(`${msg}`) } });
             }
           });
       }
       catch (error: any) {
         console.log(error)
+        dispatch({ type: ActionTypes.SET_ERROR, payload: { error: new Error("Karambol") } });
         return error;
       }
     }, [dispatch]);
@@ -537,7 +539,6 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
               await loadAndCacheAllCategoryRows()
                 .then(async (done: boolean) => {
                   const expandInfo: IExpandInfo = {
-                    topId: topId!,
                     categoryKey: parentCategoryKey,
                     formMode: FormMode.None
                   }
@@ -642,32 +643,35 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
 
 
   const addQuestion = useCallback(
-    async (categoryKey: ICategoryKey, topId: string) => {
+    async (categoryKey: ICategoryKey, isExpanded: boolean) => {
       try {
-        //const { topId, id, questionRows } = categoryRow;
-        //const categoryKey: ICategoryKey = {topId, id};
         const { topId, id } = categoryKey;
-        const cat: ICategoryRow | undefined = await getCat(id!);
+        let categoryRow = await getCat(id!);
+        if (!categoryRow) {
+          alert(`Not found ${id}. Reload all Categories`)
+          return;
+        }
         const newQuestion: IQuestionRow = {
           ...initialQuestion,
           topId,
-          id: 'generateId', // backEnd will generate id
           title: 'new Question',
           parentId: id
         }
 
-        const expandInfo: IExpandInfo = {
-          topId: topId,
-          categoryKey,
-          formMode: FormMode.AddingQuestion,
-          newCategoryRow: undefined,
-          newQuestion
+        if (!isExpanded) {
+          const expandInfo: IExpandInfo = {
+            categoryKey,
+            formMode: FormMode.AddingQuestion,
+            newCategoryRow: undefined,
+            newQuestion
+          }
+          categoryRow = await expandCategory(expandInfo);
         }
-        const categoryRow: ICategoryRow | null = await expandCategory(expandInfo);
+
         if (categoryRow) {
           const question: IQuestion = {
             ...newQuestion,
-            categoryTitle: cat ? cat.title : 'Jok Parent Title',
+            categoryTitle: categoryRow ? categoryRow.title : 'Jok Parent Title',
             numOfAssignedAnswers: 0,
             assignedAnswers: [],
             numOfRelatedFilters: 0,
@@ -690,7 +694,6 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
         const { topId, parentId } = activeQuestion!;
         const categoryKey: ICategoryKey = { topId, parentId, id: parentId! };
         const expandInfo: IExpandInfo = {
-          topId: topId,
           categoryKey,
           formMode: FormMode.None
         }
@@ -732,7 +735,6 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
                   .then(async (done: boolean) => {
                     const parentCategoryKey: ICategoryKey = { topId, parentId, id: parentId! };
                     const expandInfo: IExpandInfo = {
-                      topId: topId,
                       categoryKey: parentCategoryKey,
                       formMode: FormMode.EditingQuestion
                     }
@@ -786,7 +788,6 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
               else {
                 const parentCategoryKey: ICategoryKey = { topId, parentId, id: parentId! }; // proveri
                 const expandInfo: IExpandInfo = {
-                  topId: topId,
                   categoryKey: parentCategoryKey,
                   formMode: FormMode.EditingQuestion
                 }
@@ -830,7 +831,6 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
               */
               const parentCategoryKey: ICategoryKey = { topId, parentId, id: parentId! }; // proveri
               const expandInfo: IExpandInfo = {
-                topId: topId,
                 categoryKey: parentCategoryKey,
                 formMode: FormMode.None
               }
@@ -943,8 +943,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
         }
       }
       const dto = new AssignedAnswerDto(assignedAnswer).assignedAnswerDto;
-      dto.QuestionKeyDto = new QuestionKeyDto(questionKey).dto;
-      dto.QuestionKeyDto.Workspace = workspace;
+      dto.QuestionKeyDto = new QuestionKeyDto(questionKey, workspace).dto;
       let question: IQuestion | null = null;
       const url = `${protectedResources.KnowledgeAPI.endpointQuestionAnswer}/${action}`;
       console.time()

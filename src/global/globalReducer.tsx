@@ -14,7 +14,7 @@ const initialAuthUser: IAuthUser = {
 
 const initGlobalState: IGlobalState = {
     dbp: null,
-    workspace: "DEMO",
+    workspace: 'DEMO',
     authUser: initialAuthUser,
     isAuthenticated: false,
     everLoggedIn: true,

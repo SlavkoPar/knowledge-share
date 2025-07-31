@@ -55,7 +55,7 @@ const ChatBotDlg = ({ show, onHide }: IProps) => {
     const navigate = useNavigate();
 
     const [catsSelected, setCatsSelected] = useState(true);
-    const [showAutoSuggest, setShowAutoSuggest] = useState(false);
+    const [showAutoSuggest, setShowAutoSuggest] = useState(true); //false);
 
     const [catLevels, setCatLevels] = useState<ICatLevel[]>([]);
 
@@ -549,12 +549,12 @@ const ChatBotDlg = ({ show, onHide }: IProps) => {
                     <Container id='container' fluid className='text-primary'> {/* align-items-center" */}
                         <Row className="m-0">
                             <Col>
-                                <p className='p-0 m-0 fw-lighter'>For test, Select:</p>
+                                {/* <p className='p-0 m-0 fw-lighter'>For test, Select:</p>
                                 <ul className="m-0">
                                     <li className='p-0 fw-lighter'>Sale</li>
                                     <li className='mx-2 fw-lighter'>Phones, TV, ...</li>
                                     <li className='mx-4 p-0 mb-4 fw-lighter'>Televisions, remote controllers, ...</li>
-                                </ul>
+                                </ul> */}
                             </Col>
                         </Row>
                         {/* badge */}
@@ -565,11 +565,11 @@ const ChatBotDlg = ({ show, onHide }: IProps) => {
                                     <p><b>Welcome</b>, I am Buddy and I am here to help You</p>
                                 </div> */}
 
-                                <div className='border border-0 border-primary mx-0 text-white'>
+                                {/* <div className='border border-0 border-primary mx-0 text-white'>
                                     {catLevels.map((catLevel) =>
                                         <CatLevelComponent key={catLevel.level} {...catLevel} />
                                     )}
-                                </div>
+                                </div> */}
 
                                 <div key='history' className='history'>
                                     {

@@ -71,7 +71,7 @@ const AssignedAnswers = ({ questionKey, questionTitle, assignedAnswers, isDisabl
     }, [groupRowsLoaded, loadAndCacheAllGroupRows])
 
     return (
-        <div className={'mx-0 my-0 border rounded-2 px-1 py-1 border border-info bg-info'} >
+        <div className={'mx-0 my-0 px-1 py-1 border border-2 rounded-2 border-info bg-info'} >
             <div>
                 <label className="text-muted bg-info fs-6">Assigned Answers</label>
                 <ListGroup as="ul" variant={variant} className='my-1' key="assigned-answers">

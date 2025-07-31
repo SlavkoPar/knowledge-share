@@ -11,7 +11,7 @@ const CategoryList = ({ title, categoryRow, level, isExpanded }: IParentInfo) =>
     const { topId, id, questionId } = keyExpanded ?? { topId: '', id: '', questionId: null };
 
     const { categoryRows } = categoryRow;
-    //console.log('<<<<<<<<<CategoryList', categoryRow.id, categoryRows )
+    console.log('<<<<<<<<<CategoryList', categoryRow.id, categoryRows )
 
     return (
         <div className={level! > 1 ? 'ms-2' : ''} >

@@ -123,7 +123,7 @@ const QuestionRow = ({ questionRow }: { questionRow: IQuestionRow }) => {
                         title="Add Question"
                         onClick={() => {
                             const categoryInfo: ICategoryInfo = { categoryKey, level: 0 }
-                            addQuestion(categoryKey, topId!);
+                            addQuestion(categoryKey, true);
                         }}
                     >
                         <img width="22" height="18" src={QPlus} alt="Add Question" />

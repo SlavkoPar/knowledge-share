@@ -34,7 +34,6 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
     const isSelected = activeCategory !== null && (activeCategory.id === id);
     const showForm = isSelected;
 
-
     const alreadyAdding = formMode === FormMode.AddingCategory;
     // TODO proveri ovo
     const showQuestions = isExpanded && numOfQuestions > 0 // || questions.find(q => q.inAdding) // && !questions.find(q => q.inAdding); // We don't have questions loaded
@@ -54,14 +53,12 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
         }
         else {
             const expandInfo: IExpandInfo = {
-                topId: topId!,
                 categoryKey,
                 formMode: canEdit ? FormMode.EditingCategory : FormMode.ViewingCategory
             }
             await expandCategory(expandInfo);
         }
     }
-
 
     const edit = async () => {
         // Load data from server and reinitialize category
@@ -91,7 +88,6 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
                     formMode = FormMode.None
                 }
                 const expandInfo: IExpandInfo = {
-                    topId: topId!,
                     categoryKey,
                     includeQuestionId: questionId ?? undefined,
                     formMode // differs from handleExpandClick
@@ -176,7 +172,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
                             title="Add SubCategory"
                             onClick={() => {
                                 categoryRow.level += 1;
-                                addSubCategory(categoryRow)
+                                addSubCategory(categoryRow);
                                 //</>const categoryInfo: ICategoryInfo = { categoryKey: { topId, id: parentId }, level: 0 }
                                 // dispatch({
                                 //     type: ActionTypes.ADD_SUB_CATEGORY,
@@ -205,7 +201,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
                             title="Add Question"
                             onClick={async () => {
                                 //const categoryInfo: ICategoryInfo = { categoryKey: { workspace: topId, id: categoryRow.id }, level: categoryRow.level }
-                                addQuestion(categoryKey, topId!);
+                                addQuestion(categoryKey, isExpanded ?? false);
                             }}
                         >
                             <img width="22" height="18" src={QPlus} alt="Add Question" />
