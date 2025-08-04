@@ -4,14 +4,14 @@ import CategoryRow from "categories/components/CategoryRow";
 import { CategoryKey, ICategory, ICategoryRow, IParentInfo } from "categories/types";
 import { useCategoryContext } from "categories/CategoryProvider";
 
-const CategoryList = ({ title, categoryRow, level, isExpanded }: IParentInfo) => {
+const CategoryList = ({ title, categoryRow, isExpanded }: IParentInfo) => {
 
     const { state } = useCategoryContext();
     const { keyExpanded } = state;
     const { topId, id, questionId } = keyExpanded ?? { topId: '', id: '', questionId: null };
 
-    const { categoryRows } = categoryRow;
-    console.log('<<<<<<<<<CategoryList', categoryRow.id, categoryRows )
+    const { level, categoryRows } = categoryRow;
+    console.log('<<<<<<<<< Renderujem CategoryList', categoryRow.id, categoryRows )
 
     return (
         <div className={level! > 1 ? 'ms-2' : ''} >

@@ -6,7 +6,7 @@ import { CreatedModifiedForm } from "common/CreateModifiedForm"
 import { FormButtons } from "common/FormButtons"
 import { FormMode, ActionTypes, ICategoryFormProps, ICategory, IVariation, ICategoryKey, IQuestionKey, CategoryRow, CategoryKey } from "categories/types";
 
-import { useCategoryDispatch } from "categories/CategoryProvider";
+import { useCategoryContext, useCategoryDispatch  } from "categories/CategoryProvider";
 import QuestionList from "categories/components/questions/QuestionList";
 import { useGlobalContext } from "global/GlobalProvider";
 import VariationList from "categories/VariationList";
@@ -18,6 +18,8 @@ const CategoryForm = ({ inLine, formMode, category, questionId, submitForm, chil
 
   const { globalState } = useGlobalContext();
   const { isDarkMode, variant, bg } = globalState;
+  
+  const { onCategoryTitleChanged } = useCategoryContext();
 
   const viewing = formMode === FormMode.ViewingCategory;
   const editing = formMode === FormMode.EditingCategory;
@@ -73,7 +75,7 @@ const CategoryForm = ({ inLine, formMode, category, questionId, submitForm, chil
 
   const debouncedTitleHandler = useCallback(
     debounce((id: string, value: string) => {
-      dispatch({ type: ActionTypes.CATEGORY_TITLE_CHANGED, payload: { id, value } })
+        onCategoryTitleChanged(topId, id, value);
     }, 500), []);
 
   const handleChangeTitle = (event: ChangeEvent<HTMLTextAreaElement>) => {
@@ -219,7 +221,7 @@ const CategoryForm = ({ inLine, formMode, category, questionId, submitForm, chil
         <Form.Group>
           <Form.Label className="m-1 mb-0">Questions ({`${formik.values.numOfQuestions}`}) </Form.Label>
           {showQuestions &&
-            <QuestionList level={1} categoryRow={category} />  // ICategory extends ICategoryRow
+            <QuestionList categoryRow={category} />  // ICategory extends ICategoryRow
           }
         </Form.Group>
 

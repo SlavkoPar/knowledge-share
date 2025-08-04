@@ -27,7 +27,7 @@ interface IProps {
 }
 
 const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
-    console.log("=== Categories", categoryId_questionId)
+    console.log("===//////////////////====\\\\\\\\\\\\\\\\===== Categories", categoryId_questionId)
     const { state, openNode, loadTopRows, addSubCategory } = useCategoryContext();
     const {
         topRows, topRowsLoading, topRowsLoaded,
@@ -44,7 +44,7 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
     } = state;
 
     const { setLastRouteVisited, searchQuestions } = useGlobalContext();
-    const { isDarkMode, authUser, allCategoryRows: categoryRows } = useGlobalState();
+    const { isDarkMode, authUser, allCategoryRows } = useGlobalState();
 
     const [modalShow, setModalShow] = useState(false);
     const handleClose = () => {
@@ -69,11 +69,20 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
     })
 
     const categoryRow: ICategoryRow = {
-        ...initialCategory,
+        topId: '',
+        id: '',
+        parentId: null,
+        kind: 0,
+        title: '',
+        link: '',
+        header: '',
         level: 1,
-        categoryRows: topRows
+        hasSubCategories: false,
+        categoryRows: topRows,
+        variations: [],
+        numOfQuestions: 0,
+        questionRows: []
     }
-
 
     let tekst = '';
 
@@ -148,7 +157,7 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
                                 <AutoSuggestQuestions
                                     tekst={tekst}
                                     onSelectQuestion={onSelectQuestion}
-                                    categoryRows={categoryRows}
+                                    allCategoryRows={allCategoryRows}
                                     searchQuestions={searchQuestions}
                                 />
                             </div>
@@ -171,7 +180,7 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
                 <Row className="my-1">
                     <Col xs={12} md={5}>
                         <div className="categories-border" style={{ position: 'relative' }}>
-                            <CategoryList categoryRow={categoryRow} level={0} title="root" isExpanded={true} />
+                            <CategoryList categoryRow={categoryRow} title="root" isExpanded={true} />
                         </div>
 
                     </Col>

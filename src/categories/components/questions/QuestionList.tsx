@@ -6,12 +6,13 @@ import { List, ListItem, Loading } from "common/components/InfiniteList";
 import QuestionRow from "categories/components/questions/QuestionRow";
 
 //const QuestionList = ({ title, categoryRow, level }: IParentInfo) => {
-const QuestionList = ({ level, categoryRow }: { level: number, categoryRow: ICategoryRow }) => {
+const QuestionList = ({ categoryRow }: { categoryRow: ICategoryRow }) => {
   const { state, loadCategoryQuestions } = useCategoryContext();
-  const { keyExpanded, loadingQuestion, error, activeQuestion } = state;
+  const { keyExpanded, loadingQuestion, error } = state;
   const { topId, id, questionId } = keyExpanded!;
     //? keyExpanded
 
+  categoryRow.level += 1;
   const { questionRows } = categoryRow;
 
   let hasMoreQuestions = false;

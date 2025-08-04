@@ -51,7 +51,7 @@ const ChatBotDlg = ({ show, onHide }: IProps) => {
     const [hasMoreAnswers, setHasMoreAnswers] = useState<boolean>(false);
 
     const { getSubCats, getQuestion, addHistory, addHistoryFilter, getAnswersRated, searchQuestions, setLastRouteVisited } = useGlobalContext();
-    const { canEdit, authUser, isDarkMode, variant, bg, allCategoryRows: categoryRows, categoryRowsLoaded: catsLoaded } = useGlobalState();
+    const { canEdit, authUser, isDarkMode, variant, bg, allCategoryRows, categoryRowsLoaded: catsLoaded } = useGlobalState();
     const navigate = useNavigate();
 
     const [catsSelected, setCatsSelected] = useState(true);
@@ -519,7 +519,7 @@ const ChatBotDlg = ({ show, onHide }: IProps) => {
                         <AutoSuggestQuestions
                             tekst={txt}
                             onSelectQuestion={onSelectQuestion}
-                            categoryRows={categoryRows}
+                            allCategoryRows={allCategoryRows}
                             searchQuestions={searchQuestions}
                         />
                     }

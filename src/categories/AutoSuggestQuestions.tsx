@@ -43,13 +43,13 @@ const QuestionAutosuggestMulti = Autosuggest as { new(): Autosuggest<IQuestionRo
 export class AutoSuggestQuestions extends React.Component<{
 	tekst: string | undefined,
 	onSelectQuestion: (questionKey: IQuestionKey, underFilter: string) => void,
-	categoryRows: Map<string, ICategoryRow>,
+	allCategoryRows: Map<string, ICategoryRow>,
 	searchQuestions: (filter: string, count: number) => Promise<IQuestionRow[]>
 }, any> {
 	// region Fields
 	state: any;
 	isMob: boolean;
-	categoryRows: Map<string, ICategoryRow>;
+	allCategoryRows: Map<string, ICategoryRow>;
 	searchQuestions: (filter: string, count: number) => Promise<IQuestionRow[]>;
 	debouncedLoadSuggestions: (value: string) => void;
 	//inputAutosuggest: React.RefObject<HTMLInputElement>;
@@ -64,7 +64,7 @@ export class AutoSuggestQuestions extends React.Component<{
 			highlighted: ''
 		};
 		//this.inputAutosuggest = createRef<HTMLInputElement>();
-		this.categoryRows = props.categoryRows;
+		this.allCategoryRows = props.allCategoryRows;
 		this.searchQuestions = props.searchQuestions;
 		this.isMob = isMobile;
 		this.loadSuggestions = this.loadSuggestions.bind(this);
@@ -141,7 +141,7 @@ export class AutoSuggestQuestions extends React.Component<{
 	private satisfyingCategories = (searchWords: string[]): ICatIdTitle[] => {
 		const arr: ICatIdTitle[] = [];
 		searchWords.filter(w => w.length >= 3).forEach(w => {
-			this.categoryRows.forEach(async cat => {
+			this.allCategoryRows.forEach(async cat => {
 				const parentId = cat.id;
 				let j = 0;
 				// cat.words.forEach(catw => {
@@ -267,7 +267,7 @@ export class AutoSuggestQuestions extends React.Component<{
 					questionRows: []
 				};
 				if (id !== null) {
-					const cat = this.categoryRows.get(id);
+					const cat = this.allCategoryRows.get(id);
 					if (cat) {
 						const { title, titlesUpTheTree/*, variations*/ } = cat!;
 						catSection.categoryTitle = title;

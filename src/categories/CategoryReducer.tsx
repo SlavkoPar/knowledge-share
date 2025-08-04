@@ -1,10 +1,15 @@
 import { Reducer } from 'react'
-import { ActionTypes, ICategoriesState, ICategory, IQuestion, CategoriesActions, ILocStorage, ICategoryKey, ICategoryKeyExtended, IQuestionRow, Question, IQuestionRowDto, IQuestionKey, CategoryKey, QuestionKey, ICategoryDto, QuestionRow, ICategoryRow, CategoryRow, actionStoringToLocalStorage, ICategoryRowDto, FormMode, IsCategory } from "categories/types";
+import {
+  ActionTypes, Actions, ILocStorage, IsCategory,
+  ICategoriesState, ICategory, CategoryKey, ICategoryRow, CategoryRow,
+  IQuestion, IQuestionRow, Question, IQuestionKey, QuestionKey, QuestionRow,
+  actionStoringToLocalStorage, FormMode, doNotCloneActions, doNotCallInnerReducerActions
+} from "categories/types";
 
 export const initialQuestion: IQuestion = {
- 	topId: '',
-	parentId: null,
-  id: 'generateId', //  at BackEnd
+  topId: '',
+  parentId: null,
+  id: 'generateId', //  keep 'generateId', it is expected at BackEnd
   categoryTitle: '',
   title: '',
   assignedAnswers: [],
@@ -19,7 +24,7 @@ export const initialQuestion: IQuestion = {
 export const initialCategory: ICategory = {
   topId: 'null',
   parentId: 'null',
-  id: '',
+  id: 'define at BackEnd',
   kind: 0,
   title: '',
   link: '',
@@ -51,7 +56,6 @@ export const initialState: ICategoriesState = {
     id: "REMOTECTRLS",
     questionId: "qqqqqq111"
   },
-  
 
   categoryId_questionId_done: undefined,
 
@@ -100,12 +104,12 @@ if ('localStorage' in window) {
 
 export { initialCategoriesState };
 
-export const CategoryReducer: Reducer<ICategoriesState, CategoriesActions> = (state, action) => {
+export const CategoryReducer: Reducer<ICategoriesState, Actions> = (state, action) => {
 
   console.log('------------------------------->', action.type)
-  // -----------------------------------------------------------------------
-  // Rubljov, by giving the right name, you reveal the essence of things
-  // -----------------------------------------------------------------------
+  // ----------------------------------------------------------------------
+  // Rubljov: "By giving the right name, you reveal the essence of things"
+  // ----------------------------------------------------------------------
   //
   // - firstLevelCategoryRow AAA
   // ------> categoryRow AAA.1
@@ -124,62 +128,57 @@ export const CategoryReducer: Reducer<ICategoriesState, CategoriesActions> = (st
   //
   // - firstLevelCategoryRow BBB
   // - ...
-  const innerReducerModifiedTree = [
-    ActionTypes.SET_TOP_ROWS,
-    ActionTypes.NODE_OPENING,
-    ActionTypes.SET_NODE_OPENED
-  ]
 
   const { categoryRow } = action.payload;
   const isCategory = IsCategory(categoryRow); // ICategory rather than ICategoryRow
+
   // const modifyTree = categoryRow && !isCategory;
   // let us modify tree and rest of state in single action
-  const modifyTree = categoryRow !== undefined && !innerReducerModifiedTree.includes(action.type);
+  //const doClone = categoryRow ? true : false;
+  // ? doNotCloneActions.includes(action.type) ? false : true
+  // : false;
 
-  const { topRows: topCategoryRows } = state;
+  const modifyTree = categoryRow !== undefined && !doNotCloneActions.includes(action.type);
 
-  let newTopCategoryRows: ICategoryRow[];
+  const { topRows } = state;
 
-  const newState = innerReducer(state, action);
+  const newState = doNotCallInnerReducerActions.includes(action.type)
+    ? { ...state }
+    : innerReducer(state, action);
+
   // return {
-  //   ...state, // sjebace topCategoryRows
-  //   ...
+  //   ...state // calling this, state would be destroyed, because of shallow copy
   // }
 
   // Action that modify Tree
-  // Actually part topCategoryRows of state
+  // Actually part topRows of state
+  let newTopRows: ICategoryRow[];
   if (modifyTree) {
     const { topId, id } = categoryRow!;
     if (id === topId) {
-      // actually topCategoryRows is from previous state
-      newTopCategoryRows = topCategoryRows.map(c => c.id === topId
+      // actually topRows is from previous state
+      newTopRows = topRows.map(c => c.id === topId
         ? new DeepClone(categoryRow!).categoryRow
         : new DeepClone(c).categoryRow
       );
     }
     else {
-      // actually topCategoryRows is from previous state
-      const topRow: ICategoryRow = topCategoryRows.find(c => c.id === topId)!;
+      // actually topRows is from previous state
+      const topRow: ICategoryRow = topRows.find(c => c.id === topId)!;
       DeepClone.idToSet = id;
       DeepClone.newCategoryRow = categoryRow!;
       const newTopRow = new DeepClone(topRow).categoryRow;
-      newTopCategoryRows = topCategoryRows.map(c => c.id === topId
+      newTopRows = topRows.map(c => c.id === topId
         ? newTopRow
         : new DeepClone(c).categoryRow
       );
+      DeepClone.idToSet = '';
     }
-    newState.topRows = newTopCategoryRows;
+    newState.topRows = newTopRows;
   }
   else {
     // just clone to enable time-travel debugging
-    //DeepClone.idToSet = '';
-    //const state3 = { ...state } // shallow clone
-    //const newState = reducer(state3, action); // do not modify topCategoryRows inside reducer actions
-    // newState.topCategoryRows
-    //newTopCategoryRows = state.topCategoryRows;
-    //newTopCategoryRows = topCategoryRows.map(c => new DeepClone(c).categoryRow)
   }
-
 
   if (actionStoringToLocalStorage.includes(action.type)) {
     const { keyExpanded } = newState;
@@ -194,11 +193,11 @@ export const CategoryReducer: Reducer<ICategoriesState, CategoriesActions> = (st
   return newState;
 }
 
-const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICategoriesState => {
+const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesState => {
   switch (action.type) {
 
     //////////////////////////////////////////////////
-    // CategoryRows Level: 1
+    // Rows Level: 1
 
     case ActionTypes.SET_TOP_ROWS_LOADING:
       return {
@@ -282,7 +281,7 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
 
     case ActionTypes.SET_SUB_CATEGORIES: {
       const { id, categoryRows } = action.payload;
-      const { topRows: topCategoryRows } = state;
+      const { topRows } = state;
       categoryRows.forEach((categoryRow: ICategoryRow) => {
         const { id, hasSubCategories, numOfQuestions } = categoryRow;
       })
@@ -335,6 +334,20 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
     }
       */
 
+
+    // case ActionTypes.SET_CATEGORY_ROW: {
+    //   const { categoryRow } = action.payload; // category doesn't contain  inAdding 
+    //   console.assert(IsCategory(categoryRow));
+    //   const categoryKey = new CategoryKey(categoryRow).categoryKey!;
+    //   return {
+    //     ...state,
+    //     // keep mode
+    //     loadingCategory: false,
+    //     //keyExpanded: { ...categoryKey },
+    //     activeCategory: categoryRow,
+    //     activeQuestion: null
+    //   }
+    // }
 
     case ActionTypes.SET_CATEGORY: {
       const { categoryRow } = action.payload; // category doesn't contain  inAdding 
@@ -517,29 +530,6 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
     }
     */
 
-    case ActionTypes.CATEGORY_TITLE_CHANGED: {
-      const { value, id } = action.payload;
-      const { topRows } = state;
-      const categoryRow: ICategoryRow | undefined = findCategory(topRows, id);
-      if (categoryRow) {
-        categoryRow.title = value;
-      }
-      return {
-        ...state,
-      };
-    }
-
-    case ActionTypes.QUESTION_TITLE_CHANGED: {
-      const { categoryId, id, value } = action.payload;
-      const { topRows } = state;
-      const categoryRow: ICategoryRow | undefined = findCategory(topRows, categoryId);
-      if (categoryRow) {
-        categoryRow.questionRows.find(q => q.id === id)!.title = value;
-      }
-      return {
-        ...state,
-      };
-    }
 
     case ActionTypes.CANCEL_ADD_SUB_CATEGORY: {
       return {
@@ -589,7 +579,7 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
       // console.error('SET_QUESTION_AFTER_ASSIGN_ANSWER', {x})
 
       // TODO Popravi
-      // const rootCategoryRows = newTopCategoryRows.map((c: ICategory) => c.id === parentId
+      // const rootRows = newTopRows.map((c: ICategory) => c.id === parentId
       //   ? {
       //     ...c,
       //     questionRows: inAdding
@@ -642,7 +632,7 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
       const { parentId, id } = question;
       return {
         ...state, // Popravi
-        // categoryKeyExpanded: newRootCategoryRows.map((c: ICategory) => c.id === parentId
+        // categoryKeyExpanded: newRootRows.map((c: ICategory) => c.id === parentId
         //   ? {
         //     ...c,
         //     questionRows: c.questionRows.filter(q => q.id !== id)
@@ -665,42 +655,31 @@ const innerReducer = (state: ICategoriesState, action: CategoriesActions): ICate
     }
 
     default:
-      return state;  // TODO throw error
+      alert(`Action ${action.type} not allowed`)
+      return {
+        ...state
+      }
   }
 };
 
 
-function findCategory(categoryRows: ICategoryRow[], id: string): ICategoryRow | undefined {
-  let cat: ICategoryRow | undefined = categoryRows.find(c => c.id === (id ?? 'null'));
-  if (!cat) {
-    try {
-      categoryRows.forEach(c => {
-        cat = findCategory(c.categoryRows, id);
-        if (cat) {
-          throw new Error("Stop the loop");
-        }
-      })
-    }
-    catch (e) {
-      console.log("Loop stopped");
-    }
-  }
-  return cat;
-}
-
+/* -----------------------------
+   Deep Clone
+----------------------------- */
 export class DeepClone {
   static idToSet: string;
   static newCategoryRow: ICategoryRow;
   constructor(categoryRow: ICategoryRow) {
     const { topId, id, parentId, title, link, kind, header, level, variations, numOfQuestions,
-      hasSubCategories, categoryRows: subCategories, created, modified, questionRows, isExpanded } = categoryRow;
+      hasSubCategories, categoryRows, created, modified, questionRows, isExpanded } = categoryRow;
 
-    const subCats = subCategories.map((cat: ICategoryRow) => {
-      if (cat.id === DeepClone.idToSet) {
+    const subCatRows = categoryRows.map((catRow: ICategoryRow) => {
+      console.log('DeepClone >>>>>>>>>>>>>>>', catRow.id)
+      if (catRow.id === DeepClone.idToSet) {
         return { ...DeepClone.newCategoryRow }
       }
       else {
-        return new DeepClone(cat).categoryRow
+        return new DeepClone(catRow).categoryRow
       }
     });
 
@@ -714,7 +693,7 @@ export class DeepClone {
       header,
       level,
       hasSubCategories,
-      categoryRows: subCats,
+      categoryRows: subCatRows,
       numOfQuestions,
       questionRows,
       variations: variations ?? [],

@@ -79,9 +79,10 @@ export interface ICategoryKeyExtended extends ICategoryKey {
 }
 
 export class CategoryRowDto {
-	constructor(categoryRow: ICategoryRow) {
+	constructor(categoryRow: ICategoryRow, Workspace: string) {
 		const { topId, id, parentId, modified } = categoryRow;
 		this.categoryRowDto = {
+			Workspace,
 			TopId: topId,
 			Id: id,
 			ParentId: parentId,
@@ -173,9 +174,9 @@ export interface IQuestionKeyDto {
 	Id: string;
 }
 
-export class QuestionKeyDto  {
+export class QuestionKeyDto {
 	constructor(key: IQuestionKey, Workspace: string) { //, parentId: string) {
-		const { topId, parentId, id  } = key;
+		const { topId, parentId, id } = key;
 		this.dto = {
 			Workspace,
 			TopId: topId,
@@ -206,7 +207,7 @@ export class RelatedFilterDto {
 	constructor(relatedFilter: IRelatedFilter) {
 		const { questionKey, filter, numOfUsages, created, lastUsed } = relatedFilter;
 		this.relatedFilterDto = {
-			QuestionKey: questionKey??undefined,
+			QuestionKey: questionKey ?? undefined,
 			Filter: filter,
 			Created: created ? new WhoWhen2Dto(created).whoWhenDto! : null,
 			LastUsed: lastUsed ? new WhoWhen2Dto(lastUsed).whoWhenDto! : null,
@@ -220,7 +221,7 @@ export class RelatedFilter {
 	constructor(dto: IRelatedFilterDto) {
 		const { QuestionKey, Filter, Created, LastUsed, NumOfUsages } = dto;
 		this.relatedFilter = {
-			questionKey: QuestionKey??null,
+			questionKey: QuestionKey ?? null,
 			filter: Filter,
 			created: Created ? new Dto2WhoWhen(Created).whoWhen! : null,
 			lastUsed: LastUsed ? new Dto2WhoWhen(LastUsed).whoWhen! : null,
@@ -418,10 +419,11 @@ export class QuestionKey {
 }
 
 export class QuestionDto {
-	constructor(question: IQuestion) {
+	constructor(question: IQuestion, Workspace: string) {
 		const { topId, parentId, id, title, source, status, created, modified,
 			numOfAssignedAnswers, numOfRelatedFilters } = question;
 		this.questionDto = {
+			Workspace,
 			TopId: topId,
 			ParentId: parentId ?? 'null',  // TODO proveri
 			Id: id,
@@ -505,7 +507,7 @@ export interface IExpandInfo {
 	formMode: FormMode;
 	includeQuestionId?: string;
 	newCategoryRow?: ICategoryRow;
-	newQuestion?: IQuestionRow;
+	newQuestionRow?: IQuestionRow;
 }
 
 
@@ -568,6 +570,8 @@ export interface ICategoriesContext {
 	deleteCategoryVariation: (categoryKey: ICategoryKey, name: string) => void,
 	expandCategory: (expandInfo: IExpandInfo) => Promise<any>,
 	collapseCategory: (categoryRow: ICategoryRow) => void,
+	findCategory: (categoryRows: ICategoryRow[], id: string) => ICategoryRow | undefined;
+	onCategoryTitleChanged: (topId: string, id: string, title: string) => void;
 	//////////////
 	// questions
 	loadCategoryQuestions: (catParams: ILoadCategoryQuestions) => void;  //(parentInfo: IParentInfo) => void,
@@ -579,6 +583,7 @@ export interface ICategoriesContext {
 	updateQuestion: (oldParentId: string, question: IQuestion, categoryChanged: boolean) => Promise<any>;
 	assignQuestionAnswer: (action: 'Assign' | 'UnAssign', questionKey: IQuestionKey, assignedAnswerKey: IAssignedAnswerKey) => Promise<any>;
 	deleteQuestion: (questionRow: IQuestionRow) => void;
+	onQuestionTitleChanged: (topId: string, categoryId: string, id: string, title: string) => void;
 }
 
 export interface ICategoryFormProps {
@@ -676,7 +681,8 @@ export enum ActionTypes {
 	CATEGORY_TITLE_CHANGED = 'CATEGORY_TITLE_CHANGED',
 	CANCEL_ADD_SUB_CATEGORY = 'CANCEL_ADD_SUB_CATEGORY',
 	SET_CATEGORY = 'SET_CATEGORY',
-	SET_CATEGORY_ROW = 'SET_CATEGORY_ROW',
+	//SET_CATEGORY_ROW = 'SET_CATEGORY_ROW',
+	ADD_NEW_QUESTION_TO_ROW = 'ADD_NEW_QUESTION_TO_ROW',
 	SET_ROW_EXPANDING = 'SET_ROW_EXPANDING',
 	SET_ROW_EXPANDED = 'SET_ROW_EXPANDED',
 	SET_ROW_COLLAPSING = 'SET_ROW_COLLAPSING',
@@ -745,8 +751,23 @@ export const actionStoringToLocalStorage = [
 	ActionTypes.FORCE_OPEN_NODE
 ];
 
+export const doNotCloneActions = [
+	ActionTypes.SET_TOP_ROWS,
+	ActionTypes.NODE_OPENING,
+	ActionTypes.SET_NODE_OPENED
+]
 
-export type CategoriesPayload = {
+
+
+export const doNotCallInnerReducerActions = [
+	ActionTypes.CATEGORY_TITLE_CHANGED,
+	ActionTypes.QUESTION_TITLE_CHANGED,
+	ActionTypes.ADD_SUB_CATEGORY,
+	ActionTypes.ADD_NEW_QUESTION_TO_ROW
+]
+
+
+export type Payload = {
 
 	[ActionTypes.SET_TOP_ROWS_LOADING]: {
 		categoryRow?: ICategoryRow;
@@ -800,15 +821,10 @@ export type CategoriesPayload = {
 
 	[ActionTypes.CATEGORY_TITLE_CHANGED]: {
 		categoryRow?: ICategoryRow;
-		id: string;
-		value: string;
 	}
 
 	[ActionTypes.QUESTION_TITLE_CHANGED]: {
 		categoryRow?: ICategoryRow;
-		categoryId: string;
-		id: string;
-		value: string;
 	}
 
 	[ActionTypes.CANCEL_ADD_SUB_CATEGORY]: {
@@ -819,6 +835,9 @@ export type CategoriesPayload = {
 		categoryRow: ICategory;
 	};
 
+	// [ActionTypes.SET_CATEGORY_ROW]: {
+	// 	categoryRow: ICategoryRow;
+	// };
 
 	[ActionTypes.SET_CATEGORY_TO_VIEW]: {
 		categoryRow: ICategoryRow; // ICategory extends ICategoryRow
@@ -830,6 +849,12 @@ export type CategoriesPayload = {
 
 	[ActionTypes.SET_CATEGORY_UPDATED]: {
 		categoryRow: ICategoryRow; // ICategory extends ICategoryRow
+	};
+
+
+	[ActionTypes.ADD_NEW_QUESTION_TO_ROW]: {
+		categoryRow?: ICategoryRow;
+		newQuestionRow: IQuestionRow;
 	};
 
 
@@ -950,6 +975,6 @@ export type CategoriesPayload = {
 	};
 };
 
-export type CategoriesActions =
-	ActionMap<CategoriesPayload>[keyof ActionMap<CategoriesPayload>];
+export type Actions =
+	ActionMap<Payload>[keyof ActionMap<Payload>];
 

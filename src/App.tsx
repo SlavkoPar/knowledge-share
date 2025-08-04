@@ -62,7 +62,7 @@ function App() {
   }, [isAuthenticated]) // , isAuthenticated
 
   const locationPathname = location.pathname;
-  console.log('App locationPathname ===>>>', locationPathname);
+  console.log('---------------- ================== App locationPathname ===>>>', locationPathname);
 
   const searchParams = new URLSearchParams(location.search);
 

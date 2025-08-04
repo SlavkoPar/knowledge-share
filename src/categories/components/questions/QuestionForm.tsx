@@ -25,7 +25,7 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
   const { globalState } = useGlobalContext();
   const { isDarkMode, variant, bg } = globalState;
 
-  const { state } = useCategoryContext();
+  const { state, onQuestionTitleChanged } = useCategoryContext();
   let { formMode } = state;
 
   const viewing = formMode === FormMode.ViewingQuestion;
@@ -83,14 +83,15 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
   });
 
   const debouncedTitleHandler = useCallback(
-    debounce((categoryId: string, id: string, value: string) => {
-      dispatch({ type: ActionTypes.QUESTION_TITLE_CHANGED, payload: { categoryId, id, value } })
+    debounce((value: string) => {
+      //dispatch({ type: ActionTypes.QUESTION_TITLE_CHANGED, payload: { categoryId, id, value } })
+      onQuestionTitleChanged(topId, parentId!, id, value);
     }, 500), []);
 
   const handleChangeTitle = (event: ChangeEvent<HTMLTextAreaElement>) => {
     formik.handleChange(event);
     const value = event.target.value;
-    debouncedTitleHandler(formik.values.parentId!, id, value)
+    debouncedTitleHandler(value)
   };
 
 

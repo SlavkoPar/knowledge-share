@@ -61,7 +61,7 @@ const SupportPage: React.FC = () => {
 							<AutoSuggestQuestions
 								tekst={tekst}
 								onSelectQuestion={onSelectQuestion}
-								categoryRows={cats}
+								allCategoryRows={cats}
 								searchQuestions={searchQuestions}
 							/>
 						</div>

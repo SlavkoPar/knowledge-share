@@ -393,7 +393,7 @@ const ChatBotPage: React.FC = () => {
 									<AutoSuggestQuestions
 										tekst={txt}
 										onSelectQuestion={onSelectQuestion}
-										categoryRows={cats}
+										allCategoryRows={cats}
 										searchQuestions={searchQuestions}
 									/>
 								</>

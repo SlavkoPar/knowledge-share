@@ -19,8 +19,9 @@ import AddCategory from './AddCategory';
 
 const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, questionId: string | null }) => {
 
-    const { topId, parentId, id, title, level, hasSubCategories, categoryRows: subCategories,
+    const { topId, parentId, id, title, level, hasSubCategories, categoryRows,
         numOfQuestions, questionRows, isExpanded } = categoryRow;
+    categoryRow.level += 1;
 
     const categoryKey: ICategoryKey = new CategoryKey(categoryRow).categoryKey!;
 
@@ -217,7 +218,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
                 }
             </div>
             <div className='ps-3'>
-                {showQuestions && <QuestionList level={level + 1} categoryRow={categoryRow} />}
+                {showQuestions && <QuestionList categoryRow={categoryRow} />}
             </div>
         </>
 
@@ -287,10 +288,10 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
                     {isExpanded &&
                         <>
                             {hasSubCategories &&
-                                <CategoryList level={level + 1} categoryRow={categoryRow} title={title} isExpanded={isExpanded} />
+                                <CategoryList  categoryRow={categoryRow} title={title} isExpanded={isExpanded} />
                             }
                             {/* {showQuestions &&
-                                <QuestionList level={level + 1} categoryRow={categoryRow} />
+                                <QuestionList categoryRow={categoryRow} />
                             } */}
                         </>
                     }
