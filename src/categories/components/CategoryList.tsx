@@ -8,10 +8,10 @@ const CategoryList = ({ title, categoryRow, isExpanded }: IParentInfo) => {
 
     const { state } = useCategoryContext();
     const { keyExpanded } = state;
-    const { topId, id, questionId } = keyExpanded ?? { topId: '', id: '', questionId: null };
+    const { topId, categoryId: id, questionId } = keyExpanded ?? { topId: '', categoryId: '', questionId: null };
 
     const { level, categoryRows } = categoryRow;
-    console.log('<<<<<<<<< Renderujem CategoryList', categoryRow.id, categoryRows )
+    console.log('<<<<<<<<< Renderujem CategoryList', categoryRow.id, categoryRows)
 
     return (
         <div className={level! > 1 ? 'ms-2' : ''} >

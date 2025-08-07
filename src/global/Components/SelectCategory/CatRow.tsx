@@ -8,7 +8,7 @@ import { useGlobalState } from 'global/GlobalProvider'
 import { ICategoryRow } from "categories/types";
 
 import CatList from "global/Components/SelectCategory/CatList";
-import { CatsActions, CatsActionTypes } from './types';
+import { CatsActions, CatActionTypes } from './types';
 
 interface ICatRow {
     cat: ICategoryRow;
@@ -24,7 +24,7 @@ const CatRow = ({ cat, dispatch, setParentCat, selId }: ICatRow) => {
     const { isDarkMode, variant, bg } = useGlobalState();
 
     const expand = (_id: IDBValidKey) => {
-        dispatch({ type: CatsActionTypes.SET_EXPANDED, payload: { id, expanding: !isExpanded } });
+        dispatch({ type: CatActionTypes.SET_EXPANDED, payload: { id, expanding: !isExpanded } });
     }
 
     const onSelectCat = (cat: ICategoryRow) => {

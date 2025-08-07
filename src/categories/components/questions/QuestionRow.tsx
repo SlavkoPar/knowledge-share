@@ -29,7 +29,7 @@ const QuestionRow = ({ questionRow }: { questionRow: IQuestionRow }) => {
     const { canEdit, isDarkMode, variant, bg, authUser } = useGlobalState();
     const { state, viewQuestion, addQuestion, editQuestion, deleteQuestion } = useCategoryContext();
 
-    const { activeQuestion, formMode, keyExpanded: categoryKeyExpanded } = state;
+    const { activeQuestion, formMode, keyExpanded } = state;
 
     const showForm = activeQuestion !== null && activeQuestion.id === id;
 
@@ -41,7 +41,7 @@ const QuestionRow = ({ questionRow }: { questionRow: IQuestionRow }) => {
             time: new Date(),
             nickName: authUser.nickName
         }
-        deleteQuestion(questionRow);
+        deleteQuestion(questionRow, showForm /* isActive */);
     };
 
     const edit = async (Id: string) => {
@@ -76,7 +76,7 @@ const QuestionRow = ({ questionRow }: { questionRow: IQuestionRow }) => {
     const [hoverRef, hoverProps] = useHover();
 
     const Row1 =
-        <div ref={hoverRef} className={`d-flex justify-content-start align-items-center w-100 position-relative question-row${showForm ? '-selected' : ''}`}>
+        <div ref={hoverRef} className={`p-0 d-flex justify-content-start align-items-center w-100 position-relative question-row${showForm ? '-selected' : ''}`}>
             <Button
                 variant='link'
                 size="sm"
@@ -87,7 +87,7 @@ const QuestionRow = ({ questionRow }: { questionRow: IQuestionRow }) => {
             <Button
                 variant='link'
                 size="sm"
-                className={`p-0 px-1 mx-0 question-row-title ${showForm ? 'fw-bold' : ''}`}
+                className={`p-0 px-1 m-1 ms-0 question-row-title ${showForm ? 'fw-bold' : ''}`}
                 title={`id:${id!.toString()}`}
                 onClick={() => onSelectQuestion(id!)}
                 disabled={alreadyAdding}

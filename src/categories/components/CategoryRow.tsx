@@ -83,8 +83,8 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
 
     useEffect(() => {
         if (numOfQuestions > 0 && !isExpanded) { //!isExpanded && !isSelected) {
-            if (keyExpanded && keyExpanded.id === id) { // catKeyExpanded.id) {
-                console.log('%%%%%%%%%%%%%%%%%%%%%%%% Zovem iz CategoryRow', keyExpanded.id, id)
+            if (keyExpanded && keyExpanded.categoryId === id) { // catKeyExpanded.id) {
+                console.log('%%%%%%%%%%%%%%%%%%%%%%%% Zovem iz CategoryRow', keyExpanded.categoryId, id)
                 if (formMode !== FormMode.AddingCategory) {
                     formMode = FormMode.None
                 }
@@ -288,7 +288,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
                     {isExpanded &&
                         <>
                             {hasSubCategories &&
-                                <CategoryList  categoryRow={categoryRow} title={title} isExpanded={isExpanded} />
+                                <CategoryList categoryRow={categoryRow} title={title} isExpanded={isExpanded} />
                             }
                             {/* {showQuestions &&
                                 <QuestionList categoryRow={categoryRow} />

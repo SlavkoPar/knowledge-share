@@ -19,7 +19,8 @@ import { globalReducer, initialGlobalState } from "global/globalReducer";
 import {
   Category, ICategory, ICategoryDto, ICategoryKey, IQuestionRow, IQuestionRowDto, IQuestionRowDtosEx,
   IQuestion, IQuestionDto, IQuestionDtoEx, IQuestionEx, IQuestionKey, Question, IAssignedAnswer,
-  ICategoryRowDto, ICategoryRow, CategoryRow
+  ICategoryRowDto, ICategoryRow, CategoryRow,
+  QuestionKey
 } from "categories/types";
 
 import {
@@ -48,7 +49,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
   // we reset changes, and again we use initialGlobalState
   // so, don't use globalDispatch inside of inner Provider, like Categories Provider
   const [globalState, dispatch] = useReducer(globalReducer, initialGlobalState);
-  const { workspace, authUser } = globalState;
+  const { workspace, authUser, allCategoryRows } = globalState;
 
   console.log('--------> GlobalProvider')
 
@@ -124,23 +125,22 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
         const url = `${protectedResources.KnowledgeAPI.endpointCategoryRow}/${workspace}`;
         await Execute("GET", url, null)
           .then((catRowDtos: ICategoryRowDto[]) => {   //  | Response
-            const allCategoryRows = new Map<string, ICategoryRow>();
+            const allCatRows = new Map<string, ICategoryRow>();
             console.timeEnd();
-            catRowDtos.forEach((rowDto: ICategoryRowDto) =>
-              allCategoryRows.set(rowDto.Id, new CategoryRow(rowDto).categoryRow));
-            allCategoryRows.forEach(cat => {
+            catRowDtos.forEach((rowDto: ICategoryRowDto) =>  allCatRows.set(rowDto.Id, new CategoryRow(rowDto).categoryRow));
+            allCatRows.forEach(cat => {
               let { id, parentId, title, variations, hasSubCategories, level, kind } = cat;
               let titlesUpTheTree = id;
               let parentCat = parentId;
               while (parentCat) {
-                const cat2 = allCategoryRows.get(parentCat)!;
+                const cat2 = allCatRows.get(parentCat)!;
                 titlesUpTheTree = cat2!.id + ' / ' + titlesUpTheTree;
                 parentCat = cat2.parentId;
               }
               cat.titlesUpTheTree = titlesUpTheTree;
-              allCategoryRows.set(id, cat);
+              allCatRows.set(id, cat);
             })
-            dispatch({ type: GlobalActionTypes.SET_ALL_CATEGORY_ROWS, payload: { allCategoryRows } });
+            dispatch({ type: GlobalActionTypes.SET_ALL_CATEGORY_ROWS, payload: { allCategoryRows: allCatRows } });
             resolve(true)
           });
       }
@@ -212,7 +212,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
               const { TopId, ParentId, Id, Title, NumOfAssignedAnswers, Included } = dto;
               return {
                 topId: TopId,
-                parentId: ParentId,
+                parentId: ParentId??'',
                 id: Id,
                 title: Title,
                 categoryTitle: '',
@@ -353,10 +353,12 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
 
   // differs from CategoryProvider, here we don't dispatch
   const getQuestion = async (questionKey: IQuestionKey): Promise<any> => {
+    
     return new Promise(async (resolve) => {
       try {
-        const { topId: topId, id } = questionKey;
-        const url = `${protectedResources.KnowledgeAPI.endpointQuestion}/${topId}/${id}`;
+        const { topId, id } = questionKey;
+        const query = new QuestionKey(questionKey).toQuery(workspace);
+        const url = `${protectedResources.KnowledgeAPI.endpointQuestion}?${query}`;
         console.time()
         await Execute("GET", url)
           .then((questionDtoEx: IQuestionDtoEx) => {
@@ -392,9 +394,9 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
 
   const getCatsByKind = async (kind: number): Promise<ICategoryRow[]> => {
     try {
-      const { allCategoryRows: cats } = globalState;
+      const { allCategoryRows } = globalState;
       const categories: ICategoryRow[] = [];
-      cats.forEach((c, id) => {
+      allCategoryRows.forEach((c, id) => {
         if (c.kind === kind) {
           const { topId, id, title, level, link, header } = c;
           // const cat: ICat = {
@@ -427,9 +429,8 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
 
   const getCatsByLevel = async (kind: number): Promise<ICategoryRow[]> => {
     try {
-      const { allCategoryRows: cats } = globalState;
       const categories: ICategoryRow[] = [];
-      cats.forEach((c, id) => {
+      allCategoryRows.forEach((c, id) => {
         if (c.kind === kind) {
           const { topId, id, header, title, link, level } = c;
           // const cat: ICategoryRow = {
@@ -461,29 +462,13 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
 
   const getSubCats = useCallback(async (categoryId: string | null) => {
     try {
-      const { allCategoryRows: cats } = globalState;
       let parentHeader = "";
-      console.log('globalState.cats', { cats }, categoryId)
       const subCats: ICategoryRow[] = [];
-      cats.forEach((cat, id) => {  // globalState.cats is Map<string, ICat>
+      allCategoryRows.forEach((cat, id) => {  // globalState.cats is Map<string, ICat>
         if (id === categoryId) {
           parentHeader = ""; //cat.header!;
         }
         else if (cat.parentId === categoryId) {
-          // const { topId, id, parentId, title, level, kind, hasSubCategories } = cat;
-          // const c: ICat = {
-          //   topId,
-          //   id,
-          //   title,
-          //   parentId,
-          //   titlesUpTheTree: "",
-          //   variations: [],
-          //   hasSubCategories,
-          //   level,
-          //   kind,
-          //   isExpanded: false
-          // }
-          // subCats.push(c);
           subCats.push(cat);
         }
       })
@@ -494,12 +479,11 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
       dispatch({ type: GlobalActionTypes.SET_ERROR, payload: { error } });
       return { subCats: [], parentHeader: 'Kiks subCats' }
     }
-  }, [globalState.allCategoryRows]);
+  }, [allCategoryRows]);
 
   const getCat = useCallback(async (id: string): Promise<ICategoryRow | undefined> => {
     try {
-      const { allCategoryRows: categoryRows } = globalState;
-      const cat: ICategoryRow | undefined = categoryRows.get(id);  // globalState.cats is Map<string, ICat>
+      const cat: ICategoryRow | undefined = allCategoryRows.get(id);  // globalState.cats is Map<string, ICat>
       return cat;
     }
     catch (error: any) {
@@ -507,7 +491,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
       dispatch({ type: GlobalActionTypes.SET_ERROR, payload: { error } });
     }
     return undefined;
-  }, [globalState.allCategoryRows]);
+  }, [allCategoryRows]);
 
 
   const health = () => {

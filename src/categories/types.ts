@@ -51,8 +51,11 @@ export interface ICategoryKey {
 	parentId: string | null;
 }
 
-export interface ICategoryKeyExpanded extends ICategoryKey {
+export interface IKeyExpanded { //} extends ICategoryKey {
+	topId: string,
+	categoryId: string;
 	questionId: string | null;
+	//toCategoryKey: () =>  ICategoryKey;
 }
 
 export interface ICategoryRow extends ICategoryKey, IRecord {
@@ -74,10 +77,6 @@ export interface ICategory extends ICategoryRow {
 	doc1: string, // some document optionally, used in Category, but not not in CategoryRow
 }
 
-export interface ICategoryKeyExtended extends ICategoryKey {
-	title: string;
-}
-
 export class CategoryRowDto {
 	constructor(categoryRow: ICategoryRow, Workspace: string) {
 		const { topId, id, parentId, modified } = categoryRow;
@@ -85,7 +84,7 @@ export class CategoryRowDto {
 			Workspace,
 			TopId: topId,
 			Id: id,
-			ParentId: parentId,
+			ParentId: parentId ?? undefined,
 			Title: '',
 			Link: '',
 			Header: '',
@@ -112,7 +111,7 @@ export class CategoryRow {
 		this.categoryRow = {
 			topId: TopId,
 			id: Id,
-			parentId: ParentId,
+			parentId: ParentId ?? null,
 			title: Title,
 			link: Link,
 			header: Header,
@@ -138,7 +137,7 @@ export class CategoryRow {
 
 export interface IQuestionKey {
 	topId: string,
-	parentId: string | null;
+	parentId: string;
 	id: string;
 }
 
@@ -247,7 +246,7 @@ export class QuestionRow {
 		const { TopId, ParentId, Id, NumOfAssignedAnswers, Title, CategoryTitle, Created, Modified, Included } = rowDto;
 		this.questionRow = {
 			topId: TopId,
-			parentId: ParentId,
+			parentId: ParentId ?? '',
 			id: Id,
 			numOfAssignedAnswers: NumOfAssignedAnswers ?? 0,
 			title: Title,
@@ -263,9 +262,10 @@ export class QuestionRow {
 }
 
 export class QuestionRowDto {
-	constructor(row: IQuestionRow) { //, parentId: string) {
+	constructor(row: IQuestionRow, Workspace: string) { //, parentId: string) {
 		const { topId, parentId, id, numOfAssignedAnswers, created, modified, isSelected } = row;
 		this.questionRowDto = {
+			Workspace,
 			TopId: topId,
 			ParentId: parentId ?? '',
 			Id: id,
@@ -282,11 +282,12 @@ export class QuestionRowDto {
 
 
 export class CategoryKey {
-	constructor(cat: IQuestionKey | ICategoryRow | ICategory | ICategoryKeyExtended) {
+	constructor(x: IQuestionKey | ICategoryRow | ICategory | ICategoryKey) {
+		const { topId, id, parentId } = x;
 		this.categoryKey = {
-			topId: cat.topId,
-			id: cat.id,
-			parentId: cat.parentId
+			topId,
+			id,
+			parentId
 		}
 	}
 	categoryKey: ICategoryKey;
@@ -349,7 +350,7 @@ export class CategoryDto {
 			TopId: topId,
 			Id: id,
 			Kind: kind,
-			ParentId: parentId,
+			ParentId: parentId ?? undefined,
 			Title: title,
 			Link: link,
 			Header: header ?? '',
@@ -378,7 +379,7 @@ export class Question {
 		// TODO possible to call base class construtor
 		this.question = {
 			topId: dto.TopId, // TODO will be set later
-			parentId: dto.ParentId,
+			parentId: dto.ParentId ?? '',
 			id: dto.Id,
 			title: dto.Title,
 			categoryTitle: dto.CategoryTitle,
@@ -531,7 +532,7 @@ export interface ICategoriesState {
 	topRows: ICategoryRow[];
 	topRowsLoading: boolean;
 	topRowsLoaded: boolean;
-	keyExpanded: ICategoryKeyExpanded | null; // ICategoryKey + questionId
+	keyExpanded: IKeyExpanded | null; // ICategoryKey + questionId
 	categoryId_questionId_done?: string;
 	nodeOpening: boolean;
 	nodeOpened: boolean;
@@ -545,9 +546,8 @@ export interface ICategoriesState {
 	whichRowId?: string; // category.id or question.id
 }
 
-export interface ILocStorage {
-	lastKeyExpanded: ICategoryKey | null;
-	lastQuestionId: string | null;
+export interface ILocStorage  {
+	keyExpanded: IKeyExpanded | null
 }
 
 export interface ILoadCategoryQuestions {
@@ -558,7 +558,7 @@ export interface ILoadCategoryQuestions {
 
 export interface ICategoriesContext {
 	state: ICategoriesState,
-	openNode: (keyExpanded: ICategoryKeyExpanded, fromChatBotDlg?: string) => Promise<any>;
+	openNode: (keyExpanded: IKeyExpanded, fromChatBotDlg?: string) => Promise<any>;
 	loadTopRows: () => Promise<any>,
 	addSubCategory: (categoryRow: ICategoryRow) => Promise<any>;
 	cancelAddCategory: () => Promise<any>;
@@ -582,7 +582,7 @@ export interface ICategoriesContext {
 	editQuestion: (questionRow: IQuestionRow) => void;
 	updateQuestion: (oldParentId: string, question: IQuestion, categoryChanged: boolean) => Promise<any>;
 	assignQuestionAnswer: (action: 'Assign' | 'UnAssign', questionKey: IQuestionKey, assignedAnswerKey: IAssignedAnswerKey) => Promise<any>;
-	deleteQuestion: (questionRow: IQuestionRow) => void;
+	deleteQuestion: (questionRow: IQuestionRow, isActive: boolean) => void;
 	onQuestionTitleChanged: (topId: string, categoryId: string, id: string, title: string) => void;
 }
 
@@ -713,32 +713,11 @@ export enum ActionTypes {
 	SET_QUESTION = 'SET_QUESTION',
 	SET_QUESTION_AFTER_ASSIGN_ANSWER = 'SET_QUESTION_AFTER_ASSIGN_ANSWER',
 	SET_QUESTION_ANSWERS = 'SET_QUESTION_ANSWERS',
-	DELETE_QUESTION = 'DELETE_QUESTION',
+	QUESTION_DELETED = 'QUESTION_DELETED',
 
 	CLOSE_QUESTION_FORM = 'CLOSE_QUESTION_FORM',
 	CANCEL_QUESTION_FORM = 'CANCEL_QUESTION_FORM'
 }
-
-/*
-//export const actionsThatModifyFirstLevelCategoryRow = [
-export const actionsThatModifyTree = [
-	// ActionTypes.SET_FIRST_LEVEL_CATEGORY_ROWS keep commented
-	// ActionTypes.SET_CATEGORY_NODE_OPENED,
-	ActionTypes.DELETE_CATEGORY,
-	ActionTypes.SET_CATEGORY_ROW_EXPANDED,
-	ActionTypes.SET_CATEGORY_ROW_COLLAPSED,
-	ActionTypes.SET_CATEGORY_UPDATED,
-	//ActionTypes.SET_CATEGORY_TO_VIEW,
-	//ActionTypes.SET_CATEGORY_TO_EDIT,
-	// ActionTypes.SET_QUESTION_TO_VIEW,
-	// ActionTypes.SET_QUESTION_TO_EDIT,
-	ActionTypes.CLOSE_CATEGORY_FORM,
-	ActionTypes.CANCEL_CATEGORY_FORM,
-	ActionTypes.ADD_QUESTION
-]
-	*/
-
-
 
 export const actionStoringToLocalStorage = [
 	// ActionTypes.SET_CATEGORY_NODE_OPENED
@@ -757,15 +736,12 @@ export const doNotCloneActions = [
 	ActionTypes.SET_NODE_OPENED
 ]
 
-
-
 export const doNotCallInnerReducerActions = [
 	ActionTypes.CATEGORY_TITLE_CHANGED,
 	ActionTypes.QUESTION_TITLE_CHANGED,
 	ActionTypes.ADD_SUB_CATEGORY,
 	ActionTypes.ADD_NEW_QUESTION_TO_ROW
 ]
-
 
 export type Payload = {
 
@@ -795,7 +771,7 @@ export type Payload = {
 	[ActionTypes.SET_NODE_OPENED]: {
 		// categoryNodesUpTheTree: ICategoryKeyExtended[]; /// we could have used Id only
 		categoryRow: ICategoryRow;
-		keyExpanded: ICategoryKeyExpanded;
+		keyExpanded: IKeyExpanded;
 		//questionId: string | null,
 		fromChatBotDlg: boolean;
 	};
@@ -907,7 +883,7 @@ export type Payload = {
 
 	[ActionTypes.FORCE_OPEN_NODE]: {
 		categoryRow?: ICategoryRow,
-		keyExpanded: ICategoryKeyExpanded
+		keyExpanded: IKeyExpanded
 	};
 
 
@@ -959,7 +935,7 @@ export type Payload = {
 		answers: IAssignedAnswer[];
 	};
 
-	[ActionTypes.DELETE_QUESTION]: {
+	[ActionTypes.QUESTION_DELETED]: {
 		categoryRow?: ICategoryRow;
 		question: IQuestion
 	};

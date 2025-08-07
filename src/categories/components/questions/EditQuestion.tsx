@@ -33,13 +33,14 @@ const EditQuestion = ({ inLine }: { inLine: boolean }) => {
         const { parentId } = activeQuestion;
         const categoryChanged = parentId !== newQuestion.parentId;
         //const questionKey = new QuestionKey(activeQuestion).questionKey;
-        const question = await updateQuestion(parentId!, newQuestion, categoryChanged);
+        /*const question =*/ await updateQuestion(parentId!, newQuestion, categoryChanged);
+        /*
         if (activeQuestion.parentId !== question.parentId) {
-            /*
              await loadAndCacheAllCategoryRows(); // reload, group could have been changed
              await openNode({ topId: '', id: q.parentId, questionId: q.id });
-            */
         }
+        */
+        
         // if (categoryChanged) {
         //     setTimeout(() => dispatch({ type: ActionTypes.CLOSE_QUESTION_FORM, payload: { question: question } }), 1000);
         // }

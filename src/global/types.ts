@@ -28,7 +28,7 @@ export interface IDtoKey extends IDto {
 	Workspace?: string; // will be set during fetch
 	TopId: string,
 	Id: string,
-	ParentId: string | null;
+	ParentId?: string;
 }
 
 export class Dto2WhoWhen {

@@ -1,13 +1,13 @@
 import React, { useEffect, useReducer, useState } from "react";
 import { ListGroup } from "react-bootstrap";
 import CatRow from "global/Components/SelectCategory/CatRow";
-import { CatsReducer, initialState } from "global/Components/SelectCategory/CatsReducer";
+import { CatReducer, initialState } from "global/Components/SelectCategory/CatReducer";
 import { useGlobalContext } from "global/GlobalProvider";
-import { CatsActionTypes, ICatInfo } from "./types";
+import { CatActionTypes, ICatInfo } from "./types";
 import { ICategoryKey, ICategoryRow } from "categories/types";
 
 const CatList = ({ selId, categoryKey, level, setParentId }: ICatInfo) => {
-    const [state, dispatch] = useReducer(CatsReducer, initialState);
+    const [state, dispatch] = useReducer(CatReducer, initialState);
     const { getSubCats } = useGlobalContext();
 
     const { id } = categoryKey ?? { id: null };
@@ -17,14 +17,14 @@ const CatList = ({ selId, categoryKey, level, setParentId }: ICatInfo) => {
         (async () => {
             const res = await getSubCats(id);
             const { subCats, parentHeader } = res;
-            dispatch({ type: CatsActionTypes.SET_SUB_CATS, payload: { subCats } });
+            dispatch({ type: CatActionTypes.SET_SUB_CATS, payload: { subCats } });
         })()
     }, [getSubCats, catKey]);
 
     const mySubCats = state.cats.filter(c => c.parentId === id);
 
     const setParentCat = (cat: ICategoryRow) => {
-        dispatch({ type: CatsActionTypes.SET_PARENT_CAT, payload: { cat } })
+        dispatch({ type: CatActionTypes.SET_PARENT_CAT, payload: { cat } })
         setParentId!(cat);
     }
 

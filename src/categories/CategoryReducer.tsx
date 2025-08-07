@@ -3,12 +3,13 @@ import {
   ActionTypes, Actions, ILocStorage, IsCategory,
   ICategoriesState, ICategory, CategoryKey, ICategoryRow, CategoryRow,
   IQuestion, IQuestionRow, Question, IQuestionKey, QuestionKey, QuestionRow,
-  actionStoringToLocalStorage, FormMode, doNotCloneActions, doNotCallInnerReducerActions
+  actionStoringToLocalStorage, FormMode, doNotCloneActions, doNotCallInnerReducerActions,
+  IKeyExpanded
 } from "categories/types";
 
 export const initialQuestion: IQuestion = {
   topId: '',
-  parentId: null,
+  parentId: 'null',
   id: 'generateId', //  keep 'generateId', it is expected at BackEnd
   categoryTitle: '',
   title: '',
@@ -52,8 +53,7 @@ export const initialState: ICategoriesState = {
 
   keyExpanded: {
     topId: "MTS",
-    parentId: null,
-    id: "REMOTECTRLS",
+    categoryId: "REMOTECTRLS",
     questionId: "qqqqqq111"
   },
 
@@ -67,7 +67,6 @@ export const initialState: ICategoriesState = {
   loadingCategory: false,
   loadingQuestion: false
 }
-
 
 // let state_fromLocalStorage: IState_fromLocalStorage | undefined;
 // const hasMissingProps = (): boolean => {
@@ -130,15 +129,11 @@ export const CategoryReducer: Reducer<ICategoriesState, Actions> = (state, actio
   // - ...
 
   const { categoryRow } = action.payload;
-  const isCategory = IsCategory(categoryRow); // ICategory rather than ICategoryRow
+  // const isCategory = IsCategory(categoryRow); // ICategory rather than ICategoryRow
 
-  // const modifyTree = categoryRow && !isCategory;
-  // let us modify tree and rest of state in single action
-  //const doClone = categoryRow ? true : false;
-  // ? doNotCloneActions.includes(action.type) ? false : true
-  // : false;
-
-  const modifyTree = categoryRow !== undefined && !doNotCloneActions.includes(action.type);
+  const modifyTree = categoryRow
+    ? doNotCloneActions.includes(action.type) ? false : true
+    : false;
 
   const { topRows } = state;
 
@@ -146,14 +141,12 @@ export const CategoryReducer: Reducer<ICategoriesState, Actions> = (state, actio
     ? { ...state }
     : innerReducer(state, action);
 
-  // return {
-  //   ...state // calling this, state would be destroyed, because of shallow copy
-  // }
+  // return { ...state } // calling this, state would be destroyed, because of shallow copy
 
   // Action that modify Tree
   // Actually part topRows of state
-  let newTopRows: ICategoryRow[];
   if (modifyTree) {
+    let newTopRows: ICategoryRow[];
     const { topId, id } = categoryRow!;
     if (id === topId) {
       // actually topRows is from previous state
@@ -183,12 +176,9 @@ export const CategoryReducer: Reducer<ICategoriesState, Actions> = (state, actio
   if (actionStoringToLocalStorage.includes(action.type)) {
     const { keyExpanded } = newState;
     const locStorage: ILocStorage = {
-      lastKeyExpanded: keyExpanded,
-      lastQuestionId: null
+      keyExpanded
     }
-    /* (privremeno)
     localStorage.setItem('CATEGORIES_STATE', JSON.stringify(locStorage));
-    */
   }
   return newState;
 }
@@ -236,7 +226,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
 
     case ActionTypes.SET_NODE_OPENED: {
       const { categoryRow, keyExpanded, fromChatBotDlg } = action.payload;
-      const { id, questionId } = keyExpanded; //;
+      const { categoryId: id, questionId } = keyExpanded; //;
       const { topRows } = state;
       return {
         ...state,
@@ -372,24 +362,18 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
 
     case ActionTypes.SET_ROW_EXPANDED: {
       const { categoryRow, formMode } = action.payload;
-      const { topId: rowTopId, parentId: rowParentId, id: rowId } = categoryRow;
-      let { keyExpanded } = state;
-      if (keyExpanded) {
-        const { topId, id } = keyExpanded;
-        keyExpanded = {
-          topId: rowTopId,
-          parentId: rowParentId,
-          id: rowId,
-          questionId: null
-        }
-      }
+      const { topId, id } = categoryRow;
       // Do not work with categoryRow, 
       // categoryRow will be proccesed in CategoryReducer, rather than in innerReducer
       return {
         ...state,
         // keep mode
         loadingCategories: false,
-        keyExpanded,
+        keyExpanded: {
+          topId,
+          categoryId: id,
+          questionId: null
+        },
         activeCategory: null,
         activeQuestion: null,
         formMode
@@ -407,12 +391,12 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
     case ActionTypes.SET_ROW_COLLAPSED: {
       const { categoryRow } = action.payload; // category doesn't contain  inAdding 
       const { topId, id } = categoryRow;
-      const categoryKey = new CategoryKey(categoryRow).categoryKey
+      //const categoryKey = new CategoryKey(categoryRow).categoryKey
       return {
         ...state,
         // keep mode
         loadingCategories: false,
-        keyExpanded: { ...categoryKey, questionId: null },
+        keyExpanded: { topId, categoryId: id,  questionId: null },
         activeCategory: null,
         activeQuestion: null
       }
@@ -555,6 +539,23 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
       };
     }
 
+    case ActionTypes.SET_QUESTION_SELECTED: { // from Categories / AutoSuggestQuestion
+      const { questionKey } = action.payload;
+      const { topId, parentId: categoryId, id: questionId } = questionKey;
+      return {
+        ...state,
+        topRows: state.topRows.filter(row => row.parentId === null),
+        keyExpanded: {
+          topId,
+          categoryId: categoryId,
+          questionId
+        },
+        nodeOpened: false, // keep topRows, and openNode
+        activeCategory: null,
+        activeQuestion: null
+      };
+    }
+
     case ActionTypes.SET_QUESTION: {
       const { question, formMode } = action.payload;
       console.log(ActionTypes.SET_QUESTION, question)
@@ -620,25 +621,18 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         // categoryKeyExpanded: categoryKeyExpanded
         //   ? { ...categoryKeyExpanded, questionId: categoryKeyExpanded.id === parentId ? id : null }
         //   : null,
-        //categoryKeyExpanded: { topId: parentId, id: parentId, questionId: id },
+        keyExpanded: { topId, categoryId: parentId, questionId: id },
         activeQuestion: question,
         formMode: FormMode.EditingQuestion,
         loadingQuestion: false
       }
     }
 
-    case ActionTypes.DELETE_QUESTION: {
+    case ActionTypes.QUESTION_DELETED: {
       const { question } = action.payload;
       const { parentId, id } = question;
       return {
         ...state, // Popravi
-        // categoryKeyExpanded: newRootRows.map((c: ICategory) => c.id === parentId
-        //   ? {
-        //     ...c,
-        //     questionRows: c.questionRows.filter(q => q.id !== id)
-        //   }
-        //   : c
-        // ),
         activeQuestion: null,
         formMode: FormMode.None
       }

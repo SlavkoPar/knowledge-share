@@ -3,7 +3,7 @@ import { Container, Row, Col, Button } from "react-bootstrap";
 
 import { useParams } from 'react-router-dom';
 
-import { ActionTypes, ICategoryKey, IQuestionKey, ICategory, ICategoryRow, FormMode, IsCategory, ICategoryKeyExpanded } from "./types";
+import { ActionTypes, ICategoryKey, IQuestionKey, ICategory, ICategoryRow, FormMode, IsCategory, IKeyExpanded } from "./types";
 
 import { useGlobalContext, useGlobalState } from 'global/GlobalProvider';
 
@@ -61,10 +61,9 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
         dispatch({ type: ActionTypes.SET_QUESTION_SELECTED, payload: { questionKey } })
     }
 
-    const [catKeyExpanded, setCatKeyExpanded] = useState<ICategoryKeyExpanded>({
+    const [catKeyExpanded, setCatKeyExpanded] = useState<IKeyExpanded>({
         topId: '', // null
-        parentId: null,
-        id: '',
+        categoryId: '',
         questionId: null
     })
 
@@ -113,7 +112,7 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
                         const arr = categoryId_questionId.split('_');
                         const categoryId = arr[0];
                         const questionId = arr[1];
-                        const keyExp: ICategoryKeyExpanded = { topId: 'nadji', parentId: 'isto', id: categoryId, questionId: questionId === 'null' ? null : questionId }
+                        const keyExp: IKeyExpanded = { topId: 'nadji', categoryId, questionId: questionId === 'null' ? null : questionId }
                         // setCatKeyExpanded(keyExp);
                         console.log('zovem openNode 1111111111111111111)', { categoryId_questionId }, { categoryId_questionId_done })
                         await openNode(keyExp, fromChatBotDlg ?? 'false')

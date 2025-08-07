@@ -76,7 +76,7 @@ export class GroupRowDto {
 		this.groupRowDto = {
 			TopId: topId!,
 			Id: id,
-			ParentId: parentId,
+			ParentId: parentId??'',
 			Title: '',
 			Link: '',
 			Header: '',
@@ -103,7 +103,7 @@ export class GroupRow {
 		this.groupRow = {
 			topId: TopId!,
 			id: Id,
-			parentId: ParentId,
+			parentId: ParentId??'',
 			title: Title,
 			link: Link ?? '',
 			header: Header,
@@ -179,7 +179,7 @@ export class AnswerRow {
 		this.answerRow = {
 			topId: TopId,
 			id: Id,
-			parentId: ParentId,
+			parentId: ParentId??'',
 			title: Title,
 			link: Link,
 			groupTitle: GroupTitle,
@@ -271,7 +271,6 @@ export class GroupDto {
 			TopId: topId!, // ?
 			Id: id,
 			Kind: kind,
-			ParentId: parentId,
 			Title: title,
 			Link: link??undefined,
 			Header: header ?? '',
@@ -295,7 +294,7 @@ export class Answer {
 		// TODO possible to call base class construtor
 		const {TopId, Id, ParentId, Title, Link, GroupTitle, Source, Status, Included, Created, Modified}  = dto;
 		this.answer = {
-			parentId: ParentId,
+			parentId: ParentId??'',
 			topId: TopId,
 			id: Id,
 			title: Title,

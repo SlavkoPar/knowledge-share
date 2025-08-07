@@ -1,24 +1,24 @@
 import React, { Reducer } from 'react'
 import { ICategoryRow } from "categories/types";
-import { CatsActions, CatsActionTypes, ICatsState } from './types';
+import { CatsActions, CatActionTypes, ICatState } from './types';
 
-export const initialState: ICatsState = {
+export const initialState: ICatState = {
   loading: false,
   parentId: null,
   title: '',
   cats: []
 }
 
-export const CatsReducer: Reducer<ICatsState, CatsActions> = (state, action) => {
+export const CatReducer: Reducer<ICatState, CatsActions> = (state, action) => {
 
   switch (action.type) {
-    case CatsActionTypes.SET_LOADING:
+    case CatActionTypes.SET_LOADING:
       return {
         ...state,
         loading: true
       }
 
-    case CatsActionTypes.SET_SUB_CATS: {
+    case CatActionTypes.SET_SUB_CATS: {
       const { subCats } = action.payload;
       return {
         ...state,
@@ -27,12 +27,12 @@ export const CatsReducer: Reducer<ICatsState, CatsActions> = (state, action) => 
       }
     }
 
-    case CatsActionTypes.SET_ERROR: {
+    case CatActionTypes.SET_ERROR: {
       const { error } = action.payload;
       return { ...state, error, loading: false };
     }
 
-    case CatsActionTypes.SET_EXPANDED: {
+    case CatActionTypes.SET_EXPANDED: {
       const { id, expanding } = action.payload;
       let { cats } = state;
       if (!expanding) {
@@ -51,7 +51,7 @@ export const CatsReducer: Reducer<ICatsState, CatsActions> = (state, action) => 
       };
     }
 
-    case CatsActionTypes.SET_PARENT_CAT: {
+    case CatActionTypes.SET_PARENT_CAT: {
       const { cat } = action.payload;
       const { id, title } = cat;
       return {

@@ -5,7 +5,7 @@ import { ActionMap } from "global/types";
 /////////////////////////////////////////////////////////////////////////
 // DropDown Select Category
 
-export interface ICatsState {
+export interface ICatState {
 	loading: boolean,
 	parentId: string | null,
 	title: string,
@@ -20,7 +20,7 @@ export interface ICatInfo {
 	setParentId: (cat: ICategoryRow) => void;
 }
 
-export enum CatsActionTypes {
+export enum CatActionTypes {
 	SET_LOADING = 'SET_LOADING',
 	SET_SUB_CATS = 'SET_SUB_CATS',
 	SET_ERROR = 'SET_ERROR',
@@ -29,22 +29,22 @@ export enum CatsActionTypes {
 }
 
 export type CatsPayload = {
-	[CatsActionTypes.SET_LOADING]: false;
+	[CatActionTypes.SET_LOADING]: false;
 
-	[CatsActionTypes.SET_SUB_CATS]: {
+	[CatActionTypes.SET_SUB_CATS]: {
 		subCats: ICategoryRow[];
 	};
 
-	[CatsActionTypes.SET_EXPANDED]: {
+	[CatActionTypes.SET_EXPANDED]: {
 		id: string;
 		expanding: boolean;
 	}
 
-	[CatsActionTypes.SET_ERROR]: {
+	[CatActionTypes.SET_ERROR]: {
 		error: Error;
 	};
 
-	[CatsActionTypes.SET_PARENT_CAT]: {
+	[CatActionTypes.SET_PARENT_CAT]: {
 		cat: ICategoryRow;
 	};
 
