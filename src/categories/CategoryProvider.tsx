@@ -1,5 +1,5 @@
 import { useGlobalState, useGlobalContext } from 'global/GlobalProvider'
-import React, { createContext, useContext, useReducer, useCallback, Dispatch } from 'react';
+import React, { createContext, useContext, useReducer, useCallback, Dispatch, useEffect } from 'react';
 
 import {
   ActionTypes, ICategory, IQuestion, ICategoriesContext,
@@ -19,10 +19,12 @@ import {
   IExpandInfo,
   IKeyExpanded,
   IAssignedAnswerKey,
-  QuestionKeyDto
+  QuestionKeyDto,
+  ICategoriesState,
+  ILocStorage
 } from 'categories/types';
 
-import { initialCategoriesState, CategoryReducer, initialQuestion, initialCategory } from 'categories/CategoryReducer';
+import { CategoryReducer, initialQuestion, initialCategory } from 'categories/CategoryReducer';
 import { IWhoWhen, Dto2WhoWhen, WhoWhen2Dto } from 'global/types';
 import { IAnswer, IAnswerKey, IGroup } from 'groups/types';
 import { IAssignedAnswer, IAssignedAnswerDto, IAssignedAnswerDtoEx, AssignedAnswer, AssignedAnswerDto } from 'categories/types';
@@ -35,6 +37,33 @@ type Props = {
   children: React.ReactNode
 }
 
+export const initialState: ICategoriesState = {
+  formMode: FormMode.None,
+
+  topRows: [],
+  topRowsLoading: false,
+  topRowsLoaded: false,
+
+  nodeOpening: false,
+  nodeOpened: false,
+
+  keyExpanded: {
+    topId: "MTS",
+    categoryId: "REMOTECTRLS",
+    questionId: "qqqqqq111"
+  },
+
+  categoryId_questionId_done: undefined,
+
+  activeCategory: null,
+  activeQuestion: null,
+
+  loadingCategories: false,
+  loadingQuestions: false,
+  loadingCategory: false,
+  loadingQuestion: false,
+}
+
 export const CategoryProvider: React.FC<Props> = ({ children }) => {
 
   const { loadAndCacheAllCategoryRows, getCat, setNodesReloaded } = useGlobalContext()
@@ -42,10 +71,29 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
   const { workspace, dbp, allCategoryRows, authUser, canEdit } = globalState;
   const { nickName } = authUser;
 
-  const [state, dispatch] = useReducer(CategoryReducer, initialCategoriesState);
+  const [state, dispatch] = useReducer(CategoryReducer, initialState);
   const { formMode, activeCategory, activeQuestion } = state;
 
   console.log('----->>> ----->>> ----->>> CategoryProvider')
+
+  useEffect(() => {
+    if ('localStorage' in window) {
+      console.log('Arghhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh CATEGORIES_STATE loaded before signIn')
+      let s = localStorage.getItem('CATEGORIES_STATE');
+      if (s !== null) {
+        const locStorage: ILocStorage = JSON.parse(s);
+        const { keyExpanded } = locStorage!;
+        const nodeOpened = keyExpanded ? false : true;
+        console.log('CATEGORIES_STATE nakon citanja iz memorije', { keyExpanded }, { nodeOpened });
+        const initState = {
+          keyExpanded,
+          nodeOpened
+        }
+        dispatch({ type: ActionTypes.SET_FROM_LOCAL_STORAGE, payload: { locStorage } });
+      }
+    }
+  }, []);
+
 
   const Execute = async (
     method: string,
@@ -139,15 +187,15 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
 
 
   const openNode = useCallback(
-    async (catKeyExp: IKeyExpanded, fromChatBotDlg: string = 'false'): Promise<any> => {
+    async (catKey: ICategoryKey, questionId: string|null, fromChatBotDlg: string = 'false'): Promise<any> => {
       return new Promise(async (resolve) => {
         try {
-          let { topId, categoryId: id } = catKeyExp;
+          let { topId, id } = catKey;
           console.assert(id);
           if (id) {
             const categoryRow: ICategoryRow | undefined = allCategoryRows.get(id);
             if (categoryRow) {
-              catKeyExp.topId = categoryRow.topId;
+              catKey.topId = categoryRow.topId;
             }
             else {
               alert('reload all categoryRow:' + id)
@@ -157,7 +205,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
           dispatch({ type: ActionTypes.NODE_OPENING, payload: { fromChatBotDlg: fromChatBotDlg === 'true' } })
           // ---------------------------------------------------------------------------
           console.time();
-          const categoryKey: ICategoryKey = {	topId, id, parentId:  null };
+          const categoryKey: ICategoryKey = { topId, id, parentId: null };
           const query = new CategoryKey(categoryKey).toQuery(workspace);
           const url = `${protectedResources.KnowledgeAPI.endpointCategoryRow}?${query}`;
           await Execute("GET", url)
@@ -169,9 +217,9 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
                 const categoryRow = new CategoryRow(categoryRowDto).categoryRow; // deep clone dto
                 dispatch({
                   type: ActionTypes.SET_NODE_OPENED, payload: {
-                    keyExpanded: catKeyExp,
+                    catKey,
                     categoryRow,
-                    //questionId: catKeyExp.questionId,
+                    questionId: questionId ?? null,
                     fromChatBotDlg: fromChatBotDlg === 'true'
                   }
                 })

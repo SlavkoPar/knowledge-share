@@ -12,9 +12,11 @@ import {
   IHistoryDtoListEx,
   IHistoryListEx,
   IHistoryFilterDto,
+  IAuthUser,
+  IGlobalState,
 } from 'global/types'
 
-import { globalReducer, initialGlobalState } from "global/globalReducer";
+import { globalReducer, initialAuthUser } from "global/globalReducer";
 
 import {
   Category, ICategory, ICategoryDto, ICategoryKey, IQuestionRow, IQuestionRowDto, IQuestionRowDtosEx,
@@ -44,14 +46,65 @@ interface Props {
   children: React.ReactNode
 }
 
+
+
+const initGlobalState: IGlobalState = {
+  dbp: null,
+  workspace: 'DEMO',
+  authUser: initialAuthUser,
+  isAuthenticated: false,
+  everLoggedIn: true,
+  canEdit: true,
+  isOwner: true,
+  isDarkMode: true,
+  variant: 'dark',
+  bg: 'dark',
+  loading: false,
+  allCategoryRows: new Map<string, ICategoryRow>(),
+  categoryRowsLoaded: undefined,
+  allGroupRows: new Map<string, IGroupRow>(),
+  groupRowsLoaded: undefined,
+  nodesReLoaded: false,
+  lastRouteVisited: '/categories',
+}
+
 export const GlobalProvider: React.FC<Props> = ({ children }) => {
   // If we update globalState, form inner Provider, 
   // we reset changes, and again we use initialGlobalState
   // so, don't use globalDispatch inside of inner Provider, like Categories Provider
-  const [globalState, dispatch] = useReducer(globalReducer, initialGlobalState);
+  const [globalState, dispatch] = useReducer(globalReducer, initGlobalState);
   const { workspace, authUser, allCategoryRows } = globalState;
 
   console.log('--------> GlobalProvider')
+
+
+  useEffect(() => {
+    let initState: IGlobalState = {
+      ...initGlobalState
+    }
+    if ('localStorage' in window) {
+      console.log('Arghhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh CATEGORIES_STATE loaded before signIn')
+      let s = localStorage.getItem('GLOBAL_STATE');
+      if (s !== null) {
+        const locStorage = JSON.parse(s);
+        const { everLoggedIn, nickName, isDarkMode, variant, bg, lastRouteVisited } = locStorage;
+        // initState = {
+        //   ...initState,
+        //   everLoggedIn,
+        //   // authUser: {
+        //   //   ...authUser,
+        //   //   nickName
+        //   // },
+        //   isDarkMode,
+        //   variant,
+        //   bg,
+        //   lastRouteVisited
+        // }
+        dispatch({ type: GlobalActionTypes.SET_FROM_LOCAL_STORAGE, payload: { locStorage } });
+      }
+    }
+   
+  }, []);
 
   const Execute = async (method: string, endpoint: string, data: Object | null = null): Promise<any> => {
     const accessToken = localStorage.getItem("accessToken");
@@ -115,6 +168,8 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
     }
   }
 
+
+
   // ---------------------------
   // load all categoryRows
   // ---------------------------
@@ -127,7 +182,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
           .then((catRowDtos: ICategoryRowDto[]) => {   //  | Response
             const allCatRows = new Map<string, ICategoryRow>();
             console.timeEnd();
-            catRowDtos.forEach((rowDto: ICategoryRowDto) =>  allCatRows.set(rowDto.Id, new CategoryRow(rowDto).categoryRow));
+            catRowDtos.forEach((rowDto: ICategoryRowDto) => allCatRows.set(rowDto.Id, new CategoryRow(rowDto).categoryRow));
             allCatRows.forEach(cat => {
               let { id, parentId, title, variations, hasSubCategories, level, kind } = cat;
               let titlesUpTheTree = id;
@@ -212,7 +267,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
               const { TopId, ParentId, Id, Title, NumOfAssignedAnswers, Included } = dto;
               return {
                 topId: TopId,
-                parentId: ParentId??'',
+                parentId: ParentId ?? '',
                 id: Id,
                 title: Title,
                 categoryTitle: '',
@@ -301,7 +356,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
         const filterEncoded = encodeURIComponent(filter);
         const url = `${protectedResources.KnowledgeAPI.endpointAnswer}/${workspace}/${filterEncoded}/${count}/nesto`;
         await Execute("GET", url).then((answerRowDtosEx: IAnswerRowDtosEx) => {
-          const { answerRowDtos: dtos, msg} = answerRowDtosEx;
+          const { answerRowDtos: dtos, msg } = answerRowDtosEx;
           console.log('ANSWERSSSSS', { answerRowDtos: dtos }, url);
           console.timeEnd();
           if (dtos) {
@@ -353,7 +408,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
 
   // differs from CategoryProvider, here we don't dispatch
   const getQuestion = async (questionKey: IQuestionKey): Promise<any> => {
-    
+
     return new Promise(async (resolve) => {
       try {
         const { topId, id } = questionKey;

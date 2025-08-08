@@ -1,5 +1,5 @@
 // Define the Global State
-import { IAssignedAnswerKey, ICategory, ICategoryKey, ICategoryRow, ICategoryRowDto, IQuestion, IQuestionEx, IQuestionKey, IQuestionRow } from 'categories/types';
+import { IAssignedAnswerKey, ICategory, ICategoryKey, ICategoryRow, ICategoryRowDto, IKeyExpanded, IQuestion, IQuestionEx, IQuestionKey, IQuestionRow } from 'categories/types';
 import { IGroup, IGroupKey, IAnswerRow, IAnswer, IAnswerKey, IGroupRow, IHistoryAnswerKey } from 'groups/types';
 //import { IOption } from 'common/types';
 import { IDBPDatabase } from 'idb';
@@ -63,7 +63,7 @@ export class HistoryDto {
 		this.historyDto = {
 			QuestionKey: history.questionKey,
 			AssignedAnswerKey: history.assignedAnswerKey,
-			UserAction: history.userAction, 
+			UserAction: history.userAction,
 			Created: new WhoWhen2Dto(history.created).whoWhenDto!,
 		}
 	}
@@ -145,10 +145,11 @@ export interface IGlobalState {
 	allGroupRows: Map<string, IGroupRow>;
 	groupRowsLoaded?: number;
 	nodesReLoaded: boolean; // categoryNodeLoaded || groupNodeLoaded  ( to prevent showing of ChatBotDlg)
-	lastRouteVisited: string
+	lastRouteVisited: string;
 }
 
-export interface IGlobalStateFromLocalStorage {
+
+export interface ILocStorage {
 	nickName: string;
 	everLoggedIn: boolean;
 	isDarkMode: boolean;
@@ -190,6 +191,7 @@ export interface IGlobalContext {
 
 export enum GlobalActionTypes {
 	SET_LOADING = 'SET_LOADING',
+	SET_FROM_LOCAL_STORAGE = "SET_FROM_LOCAL_STORAGE",
 	AUTHENTICATE = "AUTHENTICATE",
 	UN_AUTHENTICATE = "UN_AUTHENTICATE",
 	SET_DBP = "SET_DBP",
@@ -242,6 +244,11 @@ export type ActionMap<M extends Record<string, any>> = {
 export type GlobalPayload = {
 	[GlobalActionTypes.SET_LOADING]: {
 	};
+
+	[GlobalActionTypes.SET_FROM_LOCAL_STORAGE]: {
+		locStorage: ILocStorage
+	};
+
 
 	[GlobalActionTypes.AUTHENTICATE]: {
 		user: IUser

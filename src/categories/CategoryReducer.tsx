@@ -1,10 +1,9 @@
 import { Reducer } from 'react'
 import {
   ActionTypes, Actions, ILocStorage, IsCategory,
-  ICategoriesState, ICategory, CategoryKey, ICategoryRow, CategoryRow,
-  IQuestion, IQuestionRow, Question, IQuestionKey, QuestionKey, QuestionRow,
-  actionStoringToLocalStorage, FormMode, doNotCloneActions, doNotCallInnerReducerActions,
-  IKeyExpanded
+  ICategoriesState, ICategory, CategoryKey, ICategoryRow, 
+  IQuestion, 
+  actionStoringToLocalStorage, FormMode, doNotCloneActions, doNotCallInnerReducerActions
 } from "categories/types";
 
 export const initialQuestion: IQuestion = {
@@ -41,68 +40,6 @@ export const initialCategory: ICategory = {
   doc1: ''
 }
 
-export const initialState: ICategoriesState = {
-  formMode: FormMode.None,
-
-  topRows: [],
-  topRowsLoading: false,
-  topRowsLoaded: false,
-
-  nodeOpening: false,
-  nodeOpened: false,
-
-  keyExpanded: {
-    topId: "MTS",
-    categoryId: "REMOTECTRLS",
-    questionId: "qqqqqq111"
-  },
-
-  categoryId_questionId_done: undefined,
-
-  activeCategory: null,
-  activeQuestion: null,
-
-  loadingCategories: false,
-  loadingQuestions: false,
-  loadingCategory: false,
-  loadingQuestion: false
-}
-
-// let state_fromLocalStorage: IState_fromLocalStorage | undefined;
-// const hasMissingProps = (): boolean => {
-//   let b = false;
-//   const keys = Object.keys(initialStateFromLocalStorage!)
-//   Object.keys(initialState).forEach((prop: string) => {
-//     if (!keys.includes(prop)) {
-//       b = true;
-//       console.log('missing prop:', prop, ' try with SignOut')
-//     }
-//   })
-//   return b;
-// }
-
-let initialCategoriesState: ICategoriesState = {
-  ...initialState
-}
-
-if ('localStorage' in window) {
-  console.log('Arghhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh CATEGORIES_STATE loaded before signIn')
-  const s = localStorage.getItem('CATEGORIES_STATE');
-  if (s !== null) {
-    const locStorage = JSON.parse(s);
-    const { keyExpanded } = locStorage!;
-    const nodeOpened = keyExpanded ? false : true;
-    initialCategoriesState = {
-      ...initialCategoriesState,
-      keyExpanded: { ...keyExpanded },
-      nodeOpened
-    }
-    console.log('initialCategoriesState nakon citanja iz memorije', initialCategoriesState);
-  }
-}
-
-export { initialCategoriesState };
-
 export const CategoryReducer: Reducer<ICategoriesState, Actions> = (state, action) => {
 
   console.log('------------------------------->', action.type)
@@ -130,6 +67,14 @@ export const CategoryReducer: Reducer<ICategoriesState, Actions> = (state, actio
 
   const { categoryRow } = action.payload;
   // const isCategory = IsCategory(categoryRow); // ICategory rather than ICategoryRow
+
+  if (action.type === ActionTypes.SET_FROM_LOCAL_STORAGE) {
+    const { locStorage } = action.payload;
+    return {
+      ...state,
+      ...locStorage
+    }
+  }
 
   const modifyTree = categoryRow
     ? doNotCloneActions.includes(action.type) ? false : true
@@ -225,8 +170,8 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
     }
 
     case ActionTypes.SET_NODE_OPENED: {
-      const { categoryRow, keyExpanded, fromChatBotDlg } = action.payload;
-      const { categoryId: id, questionId } = keyExpanded; //;
+      const { categoryRow, catKey, questionId, fromChatBotDlg } = action.payload;
+      const { topId, id } = catKey; //;
       const { topRows } = state;
       return {
         ...state,
@@ -234,7 +179,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
           ? { ...categoryRow }
           : { ...c }
         ),
-        keyExpanded,
+        //keyExpanded, // TODO proveri
         categoryId_questionId_done: `${id}_${questionId}`,
         nodeOpening: false,
         nodeOpened: true,
@@ -250,15 +195,26 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
       }
 
 
+    // case ActionTypes.FORCE_OPEN_NODE:
+    //   const { keyExpanded } = action.payload;
+    //   return {
+    //     ...state,
+    //     nodeOpening: false,
+    //     nodeOpened: false,
+    //     topRows: [],
+    //     topRowsLoaded: false,
+    //     keyExpanded
+    //   }
+
     case ActionTypes.FORCE_OPEN_NODE:
       const { keyExpanded } = action.payload;
       return {
         ...state,
-        nodeOpening: false,
-        nodeOpened: false,
-        topRows: [],
-        topRowsLoaded: false,
-        keyExpanded
+        topRows: state.topRows.filter(row => row.parentId === null),
+        keyExpanded,
+        nodeOpened: false, // keep topRows, and openNode
+        activeCategory: null,
+        activeQuestion: null
       }
 
     // case ActionTypes.RESET_CATEGORY_QUESTION_DONE: {
@@ -396,7 +352,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         ...state,
         // keep mode
         loadingCategories: false,
-        keyExpanded: { topId, categoryId: id,  questionId: null },
+        keyExpanded: { topId, categoryId: id, questionId: null },
         activeCategory: null,
         activeQuestion: null
       }

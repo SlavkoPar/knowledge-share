@@ -1,10 +1,10 @@
 
 import { Reducer } from 'react'
-import { IGlobalState, GlobalActionTypes, GlobalActions, ROLES, IAuthUser, IGlobalStateFromLocalStorage } from "./types";
+import { IGlobalState, GlobalActionTypes, GlobalActions, ROLES, IAuthUser, ILocStorage } from "./types";
 import { ICategoryRow } from 'categories/types';
 import { IGroupRow } from 'groups/types';
 
-const initialAuthUser: IAuthUser = {
+export const initialAuthUser: IAuthUser = {
     nickName: '',
     name: '',
     email: '',
@@ -12,27 +12,27 @@ const initialAuthUser: IAuthUser = {
     role: ROLES.VIEWER
 }
 
-const initGlobalState: IGlobalState = {
-    dbp: null,
-    workspace: 'DEMO',
-    authUser: initialAuthUser,
-    isAuthenticated: false,
-    everLoggedIn: true,
-    canEdit: true,
-    isOwner: true,
-    isDarkMode: true,
-    variant: 'dark',
-    bg: 'dark',
-    loading: false,
-    allCategoryRows: new Map<string, ICategoryRow>(),
-    categoryRowsLoaded: undefined,
-    allGroupRows: new Map<string, IGroupRow>(),
-    groupRowsLoaded: undefined,
-    nodesReLoaded: false,
-    lastRouteVisited: '/categories'
-}
+// const initGlobalState: IGlobalState = {
+//     dbp: null,
+//     workspace: 'DEMO',
+//     authUser: initialAuthUser,
+//     isAuthenticated: false,
+//     everLoggedIn: true,
+//     canEdit: true,
+//     isOwner: true,
+//     isDarkMode: true,
+//     variant: 'dark',
+//     bg: 'dark',
+//     loading: false,
+//     allCategoryRows: new Map<string, ICategoryRow>(),
+//     categoryRowsLoaded: undefined,
+//     allGroupRows: new Map<string, IGroupRow>(),
+//     groupRowsLoaded: undefined,
+//     nodesReLoaded: false,
+//     lastRouteVisited: '/categories',
+// }
 
-let globalStateFromLocalStorage: IGlobalStateFromLocalStorage | undefined;
+//let globalStateFromLocalStorage: IGlobalStateFromLocalStorage | undefined;
 
 const hasMissingProps = (): boolean => {
     let b = false;
@@ -56,6 +56,7 @@ const hasMissingProps = (): boolean => {
     return b;
 }
 
+/*
 if ('localStorage' in window) {
     // localStorage.removeItem('GLOBAL_STATE')
     const s = localStorage.getItem('GLOBAL_STATE');
@@ -64,26 +65,25 @@ if ('localStorage' in window) {
         if (hasMissingProps()) {
             globalStateFromLocalStorage = undefined;
         }
-        /*
-        else {
-            const { authUser } = globalStateFromLocalStorage!;
-            //authUser.userId = authUser.userId;
-            console.log('===>>>globalStateFromLocalStorage', globalStateFromLocalStorage);
-        }
-        */
+        // else {
+        //     const { authUser } = globalStateFromLocalStorage!;
+        //     //authUser.userId = authUser.userId;
+        //     console.log('===>>>globalStateFromLocalStorage', globalStateFromLocalStorage);
+        // }
     }
 }
+*/
 
-export const initialGlobalState: IGlobalState = initGlobalState;
-if (globalStateFromLocalStorage) {
-    const { everLoggedIn, nickName, isDarkMode, variant, bg, lastRouteVisited } = globalStateFromLocalStorage;
-    initialGlobalState.everLoggedIn = everLoggedIn;
-    initialGlobalState.authUser.nickName = nickName;
-    initialGlobalState.isDarkMode = isDarkMode;
-    initialGlobalState.variant = variant;
-    initialGlobalState.bg = bg;
-    initialGlobalState.lastRouteVisited = lastRouteVisited;
-}
+//export const initialGlobalState: IGlobalState = initGlobalState;
+// if (globalStateFromLocalStorage) {
+//     const { everLoggedIn, nickName, isDarkMode, variant, bg, lastRouteVisited } = globalStateFromLocalStorage;
+//     initialGlobalState.everLoggedIn = everLoggedIn;
+//     initialGlobalState.authUser.nickName = nickName;
+//     initialGlobalState.isDarkMode = isDarkMode;
+//     initialGlobalState.variant = variant;
+//     initialGlobalState.bg = bg;
+//     initialGlobalState.lastRouteVisited = lastRouteVisited;
+// }
 
 export const globalReducer: Reducer<IGlobalState, GlobalActions> = (state, action) => {
     const newState = reducer(state, action);
@@ -97,7 +97,7 @@ export const globalReducer: Reducer<IGlobalState, GlobalActions> = (state, actio
     if (aTypesToStore.includes(action.type)) {
         const { authUser, everLoggedIn, isDarkMode, variant, bg, lastRouteVisited } = newState;
         const { nickName } = authUser;
-        const obj: IGlobalStateFromLocalStorage = {
+        const obj: ILocStorage = {
             nickName,
             everLoggedIn,
             isDarkMode,
@@ -119,6 +119,14 @@ const reducer: Reducer<IGlobalState, GlobalActions> = (state, action) => {
                 ...state,
                 loading: true
             }
+
+        case GlobalActionTypes.SET_FROM_LOCAL_STORAGE: {
+            const { locStorage } = action.payload;
+            return {
+                ...state,
+                ...locStorage
+            }
+        }
 
         case GlobalActionTypes.SET_ERROR: {
             const { error } = action.payload;

@@ -61,11 +61,16 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
         dispatch({ type: ActionTypes.SET_QUESTION_SELECTED, payload: { questionKey } })
     }
 
-    const [catKeyExpanded, setCatKeyExpanded] = useState<IKeyExpanded>({
-        topId: '', // null
-        categoryId: '',
-        questionId: null
-    })
+    // const [catKeyExpanded, setCatKeyExpanded] = useState<IKeyExpanded>({
+    //     topId: '', // null
+    //     categoryId: '',
+    //     questionId: null
+    // })
+    const catKey: ICategoryKey = {
+        topId: '', 
+        id: '',
+        parentId: null
+    }
 
     const categoryRow: ICategoryRow = {
         topId: '',
@@ -112,16 +117,17 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
                         const arr = categoryId_questionId.split('_');
                         const categoryId = arr[0];
                         const questionId = arr[1];
-                        const keyExp: IKeyExpanded = { topId: 'nadji', categoryId, questionId: questionId === 'null' ? null : questionId }
-                        // setCatKeyExpanded(keyExp);
+                        const catKey: ICategoryKey = { topId: '', id: categoryId, parentId: null };
                         console.log('zovem openNode 1111111111111111111)', { categoryId_questionId }, { categoryId_questionId_done })
-                        await openNode(keyExp, fromChatBotDlg ?? 'false')
+                        await openNode(catKey, questionId, fromChatBotDlg ?? 'false')
                             .then(() => { return null; });
                     }
                 }
                 else if (keyExpanded && !nodeOpened) {
                     console.log('zovem openNode 2222222222222)', { keyExpanded }, { nodeOpened })
-                    await openNode(keyExpanded)
+                    const { topId, categoryId, questionId } = keyExpanded;
+                    const catKey: ICategoryKey = { topId, id: categoryId, parentId: null} 
+                    await openNode(catKey, questionId)
                         .then(() => { return null; });
                 }
             }
@@ -168,7 +174,7 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
                     onClick={() => dispatch({
                         type: ActionTypes.ADD_SUB_CATEGORY,
                         payload: {
-                            categoryKey: catKeyExpanded,
+                            categoryKey: catKey,
                             level: 1
                         }
                     })}

@@ -51,11 +51,10 @@ export interface ICategoryKey {
 	parentId: string | null;
 }
 
-export interface IKeyExpanded { //} extends ICategoryKey {
+export interface IKeyExpanded {
 	topId: string,
 	categoryId: string;
 	questionId: string | null;
-	//toCategoryKey: () =>  ICategoryKey;
 }
 
 export interface ICategoryRow extends ICategoryKey, IRecord {
@@ -546,7 +545,7 @@ export interface ICategoriesState {
 	whichRowId?: string; // category.id or question.id
 }
 
-export interface ILocStorage  {
+export interface ILocStorage {
 	keyExpanded: IKeyExpanded | null
 }
 
@@ -558,7 +557,7 @@ export interface ILoadCategoryQuestions {
 
 export interface ICategoriesContext {
 	state: ICategoriesState,
-	openNode: (keyExpanded: IKeyExpanded, fromChatBotDlg?: string) => Promise<any>;
+	openNode: (catKey: ICategoryKey, questionId: string|null, fromChatBotDlg?: string) => Promise<any>;
 	loadTopRows: () => Promise<any>,
 	addSubCategory: (categoryRow: ICategoryRow) => Promise<any>;
 	cancelAddCategory: () => Promise<any>;
@@ -669,6 +668,7 @@ export class AssignedAnswer {
 
 
 export enum ActionTypes {
+	SET_FROM_LOCAL_STORAGE = "SET_FROM_LOCAL_STORAGE",
 	SET_TOP_ROWS = 'SET_TOP_ROWS',
 	SET_NODE_OPENED = "SET_NODE_OPENED",
 	SET_LOADING_CATEGORY = 'SET_LOADING_CATEGORY',
@@ -745,6 +745,11 @@ export const doNotCallInnerReducerActions = [
 
 export type Payload = {
 
+	[ActionTypes.SET_FROM_LOCAL_STORAGE]: {
+		categoryRow?: ICategoryRow;
+		locStorage: ILocStorage
+	}
+
 	[ActionTypes.SET_TOP_ROWS_LOADING]: {
 		categoryRow?: ICategoryRow;
 	}
@@ -771,9 +776,9 @@ export type Payload = {
 	[ActionTypes.SET_NODE_OPENED]: {
 		// categoryNodesUpTheTree: ICategoryKeyExtended[]; /// we could have used Id only
 		categoryRow: ICategoryRow;
-		keyExpanded: IKeyExpanded;
-		//questionId: string | null,
-		fromChatBotDlg: boolean;
+		catKey: ICategoryKey;
+		questionId: string | null,
+		fromChatBotDlg?: boolean;
 	};
 
 
