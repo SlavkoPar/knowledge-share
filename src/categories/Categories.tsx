@@ -44,7 +44,7 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
     } = state;
 
     const { setLastRouteVisited, searchQuestions } = useGlobalContext();
-    const { isDarkMode, authUser, allCategoryRows } = useGlobalState();
+    const { isDarkMode, authUser, allCategoryRows, allCategoryRowsLoaded } = useGlobalState();
 
     const [modalShow, setModalShow] = useState(false);
     const handleClose = () => {
@@ -59,17 +59,6 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
     const onSelectQuestion = async (questionKey: IQuestionKey) => {
         //navigate(`/categories/${questionKey.topId}_${questionKey.id}`)
         dispatch({ type: ActionTypes.SET_QUESTION_SELECTED, payload: { questionKey } })
-    }
-
-    // const [catKeyExpanded, setCatKeyExpanded] = useState<IKeyExpanded>({
-    //     topId: '', // null
-    //     categoryId: '',
-    //     questionId: null
-    // })
-    const catKey: ICategoryKey = {
-        topId: '', 
-        id: '',
-        parentId: null
     }
 
     const categoryRow: ICategoryRow = {
@@ -89,6 +78,8 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
     }
 
     let tekst = '';
+
+    
 
     useEffect(() => {
         (async () => {
@@ -126,7 +117,7 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
                 else if (keyExpanded && !nodeOpened) {
                     console.log('zovem openNode 2222222222222)', { keyExpanded }, { nodeOpened })
                     const { topId, categoryId, questionId } = keyExpanded;
-                    const catKey: ICategoryKey = { topId, id: categoryId, parentId: null} 
+                    const catKey: ICategoryKey = { topId, id: categoryId, parentId: null }
                     await openNode(catKey, questionId)
                         .then(() => { return null; });
                 }
@@ -147,7 +138,7 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
 
     console.log('===>>> Categories !!!!!!!!!!!!!!!!!')
     //if (!nodeOpened)
-    if (topRows.length === 0)
+    if (topRows.length === 0 || !allCategoryRowsLoaded)
         return null
 
     return (
@@ -174,7 +165,7 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
                     onClick={() => dispatch({
                         type: ActionTypes.ADD_SUB_CATEGORY,
                         payload: {
-                            categoryKey: catKey,
+                            categoryKey: { topId: '', id: '', parentId: null },
                             level: 1
                         }
                     })}
@@ -182,7 +173,7 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
                     Add Category
                 </Button>
 
-                <Row className="my-1">
+                <Row className="my-1 h-auto">
                     <Col xs={12} md={5}>
                         <div className="categories-border" style={{ position: 'relative' }}>
                             <CategoryList categoryRow={categoryRow} title="root" isExpanded={true} />

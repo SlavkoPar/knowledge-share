@@ -31,14 +31,14 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
     const { canEdit, isDarkMode, variant, bg, authUser } = useGlobalState();
 
     const { state, addSubCategory, viewCategory, editCategory, deleteCategory, expandCategory, collapseCategory, addQuestion } = useCategoryContext();
-    let { formMode, keyExpanded, activeCategory } = state;
+    let { formMode, keyExpanded, activeCategory, rowExpanding } = state;
     const isSelected = activeCategory !== null && (activeCategory.id === id);
     const showForm = isSelected;
 
     const alreadyAdding = formMode === FormMode.AddingCategory;
     // TODO proveri ovo
     const showQuestions = isExpanded && numOfQuestions > 0 // || questions.find(q => q.inAdding) // && !questions.find(q => q.inAdding); // We don't have questions loaded
-    console.log("----------------CategoryRow", id, numOfQuestions, questionRows, isExpanded)
+    console.log("----------------CategoryRow", id, numOfQuestions, isExpanded)
 
     const deleteCategoryRow = () => {
         categoryRow.modified = {
@@ -81,22 +81,26 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
             await viewCategory(categoryRow, questionId ?? 'null');
     }
 
+  
     useEffect(() => {
-        if (numOfQuestions > 0 && !isExpanded) { //!isExpanded && !isSelected) {
-            if (keyExpanded && keyExpanded.categoryId === id) { // catKeyExpanded.id) {
-                console.log('%%%%%%%%%%%%%%%%%%%%%%%% Zovem iz CategoryRow', keyExpanded.categoryId, id)
-                if (formMode !== FormMode.AddingCategory) {
-                    formMode = FormMode.None
+        (async () => {
+            if (numOfQuestions > 0 && !isExpanded) { //!isExpanded && !isSelected) {
+                if (keyExpanded && keyExpanded.categoryId === id && !rowExpanding) { // catKeyExpanded.id) {
+                    console.log('%%%%%%%%%%%%%%%%%%%%%%%% Zovem iz CategoryRow', keyExpanded.categoryId, id)
+                    if (formMode !== FormMode.AddingCategory) {
+                        formMode = FormMode.None  // TODO popravi
+                    }
+                    const expandInfo: IExpandInfo = {
+                        categoryKey,
+                        includeQuestionId: questionId ?? undefined,
+                        formMode // differs from handleExpandClick
+                    }
+                    await expandCategory(expandInfo);
                 }
-                const expandInfo: IExpandInfo = {
-                    categoryKey,
-                    includeQuestionId: questionId ?? undefined,
-                    formMode // differs from handleExpandClick
-                }
-                expandCategory(expandInfo);
             }
-        }
-    }, [id, isExpanded, isSelected, expandCategory, keyExpanded]) // 
+        })()
+    }, [id, isExpanded, isSelected, expandCategory, keyExpanded]);
+
 
     useEffect(() => {
         (async () => {
@@ -144,7 +148,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
                 <Button
                     variant='link'
                     size="sm"
-                    className={`py-0 mx-0 category-row-title ${isSelected ? 'fw-bold' : ''}`}
+                    className={`py-0 ms-0 me-1 category-row-title ${isSelected ? 'fw-bold' : ''}`}
                     title={id}
                     onClick={onSelectCategory}
                     disabled={alreadyAdding}

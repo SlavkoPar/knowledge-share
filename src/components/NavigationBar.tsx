@@ -25,6 +25,7 @@ export const NavigationBar = () => {
     if (instance) {
         activeAccount = instance.getActiveAccount();
         console.log(activeAccount ? activeAccount.name : 'Unknown')
+        console.log({activeAccount})
     }
 
     const request = {
@@ -47,6 +48,7 @@ export const NavigationBar = () => {
     //     return null;
     // }
     if (result) {
+        console.log('result.account.name:', result.account?.name)
         localStorage.setItem('accessToken', result.accessToken);
     }
 

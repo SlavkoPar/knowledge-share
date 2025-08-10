@@ -47,11 +47,7 @@ export const initialState: ICategoriesState = {
   nodeOpening: false,
   nodeOpened: false,
 
-  keyExpanded: {
-    topId: "MTS",
-    categoryId: "REMOTECTRLS",
-    questionId: "qqqqqq111"
-  },
+  keyExpanded: null,
 
   categoryId_questionId_done: undefined,
 
@@ -62,37 +58,58 @@ export const initialState: ICategoriesState = {
   loadingQuestions: false,
   loadingCategory: false,
   loadingQuestion: false,
+
+  rowExpanding: false,
+  rowExpanded: false
 }
+
+// let locStorageKeyExpanded: IKeyExpanded | null = null;
+// if ('localStorage' in window) {
+//   console.log('CATEGORIES_STATE loaded before signIn')
+//   let s = localStorage.getItem('CATEGORIES_STATE');
+//   if (s !== null) {
+//     const locStorage: ILocStorage = JSON.parse(s);
+//     locStorageKeyExpanded = locStorage!.keyExpanded;
+//     //const nodeOpened = keyExpanded ? false : true;
+//     //console.log('CATEGORIES_STATE nakon citanja iz memorije', { keyExpanded }, { nodeOpened });
+//     // dispatch({ type: ActionTypes.SET_FROM_LOCAL_STORAGE, payload: { locStorage } });
+//   }
+// }
 
 export const CategoryProvider: React.FC<Props> = ({ children }) => {
 
   const { loadAndCacheAllCategoryRows, getCat, setNodesReloaded } = useGlobalContext()
   const globalState = useGlobalState();
-  const { workspace, dbp, allCategoryRows, authUser, canEdit } = globalState;
+  const { isAuthenticated, workspace, dbp, allCategoryRows, allCategoryRowsLoaded, authUser, canEdit } = globalState;
   const { nickName } = authUser;
 
   const [state, dispatch] = useReducer(CategoryReducer, initialState);
-  const { formMode, activeCategory, activeQuestion } = state;
+
+  const { formMode, activeCategory, activeQuestion, keyExpanded } = state;
 
   console.log('----->>> ----->>> ----->>> CategoryProvider')
 
   useEffect(() => {
+
+    let keyExpanded: IKeyExpanded = workspace === 'SLINDZA'
+      ? { topId: "QUESTIONS", categoryId: "QUESTIONS",    questionId: "qqqqqq111" }
+      : { topId: "MTS",       categoryId: "REMOTECTRLS",  questionId: "qqqqqq111"
+      }
     if ('localStorage' in window) {
-      console.log('Arghhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh CATEGORIES_STATE loaded before signIn')
+      console.log('CATEGORIES_STATE loaded before signIn')
       let s = localStorage.getItem('CATEGORIES_STATE');
       if (s !== null) {
         const locStorage: ILocStorage = JSON.parse(s);
-        const { keyExpanded } = locStorage!;
-        const nodeOpened = keyExpanded ? false : true;
-        console.log('CATEGORIES_STATE nakon citanja iz memorije', { keyExpanded }, { nodeOpened });
-        const initState = {
-          keyExpanded,
-          nodeOpened
-        }
-        dispatch({ type: ActionTypes.SET_FROM_LOCAL_STORAGE, payload: { locStorage } });
+        keyExpanded  = locStorage.keyExpanded!;
       }
     }
-  }, []);
+    dispatch({ type: ActionTypes.SET_FROM_LOCAL_STORAGE, payload: { keyExpanded } });
+  }, [dispatch, workspace]);
+
+  useEffect(() => {
+    if (isAuthenticated && allCategoryRowsLoaded === undefined)
+      loadAndCacheAllCategoryRows();
+  }, [isAuthenticated, allCategoryRowsLoaded, loadAndCacheAllCategoryRows]);
 
 
   const Execute = async (
@@ -187,7 +204,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
 
 
   const openNode = useCallback(
-    async (catKey: ICategoryKey, questionId: string|null, fromChatBotDlg: string = 'false'): Promise<any> => {
+    async (catKey: ICategoryKey, questionId: string | null, fromChatBotDlg: string = 'false'): Promise<any> => {
       return new Promise(async (resolve) => {
         try {
           let { topId, id } = catKey;
@@ -235,7 +252,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
           dispatch({ type: ActionTypes.SET_ERROR, payload: { error } });
         }
       })
-    }, [dispatch]);
+    }, [dispatch, allCategoryRows]);
 
 
   // get category With subcategoryRows and questionRows
@@ -1074,6 +1091,9 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
     viewQuestion, editQuestion, updateQuestion, deleteQuestion, onQuestionTitleChanged,
     assignQuestionAnswer
   }
+
+  if (!isAuthenticated || !allCategoryRowsLoaded || keyExpanded === null)
+    return null;
 
   return (
     <CategoriesContext.Provider value={contextValue}>

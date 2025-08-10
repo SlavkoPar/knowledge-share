@@ -1,8 +1,7 @@
 import { Reducer } from 'react'
 import {
   ActionTypes, Actions, ILocStorage, IsCategory,
-  ICategoriesState, ICategory, CategoryKey, ICategoryRow, 
-  IQuestion, 
+  ICategoriesState, ICategory, CategoryKey, ICategoryRow, IQuestion,
   actionStoringToLocalStorage, FormMode, doNotCloneActions, doNotCallInnerReducerActions
 } from "categories/types";
 
@@ -69,10 +68,10 @@ export const CategoryReducer: Reducer<ICategoriesState, Actions> = (state, actio
   // const isCategory = IsCategory(categoryRow); // ICategory rather than ICategoryRow
 
   if (action.type === ActionTypes.SET_FROM_LOCAL_STORAGE) {
-    const { locStorage } = action.payload;
+    const { keyExpanded } = action.payload;
     return {
       ...state,
-      ...locStorage
+      keyExpanded
     }
   }
 
@@ -312,6 +311,8 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
     case ActionTypes.SET_ROW_EXPANDING: {
       return {
         ...state,
+        rowExpanding: true,
+        rowExpanded: false,
         loadingCategories: true
       }
     }
@@ -332,6 +333,8 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         },
         activeCategory: null,
         activeQuestion: null,
+        rowExpanding: false,
+        rowExpanded: true,
         formMode
       }
     }
@@ -340,7 +343,9 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
       return {
         ...state,
         // keep mode
-        loadingCategories: true
+        loadingCategories: true, 
+        rowExpanding: true, // actually collapsing
+        rowExpanded: false
       }
     }
 
@@ -353,6 +358,8 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         // keep mode
         loadingCategories: false,
         keyExpanded: { topId, categoryId: id, questionId: null },
+        rowExpanding: false, // actually collapsing
+        rowExpanded: true,
         activeCategory: null,
         activeQuestion: null
       }

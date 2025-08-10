@@ -141,9 +141,9 @@ export interface IGlobalState {
 	loading: boolean;
 	error?: Error;
 	allCategoryRows: Map<string, ICategoryRow>;
-	categoryRowsLoaded?: number;
+	allCategoryRowsLoaded?: number;
 	allGroupRows: Map<string, IGroupRow>;
-	groupRowsLoaded?: number;
+	allGroupRowsLoaded?: number;
 	nodesReLoaded: boolean; // categoryNodeLoaded || groupNodeLoaded  ( to prevent showing of ChatBotDlg)
 	lastRouteVisited: string;
 }
@@ -448,6 +448,7 @@ export interface IHistoryData {
 
 
 export interface IUser {
+	workspace: string;
 	nickName: string;
 	name: string;
 	color?: string;

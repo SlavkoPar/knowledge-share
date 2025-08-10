@@ -25,7 +25,7 @@ function App() {
   console.log('-----------> App')
 
   //const { getUser, OpenDB, setLastRouteVisited } = useGlobalContext();
-  const { dbp, authUser, isAuthenticated, everLoggedIn, categoryRowsLoaded, groupRowsLoaded, lastRouteVisited, nodesReLoaded } = useGlobalState()
+  const { dbp, authUser, isAuthenticated, everLoggedIn, allCategoryRowsLoaded, allGroupRowsLoaded: groupRowsLoaded, lastRouteVisited, nodesReLoaded } = useGlobalState()
   const { nickName, role } = authUser;
 
   const formInitialValues = {
@@ -51,22 +51,23 @@ function App() {
     if (!isAuthenticated) {
       if (instance) {
         const activeAccount: AccountInfo | null = instance.getActiveAccount();
+        const name = (activeAccount && activeAccount.name) ? activeAccount.name : 'Unknown';
         const user: IUser = {
-          nickName: (activeAccount && activeAccount.name) ? activeAccount.name : 'Unknown',
-          name: ''
+          nickName: name,
+          name,
+          workspace: name === 'Slindza' ? 'SLINDZA' : 'DEMO'
         }
         dispatch({ type: GlobalActionTypes.AUTHENTICATE, payload: { user } });
       }
     }
-
-  }, [isAuthenticated]) // , isAuthenticated
+  }, [dispatch, isAuthenticated]) // , isAuthenticated
 
   const locationPathname = location.pathname;
   console.log('---------------- ================== App locationPathname ===>>>', locationPathname);
 
   const searchParams = new URLSearchParams(location.search);
 
-  const showChatBotDlg = (locationPathname.startsWith('/categories') && categoryRowsLoaded) ||
+  const showChatBotDlg = (locationPathname.startsWith('/categories') && allCategoryRowsLoaded) ||
     (locationPathname.startsWith('/groups') && groupRowsLoaded);
   useEffect(() => {
     (async () => {
@@ -103,7 +104,7 @@ function App() {
     navigate(lastRouteVisited);
   }, [])
 
-  if (!isAuthenticated || !categoryRowsLoaded) // || !groupRowsLoaded)
+  if (!isAuthenticated) // || !categoryRowsLoaded) // || !groupRowsLoaded)
     return <div>App loading</div>
 
   return (
@@ -135,7 +136,7 @@ function App() {
         </Col>
       </Row>
       {/* {<ModalChatBot show={modalChatBotShow} onHide={() => { setModalChatBotShow(false) }} />} */}
-      {categoryRowsLoaded && //nodesReLoaded &&
+      {allCategoryRowsLoaded && //nodesReLoaded &&
         <>
           <ChatBotDlg show={modalChatBotShow} onHide={() => { setModalChatBotShow(false) }} />
           <Button onClick={(e) => {

@@ -47,10 +47,9 @@ interface Props {
 }
 
 
-
 const initGlobalState: IGlobalState = {
   dbp: null,
-  workspace: 'DEMO',
+  workspace: 'unknown',
   authUser: initialAuthUser,
   isAuthenticated: false,
   everLoggedIn: true,
@@ -61,9 +60,9 @@ const initGlobalState: IGlobalState = {
   bg: 'dark',
   loading: false,
   allCategoryRows: new Map<string, ICategoryRow>(),
-  categoryRowsLoaded: undefined,
+  allCategoryRowsLoaded: undefined,
   allGroupRows: new Map<string, IGroupRow>(),
-  groupRowsLoaded: undefined,
+  allGroupRowsLoaded: undefined,
   nodesReLoaded: false,
   lastRouteVisited: '/categories',
 }
@@ -103,7 +102,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
         dispatch({ type: GlobalActionTypes.SET_FROM_LOCAL_STORAGE, payload: { locStorage } });
       }
     }
-   
+
   }, []);
 
   const Execute = async (method: string, endpoint: string, data: Object | null = null): Promise<any> => {
@@ -180,22 +179,22 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
         const url = `${protectedResources.KnowledgeAPI.endpointCategoryRow}/${workspace}`;
         await Execute("GET", url, null)
           .then((catRowDtos: ICategoryRowDto[]) => {   //  | Response
-            const allCatRows = new Map<string, ICategoryRow>();
+            const allCategoryRows = new Map<string, ICategoryRow>();
             console.timeEnd();
-            catRowDtos.forEach((rowDto: ICategoryRowDto) => allCatRows.set(rowDto.Id, new CategoryRow(rowDto).categoryRow));
-            allCatRows.forEach(cat => {
+            catRowDtos.forEach((rowDto: ICategoryRowDto) => allCategoryRows.set(rowDto.Id, new CategoryRow(rowDto).categoryRow));
+            allCategoryRows.forEach(cat => {
               let { id, parentId, title, variations, hasSubCategories, level, kind } = cat;
               let titlesUpTheTree = id;
               let parentCat = parentId;
               while (parentCat) {
-                const cat2 = allCatRows.get(parentCat)!;
+                const cat2 = allCategoryRows.get(parentCat)!;
                 titlesUpTheTree = cat2!.id + ' / ' + titlesUpTheTree;
                 parentCat = cat2.parentId;
               }
               cat.titlesUpTheTree = titlesUpTheTree;
-              allCatRows.set(id, cat);
+              allCategoryRows.set(id, cat);
             })
-            dispatch({ type: GlobalActionTypes.SET_ALL_CATEGORY_ROWS, payload: { allCategoryRows: allCatRows } });
+            dispatch({ type: GlobalActionTypes.SET_ALL_CATEGORY_ROWS, payload: { allCategoryRows } });
             resolve(true)
           });
       }
@@ -205,7 +204,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
       }
       resolve(true);
     });
-  }, [dispatch]);
+  }, [dispatch, workspace]);
 
 
   // ---------------------------
@@ -249,7 +248,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
       }
       resolve(true);
     });
-  }, [dispatch]);
+  }, [dispatch, workspace]);
 
   //const searchQuestions = useCallback(async (execute: (method: string, endpoint: string) => Promise<any>, filter: string, count: number): Promise<any> => {
   const searchQuestions = async (filter: string, count: number): Promise<any> => {
@@ -303,8 +302,8 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
 
 
   const getGroupRows = useCallback(async (groupId: string | null) => {
-    const { groupRowsLoaded } = globalState;
-    if (!groupRowsLoaded) {
+    const { allGroupRowsLoaded } = globalState;
+    if (!allGroupRowsLoaded) {
       await loadAndCacheAllGroupRows();
     }
     try {
@@ -389,10 +388,10 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
 
   const OpenDB = useCallback(async (): Promise<any> => {
     try {
-      await loadAndCacheAllCategoryRows();
+      // await loadAndCacheAllCategoryRows();
       // await loadAndCacheAllGroupRows();
-      console.log('*** loadAndCacheAllCategoryRows')
-      return true;
+      //console.log('*** loadAndCacheAllCategoryRows')
+      // return true;
     }
     catch (err: any) {
       console.log(err);

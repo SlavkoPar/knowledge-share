@@ -140,7 +140,7 @@ const reducer: Reducer<IGlobalState, GlobalActions> = (state, action) => {
         case GlobalActionTypes.AUTHENTICATE: {
             console.log('GlobalActionTypes.AUTHENTICATE', action.payload)
             const { user } = action.payload;
-            const { nickName, name } = user;
+            const { nickName, name, workspace } = user;
             return {
                 ...state,
                 authUser: {
@@ -150,7 +150,7 @@ const reducer: Reducer<IGlobalState, GlobalActions> = (state, action) => {
                     color: 'blue',
                     everLoggedIn: true,
                 },
-                workspace: 'DEMO',
+                workspace,
                 canEdit: true, //user.parentRole !== ROLES.VIEWER,
                 isOwner: true, //user.parentRole === ROLES.OWNER,
                 isAuthenticated: true,
@@ -196,8 +196,8 @@ const reducer: Reducer<IGlobalState, GlobalActions> = (state, action) => {
             const { allCategoryRows } = action.payload;
             return {
                 ...state,
-                allCategoryRows: allCategoryRows,
-                categoryRowsLoaded: Date.now()
+                allCategoryRows,
+                allCategoryRowsLoaded: Date.now()
             };
         }
 
@@ -206,7 +206,7 @@ const reducer: Reducer<IGlobalState, GlobalActions> = (state, action) => {
             return {
                 ...state,
                 allGroupRows,
-                groupRowsLoaded: Date.now()
+                allGroupRowsLoaded: Date.now()
             };
         }
 

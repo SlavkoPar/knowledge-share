@@ -20,7 +20,7 @@ interface IProps {
 const AssignedAnswers = ({ questionKey, questionTitle, assignedAnswers, isDisabled }: IProps) => {
 
     const { globalState, searchAnswers, loadAndCacheAllGroupRows } = useGlobalContext();
-    const { authUser, isDarkMode, variant, allGroupRows, groupRowsLoaded } = globalState;
+    const { authUser, isDarkMode, variant, allGroupRows, allGroupRowsLoaded } = globalState;
 
     //const [assignedAnswers2, setAssignAnswers2] = useState<IAssignedAnswer[]>([]);
 
@@ -61,14 +61,17 @@ const AssignedAnswers = ({ questionKey, questionTitle, assignedAnswers, isDisabl
     }
 
     const assignAnswer = async () => {
+        if (!allGroupRowsLoaded) {
+            await loadAndCacheAllGroupRows();
+        }
         setShowAssign(true);
     }
 
-    useEffect(() => {
-        if (!groupRowsLoaded) {
-            loadAndCacheAllGroupRows();
-        }
-    }, [groupRowsLoaded, loadAndCacheAllGroupRows])
+    // useEffect(() => {
+    //     if (!allGroupRowsLoaded) {
+    //         loadAndCacheAllGroupRows();
+    //     }
+    // }, [allGroupRowsLoaded, loadAndCacheAllGroupRows])
 
     return (
         <div className={'mx-0 my-0 px-1 py-1 border border-2 rounded-2 border-info bg-info'} >
@@ -110,7 +113,10 @@ const AssignedAnswers = ({ questionKey, questionTitle, assignedAnswers, isDisabl
                         variant={variant}
                         disabled={isDisabled}
                         onClick={
-                            (e) => {
+                            async (e) => {
+                                if (!allGroupRowsLoaded) {
+                                    await loadAndCacheAllGroupRows();
+                                }
                                 setShowAdd(true);
                                 e.preventDefault()
                             }

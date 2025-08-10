@@ -535,6 +535,8 @@ export interface ICategoriesState {
 	categoryId_questionId_done?: string;
 	nodeOpening: boolean;
 	nodeOpened: boolean;
+	rowExpanding: boolean;
+	rowExpanded: boolean;
 	activeCategory: ICategory | null;
 	activeQuestion: IQuestion | null;
 	loadingCategories: boolean,
@@ -557,7 +559,7 @@ export interface ILoadCategoryQuestions {
 
 export interface ICategoriesContext {
 	state: ICategoriesState,
-	openNode: (catKey: ICategoryKey, questionId: string|null, fromChatBotDlg?: string) => Promise<any>;
+	openNode: (catKey: ICategoryKey, questionId: string | null, fromChatBotDlg?: string) => Promise<any>;
 	loadTopRows: () => Promise<any>,
 	addSubCategory: (categoryRow: ICategoryRow) => Promise<any>;
 	cancelAddCategory: () => Promise<any>;
@@ -747,7 +749,7 @@ export type Payload = {
 
 	[ActionTypes.SET_FROM_LOCAL_STORAGE]: {
 		categoryRow?: ICategoryRow;
-		locStorage: ILocStorage
+		keyExpanded: IKeyExpanded
 	}
 
 	[ActionTypes.SET_TOP_ROWS_LOADING]: {

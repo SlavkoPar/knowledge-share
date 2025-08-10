@@ -57,7 +57,7 @@ const QuestionList = ({ categoryRow }: { categoryRow: ICategoryRow }) => {
     rootMargin: '0px 0px 100px 0px',
   });
 
-  console.log("QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQuestionList", id, questionRows)
+  //console.log("QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQuestionList", id, questionRows)
   // if (loadingQuestion)
   //   return <div> ... loading</div>
 
@@ -66,7 +66,7 @@ const QuestionList = ({ categoryRow }: { categoryRow: ICategoryRow }) => {
       ref={rootRef}
       className="ms-0" // border border-1 border-info rounded-2"
       // className="max-h-[500px] max-w-[500px] overflow-auto bg-slate-100"
-      style={{ maxHeight: '300px', overflowY: 'auto' }}
+      style={{ maxHeight: '400px', overflowY: 'auto' }}
     >
       <List>
         {questionRows.length === 0 &&
