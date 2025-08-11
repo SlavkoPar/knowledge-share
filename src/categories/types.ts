@@ -144,7 +144,8 @@ export interface IQuestionRow extends IQuestionKey, IRecord {
 	title: string;
 	numOfAssignedAnswers: number;
 	categoryTitle?: string;
-	isSelected?: boolean;
+	// isSelected?: boolean;
+	included: boolean;
 }
 
 export interface IQuestion extends IQuestionRow {
@@ -254,7 +255,8 @@ export class QuestionRow {
 			modified: Modified
 				? new Dto2WhoWhen(Modified).whoWhen
 				: undefined,
-			isSelected: Included
+			included: Included ?? false
+			//isSelected: Included
 		}
 	}
 	questionRow: IQuestionRow
@@ -262,7 +264,7 @@ export class QuestionRow {
 
 export class QuestionRowDto {
 	constructor(row: IQuestionRow, Workspace: string) { //, parentId: string) {
-		const { topId, parentId, id, numOfAssignedAnswers, created, modified, isSelected } = row;
+		const { topId, parentId, id, numOfAssignedAnswers, created, modified, included } = row;
 		this.questionRowDto = {
 			Workspace,
 			TopId: topId,
@@ -273,7 +275,7 @@ export class QuestionRowDto {
 			CategoryTitle: '',
 			Created: new WhoWhen2Dto(created!).whoWhenDto!,
 			Modified: new WhoWhen2Dto(modified).whoWhenDto!,
-			Included: isSelected
+			Included: included
 		}
 	}
 	questionRowDto: IQuestionRowDto
@@ -388,7 +390,7 @@ export class Question {
 			numOfRelatedFilters: dto.NumOfRelatedFilters ?? 0,
 			source: dto.Source ?? 0,
 			status: dto.Status ?? 0,
-			isSelected: dto.Included !== undefined,
+			included: dto.Included !== undefined,
 			created: new Dto2WhoWhen(dto.Created!).whoWhen,
 			modified: dto.Modified
 				? new Dto2WhoWhen(dto.Modified).whoWhen
@@ -539,6 +541,7 @@ export interface ICategoriesState {
 	rowExpanded: boolean;
 	activeCategory: ICategory | null;
 	activeQuestion: IQuestion | null;
+	selectedQuestionId: string | null;
 	loadingCategories: boolean,
 	loadingQuestions: boolean,
 	loadingCategory: boolean,
@@ -848,6 +851,7 @@ export type Payload = {
 	[ActionTypes.SET_ROW_EXPANDED]: {
 		categoryRow: ICategoryRow;
 		formMode: FormMode;
+		selectedQuestionId?: string | null;
 	};
 
 	[ActionTypes.SET_ROW_COLLAPSING]: {

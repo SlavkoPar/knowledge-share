@@ -52,7 +52,8 @@ export const initialState: ICategoriesState = {
   categoryId_questionId_done: undefined,
 
   activeCategory: null,
-  activeQuestion: null,
+  activeQuestion: null, 
+  selectedQuestionId: null,
 
   loadingCategories: false,
   loadingQuestions: false,
@@ -92,15 +93,16 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
   useEffect(() => {
 
     let keyExpanded: IKeyExpanded = workspace === 'SLINDZA'
-      ? { topId: "QUESTIONS", categoryId: "QUESTIONS",    questionId: "qqqqqq111" }
-      : { topId: "MTS",       categoryId: "REMOTECTRLS",  questionId: "qqqqqq111"
+      ? { topId: "QUESTIONS", categoryId: "QUESTIONS", questionId: "qqqqqq111" }
+      : {
+        topId: "MTS", categoryId: "REMOTECTRLS", questionId: "qqqqqq111"
       }
     if ('localStorage' in window) {
       console.log('CATEGORIES_STATE loaded before signIn')
       let s = localStorage.getItem('CATEGORIES_STATE');
       if (s !== null) {
         const locStorage: ILocStorage = JSON.parse(s);
-        keyExpanded  = locStorage.keyExpanded!;
+        keyExpanded = locStorage.keyExpanded!;
       }
     }
     dispatch({ type: ActionTypes.SET_FROM_LOCAL_STORAGE, payload: { keyExpanded } });
@@ -319,6 +321,10 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
           console.error({ cat: categoryRow })
         }
         else {
+          let selectedQuestionId: string | undefined = undefined;
+          if (includeQuestionId && categoryRow.questionRows.filter((row: IQuestionRow) => row.included).length > 0) {
+            selectedQuestionId = includeQuestionId;
+          }
           if (newCategoryRow) {
             categoryRow.categoryRows = [newCategoryRow, ...categoryRow.categoryRows];
           }
@@ -329,7 +335,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
           if (formMode === FormMode.None && includeQuestionId) {
             formMode = canEdit ? FormMode.EditingQuestion : FormMode.ViewingQuestion
           }
-          dispatch({ type: ActionTypes.SET_ROW_EXPANDED, payload: { categoryRow, formMode: formMode! } });
+          dispatch({ type: ActionTypes.SET_ROW_EXPANDED, payload: { categoryRow, formMode: formMode!, selectedQuestionId } });
           return categoryRow;
         }
       }
@@ -709,17 +715,18 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
           title: 'question text',
           categoryTitle: categoryRow.title,
           numOfAssignedAnswers: 0,
+          included: true
         }
-
         const question: IQuestion = {
           ...initialQuestion,
           ...newQuestionRow,
           title: ''
         }
-
         if (isExpanded) {
           const topRow: ICategoryRow = state.topRows.find(c => c.id === topId)!;
-          const catRow: ICategoryRow = findCategory(topRow.categoryRows, id)!;
+          const catRow: ICategoryRow = (topRow.id === topRow.topId)
+            ? topRow
+            : findCategory(topRow.categoryRows, id)!;
           catRow.questionRows = [newQuestionRow, ...catRow.questionRows];
           dispatch({ type: ActionTypes.ADD_NEW_QUESTION_TO_ROW, payload: { categoryRow: catRow, newQuestionRow } });
           dispatch({ type: ActionTypes.SET_QUESTION, payload: { question, formMode: FormMode.AddingQuestion } });
@@ -1062,7 +1069,10 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
   const onCategoryTitleChanged = (topId: string, id: string, title: string): void => {
     const { topRows } = state;
     const topRow: ICategoryRow = topRows.find(c => c.id === topId)!;
-    const categoryRow: ICategoryRow = findCategory(topRow.categoryRows, id)!;
+    //const categoryRow: ICategoryRow = findCategory(topRow.categoryRows, id)!;
+    const categoryRow: ICategoryRow = (topRow.id === topRow.topId)
+      ? topRow
+      : findCategory(topRow.categoryRows, id)!;
     categoryRow.title = title;
     // rerender
     dispatch({ type: ActionTypes.CATEGORY_TITLE_CHANGED, payload: { categoryRow } })
@@ -1071,8 +1081,11 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
   const onQuestionTitleChanged = (topId: string, categoryId: string, id: string, title: string): void => {
     const { topRows } = state;
     const topRow: ICategoryRow = topRows.find(c => c.id === topId)!;
-    const { categoryRows } = topRow;
-    const categoryRow: ICategoryRow = findCategory(categoryRows, categoryId)!;
+    //const { categoryRows } = topRow;
+    //const categoryRow: ICategoryRow = findCategory(categoryRows, categoryId)!;
+     const categoryRow: ICategoryRow = (topRow.id === topRow.topId)
+      ? topRow
+      : findCategory(topRow.categoryRows, id)!;
     if (categoryRow) {
       const questionRow = categoryRow.questionRows.find(q => q.id === id)!;
       questionRow.title = title;

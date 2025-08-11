@@ -665,6 +665,7 @@ export type GroupsPayload = {
 	[ActionTypes.SET_ROW_EXPANDED]: {
 		groupRow: IGroupRow;
 		formMode: FormMode;
+		selectedAnswerId?: string;
 	};
 
 	[ActionTypes.SET_ROW_COLLAPSING]: {

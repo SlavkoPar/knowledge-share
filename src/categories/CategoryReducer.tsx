@@ -17,7 +17,7 @@ export const initialQuestion: IQuestion = {
   numOfRelatedFilters: 0,
   source: 0,
   status: 0,
-  isSelected: false
+  included: false
 }
 
 export const initialCategory: ICategory = {
@@ -213,7 +213,8 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         keyExpanded,
         nodeOpened: false, // keep topRows, and openNode
         activeCategory: null,
-        activeQuestion: null
+        activeQuestion: null,
+        selectedQuestionId: null
       }
 
     // case ActionTypes.RESET_CATEGORY_QUESTION_DONE: {
@@ -303,8 +304,9 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         // keep mode
         loadingCategory: false,
         //keyExpanded: { ...categoryKey },
-        activeCategory: categoryRow,
-        activeQuestion: null
+        activeCategory: null, //categoryRow,
+        activeQuestion: null,
+        selectedQuestionId: null
       }
     }
 
@@ -318,7 +320,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
     }
 
     case ActionTypes.SET_ROW_EXPANDED: {
-      const { categoryRow, formMode } = action.payload;
+      const { categoryRow, formMode, selectedQuestionId } = action.payload;
       const { topId, id } = categoryRow;
       // Do not work with categoryRow, 
       // categoryRow will be proccesed in CategoryReducer, rather than in innerReducer
@@ -333,6 +335,8 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         },
         activeCategory: null,
         activeQuestion: null,
+        /*selectedQuestionId: selectedQuestionId ?? null, */
+        loadingQuestion: false,
         rowExpanding: false,
         rowExpanded: true,
         formMode
@@ -361,7 +365,8 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         rowExpanding: false, // actually collapsing
         rowExpanded: true,
         activeCategory: null,
-        activeQuestion: null
+        activeQuestion: null,
+        selectedQuestionId: null
       }
     }
 
@@ -378,7 +383,8 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         loadingCategory: false,
         //keyExpanded: { ...state.keyExpanded, questionId: null },
         activeCategory,
-        activeQuestion: null
+        activeQuestion: null,
+        selectedQuestionId: null
       };
     }
 
@@ -397,7 +403,8 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         topRowsLoaded,
         //categoryKeyExpanded: state.categoryKeyExpanded ? { ...state.categoryKeyExpanded, questionId: null } : null,
         activeCategory,
-        activeQuestion: null
+        activeQuestion: null,
+        selectedQuestionId: null
       };
     }
 
@@ -415,7 +422,8 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         loadingCategory: false,
         //categoryKeyExpanded: state.categoryKeyExpanded ? { ...state.categoryKeyExpanded, questionId: null } : null,
         activeCategory,
-        activeQuestion: null
+        activeQuestion: null,
+        selectedQuestionId: null
       };
     }
 
@@ -483,6 +491,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         ...state,
         activeCategory: null,
         activeQuestion: null,
+        selectedQuestionId: null,
         formMode: FormMode.None
       };
     }
@@ -498,7 +507,8 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
       return {
         ...state,
         formMode: FormMode.None,
-        activeQuestion: null
+        activeQuestion: null,
+        selectedQuestionId: null
       };
     }
 
@@ -515,9 +525,20 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         },
         nodeOpened: false, // keep topRows, and openNode
         activeCategory: null,
-        activeQuestion: null
+        activeQuestion: null,
+        selectedQuestionId: null
       };
     }
+
+
+    case ActionTypes.ADD_NEW_QUESTION_TO_ROW: {
+      const { categoryRow, newQuestionRow } = action.payload;
+      return {
+        ...state,
+        selectedQuestionId: newQuestionRow.id
+      };
+    }
+
 
     case ActionTypes.SET_QUESTION: {
       const { question, formMode } = action.payload;
@@ -597,7 +618,9 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
       return {
         ...state, // Popravi
         activeQuestion: null,
-        formMode: FormMode.None
+        selectedQuestionId: null,
+        formMode: FormMode.None,
+        loadingQuestion: false
       }
     }
 
@@ -607,7 +630,8 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
       return {
         ...state,
         formMode: FormMode.None,
-        activeQuestion: null
+        activeQuestion: null,
+        selectedQuestionId: null
       };
     }
 

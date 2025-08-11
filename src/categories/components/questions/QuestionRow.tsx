@@ -16,20 +16,18 @@ import ViewQuestion from "categories/components/questions/ViewQuestion";
 import Q from 'assets/Q.png';
 import QPlus from 'assets/QPlus.png';
 
-import { IWhoWhen } from 'global/types';
-import { initialQuestion } from 'categories/CategoryReducer';
-
 
 //const QuestionRow = ({ question, categoryInAdding }: { ref: React.ForwardedRef<HTMLLIElement>, question: IQuestion, categoryInAdding: boolean | undefined }) => {
 const QuestionRow = ({ questionRow }: { questionRow: IQuestionRow }) => {
-    const { id, topId, parentId, title, numOfAssignedAnswers, isSelected } = questionRow;
+    const { id, topId, parentId, title, numOfAssignedAnswers } = questionRow; // , isSelected
     const questionKey: IQuestionKey = new QuestionKey(questionRow).questionKey!;
     const categoryKey: ICategoryKey = { topId, parentId, id: parentId! } // proveri
 
     const { canEdit, isDarkMode, variant, bg, authUser } = useGlobalState();
     const { state, viewQuestion, addQuestion, editQuestion, deleteQuestion } = useCategoryContext();
 
-    const { activeQuestion, formMode, keyExpanded } = state;
+    const { activeQuestion, formMode, keyExpanded, selectedQuestionId } = state;
+    const isSelected = id === selectedQuestionId;
 
     const showForm = activeQuestion !== null && activeQuestion.id === id;
 
@@ -123,7 +121,7 @@ const QuestionRow = ({ questionRow }: { questionRow: IQuestionRow }) => {
                         className="ms-1 p-0 text-secondary d-flex align-items-center"
                         title="Add Question"
                         onClick={() => {
-                            const categoryInfo: ICategoryInfo = { categoryKey, level: 0 }
+                            //const categoryInfo: ICategoryInfo = { categoryKey, level: 0 }
                             addQuestion(categoryKey, true);
                         }}
                     >

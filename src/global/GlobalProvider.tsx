@@ -16,7 +16,7 @@ import {
   IGlobalState,
 } from 'global/types'
 
-import { globalReducer, initialAuthUser } from "global/globalReducer";
+import { globalReducer, initialAuthUser } from "global/GlobalReducer";
 
 import {
   Category, ICategory, ICategoryDto, ICategoryKey, IQuestionRow, IQuestionRowDto, IQuestionRowDtosEx,
@@ -78,11 +78,11 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
 
 
   useEffect(() => {
-    let initState: IGlobalState = {
-      ...initGlobalState
-    }
+    // let initState: IGlobalState = {
+    //   ...initGlobalState
+    // }
     if ('localStorage' in window) {
-      console.log('Arghhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh CATEGORIES_STATE loaded before signIn')
+      console.log('GLOBAL_STATE loaded before signIn')
       let s = localStorage.getItem('GLOBAL_STATE');
       if (s !== null) {
         const locStorage = JSON.parse(s);
@@ -271,7 +271,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
                 title: Title,
                 categoryTitle: '',
                 numOfAssignedAnswers: NumOfAssignedAnswers ?? 0,
-                isSelected: Included !== undefined,
+                included: Included ?? false,
               }
             })
             // const list: IQuestionRow[] = dtos.map((q: IQuestionRowDto) => ({
