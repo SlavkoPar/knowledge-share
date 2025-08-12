@@ -1,17 +1,17 @@
 {
   "files": {
     "main.css": "/knowledge-share/static/css/main.3eb54d4e.css",
-    "main.js": "/knowledge-share/static/js/main.4526c6f5.js",
+    "main.js": "/knowledge-share/static/js/main.58df75ba.js",
     "static/media/QuestionForm.png": "/knowledge-share/static/media/QuestionForm.5286a182127dd64e7904.png",
     "static/media/Q.png": "/knowledge-share/static/media/Q.4209512a2ea1935c338f.png",
     "static/media/QPlus.png": "/knowledge-share/static/media/QPlus.a9d1719c7a50e21d3475.png",
     "static/media/A.png": "/knowledge-share/static/media/A.69d84f9a4d04ea1e54d4.png",
     "index.html": "/knowledge-share/index.html",
     "main.3eb54d4e.css.map": "/knowledge-share/static/css/main.3eb54d4e.css.map",
-    "main.4526c6f5.js.map": "/knowledge-share/static/js/main.4526c6f5.js.map"
+    "main.58df75ba.js.map": "/knowledge-share/static/js/main.58df75ba.js.map"
   },
   "entrypoints": [
     "static/css/main.3eb54d4e.css",
-    "static/js/main.4526c6f5.js"
+    "static/js/main.58df75ba.js"
   ]
 }
