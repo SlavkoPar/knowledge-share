@@ -3,11 +3,10 @@ import React, { createContext, useContext, useReducer, useCallback, Dispatch, us
 
 import {
   ActionTypes, ICategory, IQuestion, ICategoriesContext,
-  ICategoryDto, ICategoryDtoEx, ICategoryDtoListEx, ICategoryKey, CategoryKey, Category, CategoryDto,
+  ICategoryDto, ICategoryDtoEx, ICategoryKey, CategoryKey, Category, CategoryDto,
   IQuestionDto, IQuestionDtoEx, IQuestionEx, IQuestionRowDto, IQuestionKey, IQuestionRow,
   Question, QuestionDto, QuestionRow,
   QuestionRowDto,
-  IParentInfo,
   ICategoryRow,
   ICategoryRowDtoEx,
   CategoryRow,
@@ -25,9 +24,7 @@ import {
 } from 'categories/types';
 
 import { CategoryReducer, initialQuestion, initialCategory } from 'categories/CategoryReducer';
-import { IWhoWhen, Dto2WhoWhen, WhoWhen2Dto } from 'global/types';
-import { IAnswer, IAnswerKey, IGroup } from 'groups/types';
-import { IAssignedAnswer, IAssignedAnswerDto, IAssignedAnswerDtoEx, AssignedAnswer, AssignedAnswerDto } from 'categories/types';
+import { IAssignedAnswer, AssignedAnswerDto } from 'categories/types';
 import { protectedResources } from 'authConfig';
 
 const CategoriesContext = createContext<ICategoriesContext>({} as any);
@@ -64,22 +61,9 @@ export const initialState: ICategoriesState = {
   rowExpanded: false
 }
 
-// let locStorageKeyExpanded: IKeyExpanded | null = null;
-// if ('localStorage' in window) {
-//   console.log('CATEGORIES_STATE loaded before signIn')
-//   let s = localStorage.getItem('CATEGORIES_STATE');
-//   if (s !== null) {
-//     const locStorage: ILocStorage = JSON.parse(s);
-//     locStorageKeyExpanded = locStorage!.keyExpanded;
-//     //const nodeOpened = keyExpanded ? false : true;
-//     //console.log('CATEGORIES_STATE nakon citanja iz memorije', { keyExpanded }, { nodeOpened });
-//     // dispatch({ type: ActionTypes.SET_FROM_LOCAL_STORAGE, payload: { locStorage } });
-//   }
-// }
-
 export const CategoryProvider: React.FC<Props> = ({ children }) => {
 
-  const { loadAndCacheAllCategoryRows, getCat, setNodesReloaded } = useGlobalContext()
+  const { loadAndCacheAllCategoryRows, getCat } = useGlobalContext()
   const globalState = useGlobalState();
   const { isAuthenticated, workspace, dbp, allCategoryRows, allCategoryRowsLoaded, authUser, canEdit } = globalState;
   const { nickName } = authUser;

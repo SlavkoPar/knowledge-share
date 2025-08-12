@@ -178,7 +178,6 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
           ? { ...categoryRow }
           : { ...c }
         ),
-        //keyExpanded, // TODO proveri
         categoryId_questionId_done: `${id}_${questionId}`,
         nodeOpening: false,
         nodeOpened: true,
@@ -322,6 +321,10 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
     case ActionTypes.SET_ROW_EXPANDED: {
       const { categoryRow, formMode, selectedQuestionId } = action.payload;
       const { topId, id } = categoryRow;
+      const { keyExpanded } = state;
+      const questionId = (topId === keyExpanded?.topId && id === keyExpanded.categoryId) 
+        ? keyExpanded.questionId
+        : null;
       // Do not work with categoryRow, 
       // categoryRow will be proccesed in CategoryReducer, rather than in innerReducer
       return {
@@ -331,11 +334,11 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         keyExpanded: {
           topId,
           categoryId: id,
-          questionId: null
+          questionId
         },
         activeCategory: null,
         activeQuestion: null,
-        /*selectedQuestionId: selectedQuestionId ?? null, */
+        selectedQuestionId: selectedQuestionId ?? null, 
         loadingQuestion: false,
         rowExpanding: false,
         rowExpanded: true,
@@ -485,7 +488,6 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
     }
     */
 
-
     case ActionTypes.CANCEL_ADD_SUB_CATEGORY: {
       return {
         ...state,
@@ -495,7 +497,6 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         formMode: FormMode.None
       };
     }
-
 
     case ActionTypes.SET_LOADING_QUESTION:
       return {
