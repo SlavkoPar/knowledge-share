@@ -133,6 +133,13 @@ export class CategoryRow {
 
 /////////////////////////////////////
 // Question
+export interface IQuestionDtoKey {
+	Workspace?: string;
+	TopId: string,
+	ParentId?: string;
+	Id: string;
+}
+
 
 export interface IQuestionKey {
 	topId: string,
@@ -611,6 +618,12 @@ export interface IQuestionFormProps {
 
 /////////////////////////////////////////////////
 // Assigned Answers
+
+
+export interface IAssignedAnswerDtoKey {
+	TopId: string;
+	Id: string;
+}
 
 export interface IAssignedAnswerKey {
 	topId: string;
