@@ -164,7 +164,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
       const { keyExpanded } = state;
       try {
         dispatch({ type: ActionTypes.SET_TOP_ROWS_LOADING, payload: {} });
-        const url = `${protectedResources.KnowledgeAPI.endpointCategoryRow}/${workspace}/null`;
+        const url = `${protectedResources.KnowledgeAPI.endpointCategoryRow}/${workspace}/null/topRows/all`;
         console.log('CategoryProvider loadTopRows url:', url)
         console.time();
         await Execute("GET", url)

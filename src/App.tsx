@@ -18,7 +18,7 @@ import { GlobalActionTypes, IUser } from 'global/types';
 import { AccountInfo } from '@azure/msal-browser';
 import { useMsal } from '@azure/msal-react';
 import AboutShort from 'AboutShort';
-import ModalChatBot from 'ModalChatBot';
+import WordPress from 'WordPress';
 import ChatBotDlg from 'ChatBotDlg';
 
 function App() {
@@ -130,6 +130,7 @@ function App() {
               <Route path="/groups" element={<Groups />} /> */}
               <Route path="/about" element={<About />} />
               <Route path="/about-short" element={<AboutShort />} />
+              <Route path="/word-press" element={<WordPress />} />
               <Route path="/health" element={<Health />} />
             </Routes>
           </div>

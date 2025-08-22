@@ -14,6 +14,8 @@ import {
   IHistoryFilterDto,
   IAuthUser,
   IGlobalState,
+  HistoryFilterDto,
+  IHistoryFilter,
 } from 'global/types'
 
 import { globalReducer, initialAuthUser } from "global/GlobalReducer";
@@ -673,7 +675,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
       //const { topId, id, variations, title, kind, modified } = history;
       //dispatch({ type: ActionTypes.SET_CATEGORY_LOADING, payload: { id, loading: false } });
       try {
-        const historyDto = new HistoryDto(history).historyDto;
+        const historyDto = new HistoryDto(history, workspace).historyDto;
         console.log("historyDto", { historyDto })
         const url = `${protectedResources.KnowledgeAPI.endpointHistory}`;
         console.time()
@@ -694,7 +696,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
         console.log(error)
         //dispatch({ type: ActionTypes.SET_ERROR, payload: { error: new Error('Server Error') } });
       }
-    }, []);
+    }, [workspace]);
 
   const getAnswersRated = async (questionKey: IQuestionKey): Promise<any> => {
     const mapAnswerRating = new Map<string, IAssignedAnswer>();
@@ -757,12 +759,11 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
     // }
   }
 
-
-  const addHistoryFilter = useCallback(async (historyFilterDto: IHistoryFilterDto) => {
+  const addHistoryFilter = useCallback(async (historyFilter: IHistoryFilter) => {
     //const { topId, id, variations, title, kind, modified } = history;
     //dispatch({ type: ActionTypes.SET_CATEGORY_LOADING, payload: { id, loading: false } });
     try {
-      //const historyDto = new HistoryDto(historyFilterDto).historyDto;
+      const historyFilterDto = new HistoryFilterDto(historyFilter, workspace).historyFilterDto;
       //console.log("historyDto", { historyDto })
       const url = `${protectedResources.KnowledgeAPI.endpointHistoryFilter}`;
       console.time()
@@ -783,7 +784,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
       console.log(error)
       //dispatch({ type: ActionTypes.SET_ERROR, payload: { error: new Error('Server Error') } });
     }
-  }, []);
+  }, [workspace]);
 
   const setLastRouteVisited = useCallback((lastRouteVisited: string): void => {
     dispatch({ type: GlobalActionTypes.SET_LAST_ROUTE_VISITED, payload: { lastRouteVisited } });

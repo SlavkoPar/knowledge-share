@@ -10,7 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faQuestion } from '@fortawesome/free-solid-svg-icons'
 import CatList from 'global/Components/SelectCategory/CatList';
 import { ICategory, IQuestion, IQuestionEx, IQuestionKey, QuestionKey, ICategoryRow } from 'categories/types';
-import { IWhoWhen, IHistory, USER_ANSWER_ACTION, IHistoryFilterDto } from 'global/types';
+import { IWhoWhen, IHistory, USER_ANSWER_ACTION, IHistoryFilterDto, IHistoryFilter } from 'global/types';
 import AssignedAnswersChatBot from 'global/ChatBotPage/AssignedAnswersChatBot';
 import { IChatBotAnswer, INewQuestion, INextAnswer, useAI } from './hooks/useAI'
 import { AnswerKey, IAnswer } from 'groups/types';
@@ -133,12 +133,12 @@ const ChatBotPage: React.FC = () => {
 		const questionCurr = await getCurrQuestion();
 		if (questionCurr) {
 			console.log({ questionCurr })
-			const historyFilterDto: IHistoryFilterDto = {
-				QuestionKey: new QuestionKey(questionCurr).questionKey!,
-				Filter: underFilter,
-				Created: { Time: new Date, NickName: authUser.nickName }
+			const historyFilter: IHistoryFilter = {
+				questionKey: new QuestionKey(questionCurr).questionKey!,
+				filter: underFilter,
+				created: { time: new Date(), nickName: authUser.nickName }
 			}
-			await addHistoryFilter(historyFilterDto);
+			await addHistoryFilter(historyFilter);
 		}
 		// navigate(`/categories/${categoryId}_${questionId.toString()}`)
 		// const question = await getQuestion(questionId);
@@ -233,7 +233,7 @@ const ChatBotPage: React.FC = () => {
 		const history: IHistory = {
 			questionKey: new QuestionKey(selectedQuestion!).questionKey!,
 			assignedAnswerKey: { topId: chatBotAnswer!.topId, id: chatBotAnswer!.id },
-			userAction: USER_ANSWER_ACTION.Fixed,
+			userAction: 'Fixed',
 			created: {
 				nickName: authUser.nickName,
 				time: new Date()
@@ -271,7 +271,7 @@ const ChatBotPage: React.FC = () => {
 			const history: IHistory = {
 				questionKey: new QuestionKey(selectedQuestion!).questionKey!,
 				assignedAnswerKey: { topId: chatBotAnswer.topId, id: chatBotAnswer.id },
-				userAction: nextChatBotAnswer ? USER_ANSWER_ACTION.NotFixed : USER_ANSWER_ACTION.NotClicked,
+				userAction: nextChatBotAnswer ? 'NotFixed' : 'NotClicked',
 				created: {
 					nickName: authUser.nickName,
 					time: new Date()

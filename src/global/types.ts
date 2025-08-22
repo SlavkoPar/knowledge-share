@@ -1,5 +1,5 @@
 // Define the Global State
-import { IAssignedAnswerKey, ICategory, ICategoryKey, ICategoryRow, ICategoryRowDto, IKeyExpanded, IQuestion, IQuestionEx, IQuestionKey, IQuestionRow } from 'categories/types';
+import { IAssignedAnswerDtoKey, IAssignedAnswerKey, ICategory, ICategoryKey, ICategoryRow, ICategoryRowDto, IKeyExpanded, IQuestion, IQuestionDtoKey, IQuestionEx, IQuestionKey, IQuestionRow } from 'categories/types';
 import { IGroup, IGroupKey, IAnswerRow, IAnswer, IAnswerKey, IGroupRow, IHistoryAnswerKey } from 'groups/types';
 //import { IOption } from 'common/types';
 import { IDBPDatabase } from 'idb';
@@ -59,17 +59,33 @@ export class WhoWhen2Dto {
 
 
 export class HistoryDto {
-	constructor(history: IHistory) {
+	constructor(history: IHistory, Workspace: string) {
+		const { questionKey, assignedAnswerKey, created} = history;
+
 		this.historyDto = {
-			QuestionKey: history.questionKey,
-			AssignedAnswerKey: history.assignedAnswerKey,
+			Workspace, 
+			QuestionKey: { TopId: questionKey.topId, Id: questionKey.id },
+			AnswerKey: { TopId: assignedAnswerKey.topId, Id: assignedAnswerKey.id},
 			UserAction: history.userAction,
-			Created: new WhoWhen2Dto(history.created).whoWhenDto!,
+			Created: new WhoWhen2Dto(created).whoWhenDto!,
 		}
 	}
 	historyDto: IHistoryDto;
 }
 
+
+export class HistoryFilterDto {
+	constructor(historyFilter: IHistoryFilter, Workspace: string) {
+		const { questionKey, filter, created} = historyFilter;
+		this.historyFilterDto = {
+			Workspace, 
+			Filter: filter,
+			QuestionKey: { Workspace, TopId: questionKey.topId, Id: questionKey.id },
+			Created: new WhoWhen2Dto(created).whoWhenDto!,
+		}
+	}
+	historyFilterDto: IHistoryFilterDto;
+}
 
 
 // export class History {
@@ -185,7 +201,7 @@ export interface IGlobalContext {
 	getAnswer: (answerKey: IAnswerKey) => Promise<IAnswer | null>;
 	addHistory: (history: IHistory) => Promise<void>;
 	getAnswersRated: (questionKey: IQuestionKey) => Promise<any>;
-	addHistoryFilter: (historyFilterDto: IHistoryFilterDto) => Promise<void>;
+	addHistoryFilter: (historyFilter: IHistoryFilter) => Promise<void>;
 	setNodesReloaded: () => void;
 }
 
@@ -392,11 +408,9 @@ export interface IRoleData {
 }
 
 
-export enum USER_ANSWER_ACTION {
-	NotFixed = 0,
-	Fixed = 1,
-	NotClicked = 2
-};
+
+export type USER_ANSWER_ACTION =	'NotFixed' | 'Fixed' | 'NotClicked';
+
 
 export interface IHistory {
 	id?: number;
@@ -407,17 +421,27 @@ export interface IHistory {
 }
 
 export interface IHistoryDto {
+	Workspace: string,
 	PartitionKey?: string;
 	Id?: number;
-	QuestionKey: IQuestionKey;
-	AssignedAnswerKey: IAssignedAnswerKey;
+	QuestionKey: IQuestionDtoKey;
+	AnswerKey: IAssignedAnswerDtoKey;
 	UserAction: USER_ANSWER_ACTION; // when client didn't click on 'Fixed' or 'Not fixed' buttons
 	Created: IWhoWhenDto
 }
 
 
+
+export interface IHistoryFilter {
+	Workspace?: string,
+	questionKey: IQuestionKey;
+	filter: string;
+	created: IWhoWhen
+}
+
 export interface IHistoryFilterDto {
-	QuestionKey: IQuestionKey;
+	Workspace?: string,
+	QuestionKey: IQuestionDtoKey;
 	Filter: string;
 	Created: IWhoWhenDto
 }
