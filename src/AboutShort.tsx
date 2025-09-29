@@ -122,7 +122,7 @@ const AboutShort: React.FC<IAboutShort> = (props: IAboutShort) => {
         </div>
 
         <div className="card card-block col-12 m-3">
-          <Accordion defaultActiveKey="0">
+          <Accordion defaultActiveKey="null">
             <Accordion.Item eventKey="0">
               <Accordion.Header>Integrate KnowledgeLIB at WordPress site</Accordion.Header>
               <Accordion.Body>
@@ -156,7 +156,7 @@ const AboutShort: React.FC<IAboutShort> = (props: IAboutShort) => {
         </div>
 
         <div className="card card-block col-12 m-3">
-          <Accordion defaultActiveKey="0">
+          <Accordion defaultActiveKey="null">
             <Accordion.Item eventKey="0">
               <Accordion.Header>Source Code</Accordion.Header>
               <Accordion.Body>
