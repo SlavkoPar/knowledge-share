@@ -1,29 +1,25 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faQuestion, faSurprise, faUser, faUserFriends, faReply } from '@fortawesome/free-solid-svg-icons'
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+// import { faQuestion, faSurprise, faUser, faUserFriends, faReply } from '@fortawesome/free-solid-svg-icons'
 import Q from 'assets/Q.png';
 import A from 'assets/A.png';
 
-import { GlobalActionTypes } from 'global/types'
-import { useGlobalDispatch } from 'global/GlobalProvider'
-import { IUser } from 'global/types'
 
 import { AuthenticatedTemplate, UnauthenticatedTemplate, useMsal, useMsalAuthentication, useIsAuthenticated } from '@azure/msal-react';
-import { InteractionStatus, InteractionType, InteractionRequiredAuthError, AccountInfo } from "@azure/msal-browser";
-import { Nav, Navbar, Dropdown, DropdownButton, NavDropdown } from 'react-bootstrap';
+import { InteractionType, AccountInfo } from "@azure/msal-browser";
+import { Navbar, Dropdown, DropdownButton, NavDropdown } from 'react-bootstrap';
 
 import { loginRequest, protectedResources } from 'authConfig';
-import AboutShort from 'AboutShort';
 
 export const NavigationBar = () => {
-
 
     const { instance, accounts, inProgress } = useMsal();
 
     let activeAccount: AccountInfo | null = null;
     if (instance) {
         activeAccount = instance.getActiveAccount();
+        console.log('activeAccount.idTokenClaims.email', activeAccount?.idTokenClaims?.email)
         console.log(activeAccount ? activeAccount.name : 'Unknown')
         console.log({activeAccount})
     }
