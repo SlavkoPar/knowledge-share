@@ -158,7 +158,7 @@ export const NavigationBar = () => {
                 </AuthenticatedTemplate>
                 <UnauthenticatedTemplate>
                     <a className="navbar-brand ms-2" href="/" >
-                        Microsoft identity platform
+                        Microsoft identity platform (You can sign in with Google)
                     </a>
                     <div className="collapse navbar-collapse justify-content-end">
                         <DropdownButton variant="secondary" className="ml-auto" drop="start" title="Sign In">
