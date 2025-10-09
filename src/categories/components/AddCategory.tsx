@@ -4,7 +4,7 @@ import { useCategoryContext } from 'categories/CategoryProvider'
 import { useGlobalState } from 'global/GlobalProvider'
 
 import CategoryForm from "categories/components/CategoryForm";
-import { FormMode, ICategory, ICategoryKey } from "categories/types";
+import { FormMode, ICategory } from "categories/types";
 
 const AddCategory = () => {
     const globalState = useGlobalState();

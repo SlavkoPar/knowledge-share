@@ -1,41 +1,30 @@
 import React, { createContext, useContext, useReducer, Dispatch, useCallback, useEffect } from "react";
 
 import {
-  IGlobalContext, ILoginUser, ROLES, GlobalActionTypes,
-  ICategoryData, IQuestionData,
-  IGroupData, IAnswerData,
-  IRoleData, IUserData,
-  IRegisterUser,
-  IParentInfo,
-  IWhoWhen,
-  IHistory, IHistoryDtoEx, IHistoryData, HistoryDto,
-  IHistoryDtoListEx,
-  IHistoryListEx,
-  IHistoryFilterDto,
-  IAuthUser,
+  IGlobalContext, GlobalActionTypes,
+  IHistory, HistoryDto,
   IGlobalState,
   HistoryFilterDto,
   IHistoryFilter,
 } from 'global/types'
 
-import { globalReducer, initialAuthUser } from "global/GlobalReducer";
+import { GlobalReducer, initialAuthUser } from "global/GlobalReducer";
 
 import {
-  Category, ICategory, ICategoryDto, ICategoryKey, IQuestionRow, IQuestionRowDto, IQuestionRowDtosEx,
-  IQuestion, IQuestionDto, IQuestionDtoEx, IQuestionEx, IQuestionKey, Question, IAssignedAnswer,
+  IQuestionRow, IQuestionRowDto, IQuestionRowDtosEx,
+  IQuestionDtoEx, IQuestionEx, IQuestionKey, Question,
   ICategoryRowDto, ICategoryRow, CategoryRow,
   QuestionKey
 } from "categories/types";
 
 import {
-  Group, IGroup, IGroupDto, IGroupKey, IAnswer, IAnswerDto, IAnswerKey, IAnswerRow, IAnswerRowDto, IAnswerRowDtosEx, Answer,
+  IAnswer, IAnswerDto, IAnswerKey, IAnswerRow, IAnswerRowDto, IAnswerRowDtosEx, Answer,
   IGroupRow, IGroupRowDto, GroupRow
 } from "groups/types";
 
 import { IUser } from 'global/types';
 
-import { IDBPDatabase, IDBPIndex, openDB } from 'idb' // IDBPTransaction
-import { escapeRegexCharacters } from 'common/utilities'
+// import { escapeRegexCharacters } from 'common/utilities'
 
 //////////////////
 // Initial data
@@ -73,8 +62,8 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
   // If we update globalState, form inner Provider, 
   // we reset changes, and again we use initialGlobalState
   // so, don't use globalDispatch inside of inner Provider, like Categories Provider
-  const [globalState, dispatch] = useReducer(globalReducer, initGlobalState);
-  const { workspace, authUser, allCategoryRows } = globalState;
+  const [globalState, dispatch] = useReducer(GlobalReducer, initGlobalState);
+  const { workspace, allCategoryRows } = globalState;
 
   console.log('--------> GlobalProvider')
 
@@ -88,7 +77,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
       let s = localStorage.getItem('GLOBAL_STATE');
       if (s !== null) {
         const locStorage = JSON.parse(s);
-        const { everLoggedIn, nickName, isDarkMode, variant, bg, lastRouteVisited } = locStorage;
+        //const { everLoggedIn, nickName, isDarkMode, variant, bg, lastRouteVisited } = locStorage;
         // initState = {
         //   ...initState,
         //   everLoggedIn,
@@ -185,7 +174,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
             console.timeEnd();
             catRowDtos.forEach((rowDto: ICategoryRowDto) => allCategoryRows.set(rowDto.Id, new CategoryRow(rowDto).categoryRow));
             allCategoryRows.forEach(cat => {
-              let { id, parentId, title, variations, hasSubCategories, level, kind } = cat;
+              let { id, parentId } = cat; // , title, variations, hasSubCategories, level, kind
               let titlesUpTheTree = id;
               let parentCat = parentId;
               while (parentCat) {
@@ -229,7 +218,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
             rowDtos.forEach((rowDto: IGroupRowDto) => allGroupRows.set(rowDto.Id, new GroupRow(rowDto).groupRow));
             //
             allGroupRows.forEach(groupRow => {
-              let { topId: topId, id, parentId, title, variations, hasSubGroups, level, kind } = groupRow;
+              let { id, parentId } = groupRow;
               let titlesUpTheTree = id;
               let parentGrp = parentId;
               while (parentGrp) {
@@ -260,7 +249,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
         const filterEncoded = encodeURIComponent(filter);
         const url = `${protectedResources.KnowledgeAPI.endpointQuestion}/${workspace}/${filterEncoded}/${count}/null`;
         await Execute("GET", url).then((dtosEx: IQuestionRowDtosEx) => {
-          const { questionRowDtos, msg } = dtosEx;
+          const { questionRowDtos } = dtosEx;
           console.log('questionRowDtos:', { dtos: dtosEx }, protectedResources.KnowledgeAPI.endpointCategory);
           console.timeEnd();
           if (questionRowDtos) {
@@ -318,7 +307,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
           parentHeader = groupRow.header!;
         }
         else if (groupRow.parentId === groupId) {
-          const { topId: topId, id, parentId, header, title, level, kind, hasSubGroups } = groupRow;
+          const { topId, id, parentId, header, title, level, kind, hasSubGroups } = groupRow;
           const row: IGroupRow = {
             topId,
             id,
@@ -346,11 +335,11 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
       dispatch({ type: GlobalActionTypes.SET_ERROR, payload: { error } });
       return { groupRows: [], parentHeader: 'Kiks' };
     }
-  }, [globalState.allGroupRows]);
+  }, [globalState, loadAndCacheAllGroupRows]);
 
 
   const searchAnswers = async (filter: string, count: number): Promise<any> => {
-    const { allGroupRows } = globalState;
+    //const { allGroupRows } = globalState;
     return new Promise(async (resolve) => {
       try {
         console.time();
@@ -412,7 +401,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
 
     return new Promise(async (resolve) => {
       try {
-        const { topId, id } = questionKey;
+        //const { topId, id } = questionKey;
         const query = new QuestionKey(questionKey).toQuery(workspace);
         const url = `${protectedResources.KnowledgeAPI.endpointQuestion}?${query}`;
         console.time()
@@ -454,7 +443,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
       const categories: ICategoryRow[] = [];
       allCategoryRows.forEach((c, id) => {
         if (c.kind === kind) {
-          const { topId, id, title, level, link, header } = c;
+          //const { topId, id, title, level, link, header } = c;
           // const cat: ICat = {
           //   topId,
           //   id: id,
@@ -482,7 +471,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
     return [];
   }
 
-
+  /*
   const getCatsByLevel = async (kind: number): Promise<ICategoryRow[]> => {
     try {
       const categories: ICategoryRow[] = [];
@@ -514,7 +503,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
       dispatch({ type: GlobalActionTypes.SET_ERROR, payload: { error } });
     }
     return [];
-  }
+  } */
 
   const getSubCats = useCallback(async (categoryId: string | null) => {
     try {
@@ -551,7 +540,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
 
 
   const health = () => {
-    const url = `api/health`;
+    //const url = `api/health`;
     // axios
     //   .post(url)
     //   .then(({ status }) => {
@@ -629,7 +618,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
       dispatch({ type: GlobalActionTypes.SET_ERROR, payload: { error } });
     }
     return undefined;
-  }, [globalState.allGroupRows]);
+  }, [globalState]);
 
 
   const getGroupRowsByKind = async (kind: number): Promise<IGroupRow[]> => {
@@ -638,7 +627,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
       const groups: IGroupRow[] = [];
       shortGroups.forEach((c, id) => {
         if (c.kind === kind) {
-          const { topId: topId, id, header, title, level } = c;
+          const { topId, id, header, title, level } = c;
           const groupRow: IGroupRow = {
             topId,
             id,
@@ -681,7 +670,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
         console.time()
         await Execute("POST", url, historyDto)
           .then(async (questionDtoEx: IQuestionDtoEx) => {
-            const { questionDto, msg } = questionDtoEx;
+            const { questionDto } = questionDtoEx;
             console.timeEnd();
             if (questionDto) {
               //const history = new History(historyDto).history;
@@ -699,7 +688,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
     }, [workspace]);
 
   const getAnswersRated = async (questionKey: IQuestionKey): Promise<any> => {
-    const mapAnswerRating = new Map<string, IAssignedAnswer>();
+    // const mapAnswerRating = new Map<string, IAssignedAnswer>();
     // try {
     //   console.log("getAnswersRated", { questionKey })
     //   const url = `${protectedResources.KnowledgeAPI.endpointHistory}/${questionKey.topId}/${questionKey.id}`;
@@ -769,7 +758,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
       console.time()
       await Execute("POST", url, historyFilterDto)
         .then(async (questionDtoEx: IQuestionDtoEx) => {
-          const { questionDto, msg } = questionDtoEx;
+          const { questionDto } = questionDtoEx;
           console.timeEnd();
           if (questionDto) {
             //const history = new History(historyDto).history;

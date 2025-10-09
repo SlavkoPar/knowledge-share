@@ -1,4 +1,4 @@
-import React, { Reducer } from 'react'
+import { Reducer } from 'react'
 import { ICategoryRow } from "categories/types";
 import { CatsActions, CatActionTypes, ICatState } from './types';
 

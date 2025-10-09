@@ -1,7 +1,7 @@
 import { Reducer } from 'react'
 import {
   ActionTypes, Actions, ILocStorage, IsCategory,
-  ICategoriesState, ICategory, CategoryKey, ICategoryRow, IQuestion,
+  ICategoriesState, ICategory, ICategoryRow, IQuestion,
   actionStoringToLocalStorage, FormMode, doNotCloneActions, doNotCallInnerReducerActions
 } from "categories/types";
 
@@ -169,8 +169,8 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
     }
 
     case ActionTypes.SET_NODE_OPENED: {
-      const { categoryRow, catKey, questionId, fromChatBotDlg } = action.payload;
-      const { topId, id } = catKey; //;
+      const { categoryRow, catKey, questionId } = action.payload;
+      const { id } = catKey; //;
       const { topRows } = state;
       return {
         ...state,
@@ -225,10 +225,10 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
     // }
 
     case ActionTypes.SET_SUB_CATEGORIES: {
-      const { id, categoryRows } = action.payload;
-      const { topRows } = state;
+      const { categoryRows } = action.payload;
+      //const { topRows } = state;
       categoryRows.forEach((categoryRow: ICategoryRow) => {
-        const { id, hasSubCategories, numOfQuestions } = categoryRow;
+        //const { id, hasSubCategories, numOfQuestions } = categoryRow;
       })
       return {
         ...state,
@@ -252,7 +252,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
 
     case ActionTypes.ADD_SUB_CATEGORY: {
       const { categoryKey, level } = action.payload;
-      const { topId, id } = categoryKey;
+      const { topId } = categoryKey;
       const category: ICategory = {
         ...initialCategory,
         topId: topId,
@@ -297,7 +297,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
     case ActionTypes.SET_CATEGORY: {
       const { categoryRow } = action.payload; // category doesn't contain  inAdding 
       console.assert(IsCategory(categoryRow));
-      const categoryKey = new CategoryKey(categoryRow).categoryKey!;
+      //const categoryKey = new CategoryKey(categoryRow).categoryKey!;
       return {
         ...state,
         // keep mode
@@ -379,7 +379,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
       console.assert(IsCategory(categoryRow))
       const category: ICategory = categoryRow as ICategory;
       const activeCategory: ICategory = { ...category, isExpanded: false }
-      const { topId, id, parentId } = category;
+      //const { topId, id, parentId } = category;
       return {
         ...state,
         formMode: FormMode.ViewingCategory,
@@ -397,7 +397,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
       // TODO what about instanceof?
       const category: ICategory = categoryRow as ICategory;
       const activeCategory: ICategory = { ...category, isExpanded: false }
-      const { topId, id, parentId } = category;
+      const { parentId } = category;
       const topRowsLoaded = parentId ? true : false;
       return {
         ...state,
@@ -418,7 +418,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
       // TODO what about instanceof?
       const category: ICategory = categoryRow as ICategory;
       const activeCategory: ICategory = { ...category, isExpanded: false }
-      const { topId, id, parentId } = category;
+      //const { topId, id, parentId } = category;
       return {
         ...state,
         formMode: FormMode.EditingCategory,
@@ -431,15 +431,15 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
     }
 
     case ActionTypes.SET_CATEGORY_QUESTIONS_LOADING:
-      const { loadingQuestion } = action.payload; // category doesn't contain inAdding 
+      //const { loadingQuestion } = action.payload; // category doesn't contain inAdding 
       return {
         ...state,
         loadingQuestions: true
       }
 
     case ActionTypes.CATEGORY_QUESTIONS_LOADED: {
-      const { categoryRow } = action.payload;
-      const { id, topId: topId, questionRows, hasMoreQuestions } = categoryRow;
+     // const { categoryRow } = action.payload;
+      //const { id, topId: topId, questionRows, hasMoreQuestions } = categoryRow;
       return {
         ...state,
         loadingQuestions: false
@@ -447,7 +447,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
     }
 
     case ActionTypes.DELETE_CATEGORY: {
-      const { id } = action.payload;
+      //const { id } = action.payload;
       // TODO Popravi
       return {
         ...state,
@@ -533,7 +533,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
 
 
     case ActionTypes.ADD_NEW_QUESTION_TO_ROW: {
-      const { categoryRow, newQuestionRow } = action.payload;
+      const { newQuestionRow } = action.payload;
       return {
         ...state,
         selectedQuestionId: newQuestionRow.id
@@ -556,8 +556,8 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
 
     case ActionTypes.SET_QUESTION_AFTER_ASSIGN_ANSWER: {
       const { question } = action.payload;
-      const { parentId, id } = question;
-      const inAdding = state.formMode === FormMode.AddingQuestion;
+      //const { parentId, id } = question;
+      //const inAdding = state.formMode === FormMode.AddingQuestion;
 
       // for inAdding, _id is IDBValidKey('000000000000000000000000')
       // thats why we look for q.inAdding instead of q._id === _id
@@ -586,7 +586,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
 
     case ActionTypes.SET_QUESTION_TO_VIEW: {
       const { question } = action.payload;
-      const { topId, id, parentId } = question;
+      //const { topId, id, parentId } = question;
       const { keyExpanded } = state;
       return {
         ...state,
@@ -600,7 +600,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
     case ActionTypes.SET_QUESTION_TO_EDIT: {
       const { question } = action.payload;
       const { topId, id, parentId } = question;
-      const { keyExpanded } = state;
+      //const { keyExpanded } = state;
       return {
         ...state,
         // categoryKeyExpanded: categoryKeyExpanded
@@ -614,8 +614,8 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
     }
 
     case ActionTypes.QUESTION_DELETED: {
-      const { question } = action.payload;
-      const { parentId, id } = question;
+      //const { question } = action.payload;
+      //const { parentId, id } = question;
       return {
         ...state, // Popravi
         activeQuestion: null,
@@ -627,7 +627,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
 
     case ActionTypes.CANCEL_QUESTION_FORM:
     case ActionTypes.CLOSE_QUESTION_FORM: {
-      const { question } = action.payload;
+      //const { question } = action.payload;
       return {
         ...state,
         formMode: FormMode.None,

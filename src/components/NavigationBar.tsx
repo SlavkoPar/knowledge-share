@@ -6,7 +6,7 @@ import Q from 'assets/Q.png';
 import A from 'assets/A.png';
 
 
-import { AuthenticatedTemplate, UnauthenticatedTemplate, useMsal, useMsalAuthentication, useIsAuthenticated } from '@azure/msal-react';
+import { AuthenticatedTemplate, UnauthenticatedTemplate, useMsal, useMsalAuthentication } from '@azure/msal-react';
 import { InteractionType, AccountInfo } from "@azure/msal-browser";
 import { Navbar, Dropdown, DropdownButton, NavDropdown } from 'react-bootstrap';
 
@@ -14,7 +14,7 @@ import { loginRequest, protectedResources } from 'authConfig';
 
 export const NavigationBar = () => {
 
-    const { instance, accounts, inProgress } = useMsal();
+    const { instance } = useMsal();
 
     let activeAccount: AccountInfo | null = null;
     if (instance) {
@@ -28,7 +28,7 @@ export const NavigationBar = () => {
         loginHint: "name@example.com",
         scopes: protectedResources.KnowledgeAPI.scopes.read
     }
-    const { login, result, error: msalError } = useMsalAuthentication(InteractionType.Silent, request);
+    const { result } = useMsalAuthentication(InteractionType.Silent, request);
 
     let navigate = useNavigate();
 
@@ -158,7 +158,7 @@ export const NavigationBar = () => {
                 </AuthenticatedTemplate>
                 <UnauthenticatedTemplate>
                     <a className="navbar-brand ms-2" href="/" >
-                        Microsoft identity platform (You can sign in with Google)
+                        Implement Chatbot at your site
                     </a>
                     <div className="collapse navbar-collapse justify-content-end">
                         <DropdownButton variant="secondary" className="ml-auto" drop="start" title="Sign In">

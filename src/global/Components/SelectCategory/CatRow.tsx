@@ -4,7 +4,6 @@ import { faCaretRight, faCaretDown } from '@fortawesome/free-solid-svg-icons'
 
 import { ListGroup, Button } from "react-bootstrap";
 
-import { useGlobalState } from 'global/GlobalProvider'
 import { ICategoryRow } from "categories/types";
 
 import CatList from "global/Components/SelectCategory/CatList";
@@ -21,7 +20,7 @@ const CatRow = ({ cat, dispatch, setParentCat, selId }: ICatRow) => {
     const { topId, parentId, id, title, level, isExpanded } = cat;
     const categoryKey = { topId, parentId, id };
 
-    const { isDarkMode, variant, bg } = useGlobalState();
+    //const { isDarkMode, variant, bg } = useGlobalState();
 
     const expand = (_id: IDBValidKey) => {
         dispatch({ type: CatActionTypes.SET_EXPANDED, payload: { id, expanding: !isExpanded } });

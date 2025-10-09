@@ -1,14 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faRemove, faQuestion, faPlus, faReply } from '@fortawesome/free-solid-svg-icons'
+import { faRemove } from '@fortawesome/free-solid-svg-icons'
 
 import { ListGroup, Button, Badge } from "react-bootstrap";
 
 import { useGlobalState } from 'global/GlobalProvider'
-import { ActionTypes, FormMode, ICategoryInfo, ICategoryKey, IQuestionKey, IQuestionRow, QuestionKey } from "categories/types";
-import { useCategoryContext, useCategoryDispatch } from 'categories/CategoryProvider'
+import { FormMode, ICategoryKey, IQuestionRow } from "categories/types";
+import { useCategoryContext } from 'categories/CategoryProvider'
 import { useHover } from 'hooks/useHover';
-import { IQuestion } from 'categories/types'
 
 import AddQuestion from "categories/components/questions/AddQuestion";
 import EditQuestion from "categories/components/questions/EditQuestion";
@@ -20,13 +19,13 @@ import QPlus from 'assets/QPlus.png';
 //const QuestionRow = ({ question, categoryInAdding }: { ref: React.ForwardedRef<HTMLLIElement>, question: IQuestion, categoryInAdding: boolean | undefined }) => {
 const QuestionRow = ({ questionRow }: { questionRow: IQuestionRow }) => {
     const { id, topId, parentId, title, numOfAssignedAnswers } = questionRow; // , isSelected
-    const questionKey: IQuestionKey = new QuestionKey(questionRow).questionKey!;
+    //const questionKey: IQuestionKey = new QuestionKey(questionRow).questionKey!;
     const categoryKey: ICategoryKey = { topId, parentId, id: parentId! } // proveri
 
-    const { canEdit, isDarkMode, variant, bg, authUser } = useGlobalState();
+    const { canEdit, authUser } = useGlobalState();
     const { state, viewQuestion, addQuestion, editQuestion, deleteQuestion } = useCategoryContext();
 
-    const { activeQuestion, formMode, keyExpanded, selectedQuestionId } = state;
+    const { activeQuestion, formMode, selectedQuestionId } = state;
     const isSelected = id === selectedQuestionId;
 
     const showForm = activeQuestion !== null && activeQuestion.id === id;
@@ -42,10 +41,10 @@ const QuestionRow = ({ questionRow }: { questionRow: IQuestionRow }) => {
         deleteQuestion(questionRow, showForm /* isActive */);
     };
 
-    const edit = async (Id: string) => {
-        // Load data from server and reinitialize question
-        await editQuestion(questionRow);
-    }
+    // const edit = async (Id: string) => {
+    //     // Load data from server and reinitialize question
+    //     await editQuestion(questionRow);
+    // }
 
     const onSelectQuestion = async (id: string) => {
         if (canEdit)
@@ -53,6 +52,8 @@ const QuestionRow = ({ questionRow }: { questionRow: IQuestionRow }) => {
         else
             await viewQuestion(questionRow);
     }
+
+    const [hoverRef, hoverProps] = useHover();
 
     useEffect(() => {
         (async () => {
@@ -70,9 +71,8 @@ const QuestionRow = ({ questionRow }: { questionRow: IQuestionRow }) => {
                 hoverRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
             }
         })()
-    }, [isSelected]);
+    }, [canEdit, editQuestion, formMode, hoverRef, isSelected, questionRow, viewQuestion]);
 
-    const [hoverRef, hoverProps] = useHover();
 
     const Row1 =
         <div ref={hoverRef} className={`p-0 d-flex justify-content-start align-items-center w-100 position-relative question-row${showForm ? '-selected' : ''}`}>

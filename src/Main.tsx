@@ -1,17 +1,15 @@
 import React from 'react';
 import { MsalProvider, AuthenticatedTemplate, useMsal, UnauthenticatedTemplate } from '@azure/msal-react';
-import { Container, Button } from 'react-bootstrap';
+import { Container } from 'react-bootstrap';
 import { PageLayout } from 'components/PageLayout';
-import { IdTokenData } from 'components/DataDisplay';
-import { loginRequest } from './authConfig';
+//import { IdTokenData } from 'components/DataDisplay';
 
 import './App.css';
 import { PublicClientApplication } from '@azure/msal-browser/dist/app/PublicClientApplication';
 import { GlobalProvider } from 'global/GlobalProvider';
-import { BrowserRouter as Router } from 'react-router-dom'
+//import { BrowserRouter as Router } from 'react-router-dom'
 
 import App from 'App';
-import About from 'About';
 import AboutShort from 'AboutShort';
 
 /**
@@ -32,6 +30,7 @@ const MainContent = () => {
 
     const activeAccount = instance.getActiveAccount();
 
+    /*
     const handleRedirect = () => {
         instance
             .loginRedirect({
@@ -40,6 +39,7 @@ const MainContent = () => {
             })
             .catch((error) => console.log(error));
     };
+    */
     return (
         <div className="App">
             <AuthenticatedTemplate>

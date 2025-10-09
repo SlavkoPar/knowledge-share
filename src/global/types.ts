@@ -1,6 +1,6 @@
 // Define the Global State
-import { IAssignedAnswerDtoKey, IAssignedAnswerKey, ICategory, ICategoryKey, ICategoryRow, ICategoryRowDto, IKeyExpanded, IQuestion, IQuestionDtoKey, IQuestionEx, IQuestionKey, IQuestionRow } from 'categories/types';
-import { IGroup, IGroupKey, IAnswerRow, IAnswer, IAnswerKey, IGroupRow, IHistoryAnswerKey } from 'groups/types';
+import { IAssignedAnswerDtoKey, IAssignedAnswerKey, ICategoryRow, IQuestion, IQuestionDtoKey, IQuestionEx, IQuestionKey, IQuestionRow } from 'categories/types';
+import { IGroup, IAnswerRow, IAnswer, IAnswerKey, IGroupRow } from 'groups/types';
 //import { IOption } from 'common/types';
 import { IDBPDatabase } from 'idb';
 

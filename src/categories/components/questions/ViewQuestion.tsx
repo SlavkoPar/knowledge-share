@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useCategoryContext } from 'categories/CategoryProvider'
-import { FormMode, IQuestion } from "categories/types";
+import { IQuestion } from "categories/types";
 import QuestionForm from "categories/components/questions/QuestionForm";
 
 const ViewQuestion = ({ inLine }: { inLine: boolean }) => {
     const { state } = useCategoryContext();
-    const { loadingQuestion: questionLoading, topRows: categories, activeQuestion } = state;
+    const { activeQuestion } = state;
     //const { topId, id, parentId } = activeQuestion!;
 
     const [question, setQuestion] = useState<IQuestion | null>(null);

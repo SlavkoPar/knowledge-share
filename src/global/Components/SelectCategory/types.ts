@@ -1,4 +1,4 @@
-import { ICategory, ICategoryKey, ICategoryRow, IQuestion, IQuestionEx, IQuestionKey, IQuestionRow } from 'categories/types';
+import { ICategoryKey, ICategoryRow } from 'categories/types';
 
 import { ActionMap } from "global/types";
 

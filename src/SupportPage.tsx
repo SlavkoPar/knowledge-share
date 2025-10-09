@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom' // useRouteMatch
 
 import { AutoSuggestQuestions } from 'categories/AutoSuggestQuestions';
@@ -6,12 +6,9 @@ import { AutoSuggestQuestions } from 'categories/AutoSuggestQuestions';
 import { Button, Col, Container, Row } from 'react-bootstrap';
 import { useGlobalContext, useGlobalState } from 'global/GlobalProvider';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 //import { faPlus } from '@fortawesome/free-solid-svg-icons'
 import QPlus from 'assets/QPlus.png';
 import { IQuestionKey } from 'categories/types';
-import useFetchWithMsal from 'hooks/useFetchWithMsal';
-import { protectedResources } from 'authConfig';
 
 type SupportParams = {
 	source: string;
@@ -32,7 +29,7 @@ const SupportPage: React.FC = () => {
 	//     return <div>loading...</div>;
 
 	const { searchQuestions } = useGlobalContext();
-	const { canEdit, authUser, isDarkMode, variant, bg, allCategoryRows: cats, allCategoryRowsLoaded: catsLoaded } = useGlobalState();
+	const { canEdit, isDarkMode, variant, allCategoryRows: cats, allCategoryRowsLoaded } = useGlobalState();
 
 	const onSelectQuestion = async (questionKey: IQuestionKey) => {
 		navigate(`/categories/${questionKey.topId}_${questionKey.id}`)
@@ -49,7 +46,7 @@ const SupportPage: React.FC = () => {
 
 
 
-	if (!catsLoaded)
+	if (!allCategoryRowsLoaded)
 		return null;
 
 	return (

@@ -142,8 +142,8 @@ export class AutoSuggestQuestions extends React.Component<{
 		const arr: ICatIdTitle[] = [];
 		searchWords.filter(w => w.length >= 3).forEach(w => {
 			this.allCategoryRows.forEach(async cat => {
-				const parentId = cat.id;
-				let j = 0;
+				//const parentId = cat.id;
+				//let j = 0;
 				// cat.words.forEach(catw => {
 				// 	if (catw.includes(w)) {
 				// 		console.log("Add all questions of category")
@@ -258,7 +258,7 @@ export class AutoSuggestQuestions extends React.Component<{
 			// 
 			let catSections: ICatSection[] = [];
 			catSection.forEach((quests, id) => {
-				let variationsss: string[] = [];
+				//let variationsss: string[] = [];
 				const catSection: ICatSection = {
 					id,
 					categoryTitle: '',
@@ -366,7 +366,7 @@ export class AutoSuggestQuestions extends React.Component<{
 	}
 
 	protected renderSectionTitle(section: ICatMy): JSX.Element {
-		const { parentCategoryUp, categoryParentTitle, categoryTitle } = section;
+		const { parentCategoryUp } = section; // , categoryParentTitle, categoryTitle
 		// let str = (categoryParentTitle ? (categoryParentTitle + " / ") : "") + categoryTitle;
 		// if (parentCategoryUp)
 		// 	str = " ... / " + str;

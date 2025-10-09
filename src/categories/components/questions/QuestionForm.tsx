@@ -1,11 +1,11 @@
-import React, { ChangeEvent, useCallback } from 'react';
+import React, { ChangeEvent } from 'react';
 import { useEffect, useRef } from "react";
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import { Form, CloseButton, Row, Col, Stack } from "react-bootstrap";
 import { CreatedModifiedForm } from "common/CreateModifiedForm"
 import { FormButtons } from "common/FormButtons"
-import { ActionTypes, CategoryKey, FormMode, ICategoryRow, ICategory, ICategoryKey, IQuestion, IQuestionFormProps, QuestionKey } from "categories/types";
+import { ActionTypes, FormMode, ICategoryRow, IQuestion, IQuestionFormProps, QuestionKey } from "categories/types";
 
 import { Select } from 'common/components/Select';
 import { sourceOptions } from 'common/sourceOptions'
@@ -15,15 +15,13 @@ import CatList from 'global/Components/SelectCategory/CatList'
 import { useCategoryContext, useCategoryDispatch } from "categories/CategoryProvider";
 import Dropdown from 'react-bootstrap/Dropdown';
 import AssignedAnswers from './AssignedAnswers';
-import { useGlobalContext } from 'global/GlobalProvider';
-import VariationList from 'categories/VariationList';
 import RelatedFilters from './RelatedFilters';
 import { debounce } from 'common/utilities';
 
 const QuestionForm = ({ question, submitForm, children, showCloseButton, source = 0, closeModal }: IQuestionFormProps) => {
 
-  const { globalState } = useGlobalContext();
-  const { isDarkMode, variant, bg } = globalState;
+  // const { globalState } = useGlobalContext();
+  // const { isDarkMode, variant, bg } = globalState;
 
   const { state, onQuestionTitleChanged } = useCategoryContext();
   let { formMode } = state;
@@ -36,7 +34,7 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
 
   const { topId, parentId, title, id, assignedAnswers, relatedFilters } = question;
   const questionKey = new QuestionKey(question).questionKey;
-  const categoryKey: ICategoryKey = { topId, parentId, id: parentId! }; // proveri
+  // const categoryKey: ICategoryKey = { topId, parentId, id: parentId! }; // proveri
 
   const dispatch = useCategoryDispatch();
 
@@ -61,13 +59,7 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
   // eslint-disable-next-line no-self-compare
   // const nameRef = useRef<HTMLAreaElement | null>(null);
   const nameRef = useRef<HTMLTextAreaElement>(null);
-  useEffect(() => {
-    nameRef.current!.focus();
-    if (source !== 0) {
-      formik.setFieldValue('source', source)
-    }
-  }, [nameRef])
-
+  
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: question,
@@ -82,11 +74,19 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
     }
   });
 
-  const debouncedTitleHandler = useCallback(
+  useEffect(() => {
+    nameRef.current!.focus();
+    if (source !== 0) {
+      formik.setFieldValue('source', source)
+    }
+  }, [formik, nameRef, source])
+
+  const debouncedTitleHandler = //useCallback(
     debounce((value: string) => {
       //dispatch({ type: ActionTypes.QUESTION_TITLE_CHANGED, payload: { categoryId, id, value } })
       onQuestionTitleChanged(topId, parentId!, id, value);
-    }, 500), []);
+    }, 500);
+    //, []);
 
   const handleChangeTitle = (event: ChangeEvent<HTMLTextAreaElement>) => {
     formik.handleChange(event);

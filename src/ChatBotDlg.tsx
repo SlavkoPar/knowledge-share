@@ -1,23 +1,22 @@
-import React, { useEffect, useState, JSX, useRef } from 'react';
-import { Container, Row, Col, Button, Form, ListGroup, Offcanvas, Stack } from "react-bootstrap";
-import { NavLink, useNavigate } from "react-router-dom";
+import React, { useState, useRef } from 'react';
+import { Container, Row, Col, Button, Offcanvas } from "react-bootstrap";
+//import { useNavigate } from "react-router-dom";
 
 import { useGlobalContext, useGlobalState } from 'global/GlobalProvider';
 
 import { useParams } from 'react-router-dom' // useRouteMatch
 import { AutoSuggestQuestions } from 'categories/AutoSuggestQuestions';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFolder } from '@fortawesome/free-solid-svg-icons'
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+// import { faFolder } from '@fortawesome/free-solid-svg-icons'
 
 import { ICategoryRow, IQuestion, IQuestionEx, IQuestionKey, QuestionKey } from 'categories/types';
-import { IHistory, USER_ANSWER_ACTION, IHistoryFilter } from 'global/types';
+import { IHistory, IHistoryFilter } from 'global/types';
 import { IChatBotAnswer, INewQuestion, INextAnswer, useAI } from 'hooks/useAI'
 
 import Q from 'assets/Q.png';
 import A from 'assets/A.png';
-import { useCategoryDispatch } from 'categories/CategoryProvider';
-import { isMobile } from 'react-device-detect';
+// import { useCategoryDispatch } from 'categories/CategoryProvider';
 
 type ChatBotParams = {
     source: string;
@@ -40,8 +39,7 @@ interface IProps {
 
 
 const ChatBotDlg = ({ show, onHide }: IProps) => {
-    let { source, tekst, email } = useParams<ChatBotParams>();
-    const dispatch = useCategoryDispatch();
+    let { tekst } = useParams<ChatBotParams>();
     const [autoSuggestionValue, setAutoSuggestionValue] = useState(tekst!)
     const [setNewQuestion, getCurrQuestion, getNextChatBotAnswer] = useAI([]);
     const [selectedQuestion, setSelectedQuestion] = useState<IQuestion | null>(null);
@@ -50,11 +48,11 @@ const ChatBotDlg = ({ show, onHide }: IProps) => {
     const [chatBotAnswer, setChatBotAnswer] = useState<IChatBotAnswer | null>(null);
     const [hasMoreAnswers, setHasMoreAnswers] = useState<boolean>(false);
 
-    const { getSubCats, getQuestion, addHistory, addHistoryFilter, getAnswersRated, searchQuestions, setLastRouteVisited } = useGlobalContext();
-    const { canEdit, authUser, isDarkMode, variant, bg, allCategoryRows, allCategoryRowsLoaded: catsLoaded } = useGlobalState();
-    const navigate = useNavigate();
+    const { getSubCats, getQuestion, addHistory, addHistoryFilter, searchQuestions } = useGlobalContext();
+    const { authUser, isDarkMode, allCategoryRows, allCategoryRowsLoaded: catsLoaded } = useGlobalState();
+    //const navigate = useNavigate();
 
-    const [catsSelected, setCatsSelected] = useState(true);
+    const [catsSelected] = useState(true);
     const [showAutoSuggest, setShowAutoSuggest] = useState(true); //false);
 
     const [catLevels, setCatLevels] = useState<ICatLevel[]>([]);
@@ -86,7 +84,6 @@ const ChatBotDlg = ({ show, onHide }: IProps) => {
         const parentId = 'MTS'; // null
         const res = await getSubCats(parentId);
         const { subCats, parentHeader } = res;
-        console.log('/////////////////////////////////////////////////////', subCats)
         setCatLevels((prevState) => ([
             ...prevState,
             {
@@ -97,6 +94,7 @@ const ChatBotDlg = ({ show, onHide }: IProps) => {
                 subCatIdSelected: null
             }
         ]))
+        console.log(catLevels)
 
     }
 
@@ -109,6 +107,7 @@ const ChatBotDlg = ({ show, onHide }: IProps) => {
     if (!catsLoaded) // || catsOptions.length === 0)
         return <div>cats not loaded...</div>
 
+    /*
     const onOptionChange = async (id: string, level: number, title: string) => {//event: React.ChangeEvent<HTMLInputElement>) => {
         //const target = event.target;
         //const { id, name } = target;
@@ -146,6 +145,7 @@ const ChatBotDlg = ({ show, onHide }: IProps) => {
         // 	 [name]: value
         // });
     }
+    */
 
     const onSelectQuestion = async (questionKey: IQuestionKey, underFilter: string) => {
         const questionCurr = await getCurrQuestion();
@@ -192,7 +192,6 @@ const ChatBotDlg = ({ show, onHide }: IProps) => {
             //alert(questionEx.msg)
             return;
         }
-        console.log('Breeeeeeeeeeeeeeeeeeeeeeeeeeeeeee:', { question })
         if (question.numOfRelatedFilters > 0) {
             setAutoSuggestionValue(question.relatedFilters[0].filter)
         }
@@ -305,87 +304,19 @@ const ChatBotDlg = ({ show, onHide }: IProps) => {
         setChatBotAnswer(nextChatBotAnswer);
     }
 
-    const NavigLink = (link: string) => {
+    /*const NavigLink = (link: string) => {
         //dispatch({ type: ActionTypes.RESET_CATEGORY_QUESTION_DONE })
         //dispatch({ type: ActionTypes.CLEAN_SUB_TREE, payload: { categoryKey: null } });
-        // new CategoryKey(parentCat).categoryKey*/ } });
+        // new CategoryKey(parentCat).categoryKey } });
         setTimeout(() => {
             navigate(link + "/true")
         }, 100);
     }
+    */
 
-    const CatLevelComponent = (props: ICatLevel) => {
-        const { level, catId, header, subCats, subCatIdSelected } = props;
-        console.log('subCats', { subCats }, { subCatIdSelected })
-        // const subCats2 = subCatIdSelected !== null
-        //     ? subCats.filter(c => c.id === subCatIdSelected!)
-        //     : subCats;
-        const marginLeft = ((level - 1) * 10) + 'px';
-        return (
-            <Row
-                className={`my-0 text-dark mx-1 border border-0 rounded-1`}
-                id={catId!}
-            >
-                <Col xs={12} md={12} className="p-1">
-                    <div className="d-flex justify-content-start align-items-center" style={{ marginLeft }}>
-                        {/* <div className="w-75"> */}
-
-                        {subCatIdSelected
-                            ? <div className='text-center bg-light border p-1'>
-                                {/* <FontAwesomeIcon icon={faFolder} size='sm' /> */}
-                                <i className=''>{header}</i>
-                            </div>
-                            : <div className='py-1 px-1'>
-                                {/* mx-auto */}
-                                {/* d-flex */}
-                                {/* <ListGroup as='ul' horizontal className="flex-wrap list-unstyled mx-auto"> */}
-                                {subCats.map(({ id, title, link }: ICategoryRow) => (
-                                    // <div key={id} className="px-1 text-start">
-                                    // <li className="list-group-item" style={{flexBasis: '33%'}}>
-                                    link
-                                        ? <Form id={id} key={id} className='border border-0 m-1 rounded-1'>
-                                            <ul className="list-unstyled text-start mb-0">
-                                                <li className="list-group-item p-0 m-0">
-                                                    {/* <NavLink to={link} className="px-2 text-decoration-none border">{title}</NavLink> */}
-                                                    <Button
-                                                        size="sm"
-                                                        variant='link'
-                                                        className='border py-0 text-decoration-underline small'
-                                                        onClick={() => NavigLink(link)}
-                                                    >
-                                                        {/* <FontAwesomeIcon icon={faFolder} size='sm' />&nbsp; */}
-                                                        {title}
-                                                    </Button>
-                                                    {/* <a className="px-1 text-decoration-none" onClick={() => navigate(link)}>
-                                                        {title}
-                                                    </a> */}
-                                                </li>
-                                            </ul>
-                                        </Form>
-                                        : <Form id={id} key={id} className='border border-0 m-1 rounded-1'>
-                                            <ul className="d-flex flex-wrap list-unstyled  mb-0">
-                                                <li className="list-group-item border rounded-3 m-0">
-                                                    <Button size="sm" variant='link' className='border py-0 text-decoration-none' onClick={() => onOptionChange(id, level, title)}>
-                                                        <FontAwesomeIcon icon={faFolder} size='sm' />&nbsp;
-                                                        {title}
-                                                    </Button>
-                                                </li>
-                                            </ul>
-                                        </Form>
-
-                                    // <ListGroup.Item as='li' className='p-0 d-inline-block' > </ListGroup.Item>
-                                ))}
-                                {/* </ListGroup> */}
-                            </div>
-                        }
-                    </div>
-                </Col>
-            </Row >
-        )
-    }
 
     const QuestionComponent = (props: IChild) => {
-        const { isDisabled, txt } = props;
+        const { txt } = props;
         return (
             <div id={autoSuggestId.toString()} className="d-flex flex-row mx-0 justify-content-start align-items-center">
                 <div className="d-flex flex-row mx-0 justify-content-start align-items-center">

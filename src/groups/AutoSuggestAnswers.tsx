@@ -146,8 +146,7 @@ export class AutoSuggestAnswers extends React.Component<{
 		const arr: IGroupIdTitle[] = [];
 		searchWords.filter(w => w.length >= 3).forEach(w => {
 			this.allGroupRows.forEach(async group => {
-				const parentId = group.id;
-				let j = 0;
+				//const parentId = group.id;
 				// cat.words.forEach(catw => {
 				// 	if (catw.includes(w)) {
 				// 		console.log("Add all answers of group")
@@ -265,7 +264,7 @@ export class AutoSuggestAnswers extends React.Component<{
 			let groupSections: IGroupSection[] = [];
 			groupAnswers.forEach((quests, id) => {
 
-				let variationsss: string[] = [];
+				//let variationsss: string[] = [];
 				const groupSection: IGroupSection = {
 					id,
 					groupTitle: '',
@@ -374,7 +373,7 @@ export class AutoSuggestAnswers extends React.Component<{
 	}
 
 	protected renderSectionTitle(section: IGroupMy): JSX.Element {
-		const { parentGroupUp, groupParentTitle, groupTitle } = section;
+		const { parentGroupUp } = section; // , groupParentTitle, groupTitle
 		// let str = (groupParentTitle ? (groupParentTitle + " / ") : "") + groupTitle;
 		// if (parentGroupUp)
 		// 	str = " ... / " + str;

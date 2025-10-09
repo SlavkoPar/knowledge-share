@@ -1,10 +1,8 @@
-import React, { useState } from "react";
-import { useCategoryContext, useCategoryDispatch } from 'categories/CategoryProvider'
-import { useGlobalState } from 'global/GlobalProvider'
+import React from "react";
+import { useCategoryContext } from 'categories/CategoryProvider'
 
 import QuestionForm from "categories/components/questions/QuestionForm";
-import { ActionTypes, FormMode, IQuestion, IQuestionRow } from "categories/types";
-import { initialQuestion } from "categories/CategoryReducer";
+import { IQuestion } from "categories/types";
 
 interface IProps {
     closeModal?: () => void;

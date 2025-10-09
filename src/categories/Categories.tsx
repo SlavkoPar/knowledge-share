@@ -3,7 +3,7 @@ import { Container, Row, Col, Button } from "react-bootstrap";
 
 import { useParams } from 'react-router-dom';
 
-import { ActionTypes, ICategoryKey, IQuestionKey, ICategory, ICategoryRow, FormMode, IsCategory, IKeyExpanded } from "./types";
+import { ActionTypes, ICategoryKey, IQuestionKey, ICategoryRow, FormMode } from "./types";
 
 import { useGlobalContext, useGlobalState } from 'global/GlobalProvider';
 
@@ -15,7 +15,7 @@ import EditCategory from "categories/components/EditCategory";
 import ViewQuestion from "categories/components/questions/ViewQuestion";
 import EditQuestion from "categories/components/questions/EditQuestion";
 
-import { initialCategory, initialQuestion } from "categories/CategoryReducer";
+import { initialQuestion } from "categories/CategoryReducer";
 import ModalAddQuestion from './ModalAddQuestion';
 import AddCategory from './components/AddCategory';
 import { AutoSuggestQuestions } from './AutoSuggestQuestions';
@@ -28,7 +28,7 @@ interface IProps {
 
 const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
     console.log("===//////////////////====\\\\\\\\\\\\\\\\===== Categories", categoryId_questionId)
-    const { state, openNode, loadTopRows, addSubCategory } = useCategoryContext();
+    const { state, openNode, loadTopRows } = useCategoryContext();
     const {
         topRows, topRowsLoading, topRowsLoaded,
         keyExpanded,
@@ -44,15 +44,14 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
     } = state;
 
     const { setLastRouteVisited, searchQuestions } = useGlobalContext();
-    const { isDarkMode, authUser, allCategoryRows, allCategoryRowsLoaded } = useGlobalState();
+    const { isDarkMode, allCategoryRows, allCategoryRowsLoaded } = useGlobalState();
 
     const [modalShow, setModalShow] = useState(false);
-    const handleClose = () => {
-        setModalShow(false);
-    }
+    // const handleClose = () => {
+    //     setModalShow(false);
+    // }
 
     const [newQuestion, setNewQuestion] = useState({ ...initialQuestion });
-    const [createQuestionError, setCreateQuestionError] = useState("");
 
     const dispatch = useCategoryDispatch();
 
@@ -123,7 +122,7 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
                 }
             }
         })()
-    }, [keyExpanded, nodeOpening, nodeOpened, openNode, categoryId_questionId, categoryId_questionId_done, topRowsLoaded])
+    }, [keyExpanded, nodeOpening, nodeOpened, openNode, categoryId_questionId, categoryId_questionId_done, topRowsLoaded, topRows.length, fromChatBotDlg])
 
     useEffect(() => {
         setLastRouteVisited(`/categories`);

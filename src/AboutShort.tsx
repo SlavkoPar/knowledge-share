@@ -1,7 +1,6 @@
 import * as React from "react";
 
-import { Accordion, Col, Container, Row } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Accordion, Container } from "react-bootstrap";
 
 interface IAboutShort {
 }
@@ -40,7 +39,7 @@ const AboutShort: React.FC<IAboutShort> = (props: IAboutShort) => {
                 Integrate our KnowledgeLIB<br />
                 <i>'ChatBot JavaScript Library'</i> at your site &nbsp;&nbsp;
                 <br />
-                <a href="https://knowledge-share-demo.com" target="blank">Try it</a>
+                <a href="https://knowledge-share-demo.com" target="_blank" rel="noopener noreferrer">Try it</a>
               </li>
             </ol>
           </div>
@@ -162,13 +161,13 @@ const AboutShort: React.FC<IAboutShort> = (props: IAboutShort) => {
               <Accordion.Body>
                 <ul>
                   <li>
-                    <a href="https://github.com/SlavkoPar/NewKnowledgeAPI" target="blank">Core Web API</a>
+                    <a href="https://github.com/SlavkoPar/NewKnowledgeAPI" target="_blank" rel="noopener noreferrer">ASP.NET Core Web API</a>
                   </li>
                   <li>
-                    <a href="https://github.com/SlavkoPar/knowledge-share" target="blank">React Single Page App</a>
+                    <a href="https://github.com/SlavkoPar/knowledge-share" target="_blank" rel="noopener noreferrer">React Single Page App</a>
                   </li>
                   <li>
-                    <a href="https://github.com/SlavkoPar/my-react-app" target="blank"><i>KnowledgeLIB</i>&nbsp;&nbsp;JavaScript Library</a>
+                    <a href="https://github.com/SlavkoPar/my-react-app" target="_blank" rel="noopener noreferrer"><i>KnowledgeLIB</i>&nbsp;&nbsp;JavaScript Library</a>
                   </li>
                 </ul>
               </Accordion.Body>

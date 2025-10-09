@@ -5,10 +5,8 @@ import { ListGroup, Button, Modal } from "react-bootstrap";
 
 import { useGlobalState } from 'global/GlobalProvider'
 import { useHover } from 'hooks/useHover';
-import { useCategoryContext } from "categories/CategoryProvider";
 import { formatDate } from 'common/utilities'
 import React, { useState } from "react";
-import { IAnswer, IAnswerKey } from 'groups/types';
 import { IAssignedAnswer } from 'categories/types';
 
 interface IProps {
@@ -20,18 +18,18 @@ interface IProps {
 }
 const AssignedAnswer = ({ questionTitle, assignedAnswer, isDisabled, unAssignAnswer }: IProps) => {
 
-    const { topId, id, answerTitle, created } = assignedAnswer;
+    const { id, answerTitle, created } = assignedAnswer;
 
     const { time, nickName } = created!;
     const emailFromClient = localStorage.getItem('emailFromClient');
 
     const rowTitle = `Created by: ${nickName}, ${formatDate(new Date(time))}`
 
-    const { authUser, canEdit, isDarkMode, variant, bg } = useGlobalState();
+    const { canEdit, isDarkMode } = useGlobalState();
 
     //const { nickName, email } = authUser;
 
-    const { state } = useCategoryContext();
+    //const { state } = useCategoryContext();
 
     const alreadyAdding = false;
 
@@ -39,10 +37,10 @@ const AssignedAnswer = ({ questionTitle, assignedAnswer, isDisabled, unAssignAns
         unAssignAnswer(assignedAnswer)
     };
 
-    const edit = (id: number) => {
+    //const edit = (id: number) => {
         // Load data from server and reinitialize answer
         //editAnswer(id);
-    }
+    //}
 
     const onSelectAnswer = (id: string) => {
         // Load data from server and reinitialize answer

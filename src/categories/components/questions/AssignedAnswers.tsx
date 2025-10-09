@@ -1,13 +1,11 @@
-import React, { MouseEventHandler, useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Button, ListGroup, Modal } from "react-bootstrap";
 import { IAssignedAnswer, IAssignedAnswerKey, IQuestionKey } from "categories/types";
 import { useCategoryContext } from "categories/CategoryProvider";
 import { useGlobalContext } from "global/GlobalProvider";
 import AssignedAnswer from "./AssignedAnswer";
 import { AutoSuggestAnswers } from 'groups/AutoSuggestAnswers'
-import { IWhoWhen } from "global/types";
-import { AnswerKey, IAnswer, IAnswerKey } from "groups/types";
-import { initialAnswer } from 'groups/GroupReducer'
+import { IAnswer } from "groups/types";
 import AddAnswer from "categories/components/questions/AddAnswer"
 
 interface IProps {
@@ -20,9 +18,7 @@ interface IProps {
 const AssignedAnswers = ({ questionKey, questionTitle, assignedAnswers, isDisabled }: IProps) => {
 
     const { globalState, searchAnswers, loadAndCacheAllGroupRows } = useGlobalContext();
-    const { authUser, isDarkMode, variant, allGroupRows, allGroupRowsLoaded } = globalState;
-
-    //const [assignedAnswers2, setAssignAnswers2] = useState<IAssignedAnswer[]>([]);
+    const { isDarkMode, variant, allGroupRows, allGroupRowsLoaded } = globalState;
 
     const [showAdd, setShowAdd] = useState(false);
     const handleClose = () => setShowAdd(false);
@@ -35,7 +31,7 @@ const AssignedAnswers = ({ questionKey, questionTitle, assignedAnswers, isDisabl
     const [showAssign, setShowAssign] = useState(false);
 
     const onSelectAnswer = async (assignedAnswerKey: IAssignedAnswerKey) => {
-        // TODO in next version do not update MongoDB immediately, wait until users presses Save
+        // TODO in next version do not update MongoDB immediately, wait until user presses Save
         // User could have canceled question update
         await assignQuestionAnswer('Assign', questionKey, assignedAnswerKey);
         setShowAssign(false);
@@ -55,7 +51,6 @@ const AssignedAnswers = ({ questionKey, questionTitle, assignedAnswers, isDisabl
         // }
         await assignQuestionAnswer('UnAssign', questionKey, assignedAnswerKey);
 
-        // TODO in next version do not update MongoDB immediately, wait until users presses Save
         // User could have canceled question update
         //setShowAssign(false);
     }

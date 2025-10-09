@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Button } from "react-bootstrap";
-import { Routes, Route, redirect, useLocation, useNavigate } from "react-router-dom";
+import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 
-import { Navigation } from 'Navigation'
-import { useGlobalContext, useGlobalDispatch, useGlobalState } from 'global/GlobalProvider'
+import { useGlobalDispatch, useGlobalState } from 'global/GlobalProvider'
 
 import './App.css';
 import './AutoSuggest.css';
@@ -24,14 +23,9 @@ function App() {
   console.log('-----------> App')
 
   //const { getUser, OpenDB, setLastRouteVisited } = useGlobalContext();
-  const { dbp, authUser, isAuthenticated, everLoggedIn, allCategoryRowsLoaded, allGroupRowsLoaded: groupRowsLoaded, lastRouteVisited, nodesReLoaded } = useGlobalState()
-  const { nickName, role } = authUser;
+  const { dbp, authUser, isAuthenticated, everLoggedIn, allCategoryRowsLoaded, lastRouteVisited } = useGlobalState()
+  const { nickName } = authUser;
 
-  const formInitialValues = {
-    who: '',
-    nickName: '',
-    email: ''
-  };
 
   let location = useLocation();
   const navigate = useNavigate();
@@ -59,17 +53,17 @@ function App() {
         dispatch({ type: GlobalActionTypes.AUTHENTICATE, payload: { user } });
       }
     }
-  }, [dispatch, isAuthenticated]) // , isAuthenticated
+  }, [dispatch, instance, isAuthenticated]) // , isAuthenticated
 
   const locationPathname = location.pathname;
   console.log('---------------- ================== App locationPathname ===>>>', locationPathname);
 
-  const searchParams = new URLSearchParams(location.search);
+    // const showChatBotDlg = (locationPathname.startsWith('/categories') && allCategoryRowsLoaded) ||
+  //   (locationPathname.startsWith('/groups') && groupRowsLoaded);
 
-  const showChatBotDlg = (locationPathname.startsWith('/categories') && allCategoryRowsLoaded) ||
-    (locationPathname.startsWith('/groups') && groupRowsLoaded);
   useEffect(() => {
     (async () => {
+      const searchParams = new URLSearchParams(location.search);
       const isAuthRoute = locationPathname.startsWith('/invitation') ||
         locationPathname.startsWith('/register') ||
         locationPathname.startsWith('/sign-in') ||
@@ -96,12 +90,12 @@ function App() {
         navigate(`/supporter/${source}/${question}`);
       }
     })()
-  }, [dbp, isAuthenticated, nickName, everLoggedIn, locationPathname, navigate])
+  }, [dbp, isAuthenticated, nickName, everLoggedIn, locationPathname, navigate, location.search])
 
   useEffect(() => {
     console.log('----------->>>>>>>>>> App lastRouteVisited', lastRouteVisited);
     navigate(lastRouteVisited);
-  }, [])
+  }, [lastRouteVisited, navigate])
 
   if (!isAuthenticated) // || !categoryRowsLoaded) // || !groupRowsLoaded)
     return <div>App loading</div>

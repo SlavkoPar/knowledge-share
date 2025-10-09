@@ -1,8 +1,6 @@
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
 import { IAssignedAnswer, ICategory, IQuestion, IQuestionKey } from 'categories/types';
-import { useGlobalContext } from "global/GlobalProvider";
-import { IAnswer, IAnswerKey } from "groups/types";
 import { IWhoWhen } from "global/types";
 
 export interface IChatBotAnswer {
@@ -17,7 +15,7 @@ export interface IChatBotAnswer {
 
 class ChatBotAnswer {
   constructor(assignedAnswer: IAssignedAnswer) {
-    const { topId, id, answerTitle, answerLink, created, modified } = assignedAnswer;
+    const { topId, id, answerTitle, answerLink } = assignedAnswer; // , created, modified
     this.chatBotAnswer = {
       topId,
       id,

@@ -1,12 +1,12 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faRemove, faThumbsUp, faPlus, faReply } from '@fortawesome/free-solid-svg-icons'
+import { faRemove, faThumbsUp, faPlus } from '@fortawesome/free-solid-svg-icons'
 
-import { ListGroup, Button, Badge } from "react-bootstrap";
+import { Button, Badge } from "react-bootstrap";
 
 import { useGlobalState } from 'global/GlobalProvider'
-import { ActionTypes, ICategoryInfo, ICategoryKey, FormMode } from "categories/types";
-import { useCategoryContext, useCategoryDispatch } from 'categories/CategoryProvider'
+import { ICategoryKey, FormMode } from "categories/types";
+import { useCategoryContext } from 'categories/CategoryProvider'
 import { useHover } from 'hooks/useHover';
 import { IVariation } from 'categories/types'
 
@@ -16,22 +16,22 @@ import { IVariation } from 'categories/types'
 
 //const TagRow = ({ tag, categoryInAdding }: { ref: React.ForwardedRef<HTMLLIElement>, tag: IVariation, categoryInAdding: boolean | undefined }) => {
 const VariationRow = ({ categoryKey, tag, categoryInAdding }: { categoryKey: ICategoryKey, tag: IVariation, categoryInAdding: boolean | undefined }) => {
-    const { topId, id } = categoryKey;
+    //const { topId, id } = categoryKey;
     const { name } = tag;
-    const { parentId, level, inViewing, inEditing, inAdding, numOfTags } = {
-        parentId: '',
-        level: 0,
+    const { inViewing, inEditing, inAdding } = {
+        //parentId: '',
+        //level: 0,
         inViewing: false,
         inEditing: false,
         inAdding: false,
-        numOfTags: 4
+        //numOfTags: 4
     };
 
-    const { canEdit, isDarkMode, variant, bg } = useGlobalState();
+    const { canEdit } = useGlobalState();
 
     // const { state, viewTag, editTag, deleteTag } = useCategoryContext();
     const { state, deleteCategoryVariation } = useCategoryContext();
-    const dispatch = useCategoryDispatch();
+    //const dispatch = useCategoryDispatch();
 
     const alreadyAdding = false //state.mode === Mode.AddingTag;
 
@@ -39,18 +39,18 @@ const VariationRow = ({ categoryKey, tag, categoryInAdding }: { categoryKey: ICa
         deleteCategoryVariation(categoryKey, name);
     };
 
-    const edit = (id: number) => {
+    //const edit = (id: number) => {
         // Load data from server and reinitialize tag
         //editTag(id);
-    }
+    //}
 
-    const onSelectTag = (id: number) => {
+    //const onSelectTag = (id: number) => {
         // Load data from server and reinitialize tag
         //if (canEdit)
         //editTag(id);
         //else
         //viewTag(id);
-    }
+    //}
 
     const [hoverRef, hoverProps] = useHover();
 
@@ -99,7 +99,7 @@ const VariationRow = ({ categoryKey, tag, categoryInAdding }: { categoryKey: ICa
                     title="Add Tag"
                     onClick={() => {
                         console.log('click q')
-                        const categoryInfo: ICategoryInfo = { categoryKey: { topId, parentId, id }, level }
+                        //const categoryInfo: ICategoryInfo = { categoryKey: { topId, parentId, id }, level }
                         //dispatch({ type: ActionTypes.ADD_ANSWER, payload: { categoryInfo } })
                     }}
                 >

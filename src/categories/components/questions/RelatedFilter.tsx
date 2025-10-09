@@ -1,14 +1,10 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCopy, faEnvelope, faRemove } from '@fortawesome/free-solid-svg-icons'
 
-import { ListGroup, Button, Modal, Badge } from "react-bootstrap";
+import { ListGroup, Button, Badge } from "react-bootstrap";
 
-import { useGlobalState } from 'global/GlobalProvider'
 import { useHover } from 'hooks/useHover';
-import { useCategoryContext } from "categories/CategoryProvider";
-import { formatDate, formatDateShort } from 'common/utilities'
-import React, { useState } from "react";
+import React from "react";
 import { IRelatedFilter } from 'categories/types';
+import { formatDate, formatDateShort } from "common/utilities";
 
 interface IProps {
     relatedFilter: IRelatedFilter,
@@ -23,26 +19,26 @@ const RelatedFilter = ({ relatedFilter, unAssignFilter }: IProps) => {
 
     const rowTitle = `Created by: ${nickName}, ${formatDate(new Date(time))}`
 
-    const { authUser, canEdit, isDarkMode, variant, bg } = useGlobalState();
-    const { state } = useCategoryContext();
+    // const { authUser, canEdit, isDarkMode, variant, bg } = useGlobalState();
+    // const { state } = useCategoryContext();
 
     const alreadyAdding = false;
 
-    const del = () => {
-        unAssignFilter(relatedFilter);
-    };
+    // const del = () => {
+    //     unAssignFilter(relatedFilter);
+    // };
 
-    const edit = (id: number) => {
-        // Load data from server and reinitialize answer
-        //editAnswer(id);
-    }
+    // const edit = (id: number) => {
+    //     // Load data from server and reinitialize answer
+    //     //editAnswer(id);
+    // }
 
     const onSelectAnswer = (filter: string) => {
         // Load data from server and reinitialize answer
         //viewAnswer(id);
     }
 
-    const [hoverRef, hoverProps] = useHover();
+    const [hoverRef] = useHover(); // , hoverProps
 
     const Row1 =
         <div ref={hoverRef} className="d-flex justify-content-start align-items-center w-100 text-light related-filter-row">
@@ -58,7 +54,7 @@ const RelatedFilter = ({ relatedFilter, unAssignFilter }: IProps) => {
             </Button>
 
              <Badge pill bg="secondary"  className={`text-light ${numOfUsages === 0 ? 'd-none' : 'd-inline'}`}>
-                {numOfUsages}{numOfUsages == 1 ? ' usage' : ' usages'}
+                {numOfUsages}{numOfUsages === 1 ? ' usage' : ' usages'}
                 {/* <FontAwesomeIcon icon={faReply} size='sm' /> */}
                 {/* <img width="22" height="18" src={A} alt="Answer"></img> */}
             </Badge>

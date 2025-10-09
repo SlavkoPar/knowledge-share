@@ -1,5 +1,5 @@
-import React, { forwardRef, useCallback, useEffect, useRef, useState } from "react";
-import { CategoryKey, ICategory, ICategoryRow, ILoadCategoryQuestions, IParentInfo, IQuestion, IQuestionKey, IQuestionRow } from "categories/types";
+import React from "react";
+import { CategoryKey, ICategoryRow, ILoadCategoryQuestions, IQuestionRow } from "categories/types";
 import { useCategoryContext } from "categories/CategoryProvider";
 import useInfiniteScroll from "react-infinite-scroll-hook";
 import { List, ListItem, Loading } from "common/components/InfiniteList";
@@ -9,7 +9,7 @@ import QuestionRow from "categories/components/questions/QuestionRow";
 const QuestionList = ({ categoryRow }: { categoryRow: ICategoryRow }) => {
   const { state, loadCategoryQuestions } = useCategoryContext();
   const { keyExpanded, loadingQuestion, error } = state;
-  const { topId, categoryId: id, questionId } = keyExpanded!;
+  const { questionId } = keyExpanded!;
   //? keyExpanded
 
   categoryRow.level += 1;

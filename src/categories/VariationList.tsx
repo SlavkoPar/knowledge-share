@@ -1,17 +1,17 @@
-import React, { forwardRef, useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect } from "react";
 import { ICategoryKey, IVariation } from "categories/types";
 import { useCategoryContext } from "categories/CategoryProvider";
-import { useGlobalState } from "global/GlobalProvider";
-import { List, ListItem, Loading } from "common/components/InfiniteList";
+// import { useGlobalState } from "global/GlobalProvider";
+//import { List, ListItem, Loading } from "common/components/InfiniteList";
 import VariationRow from "categories/VariationRow";
-import { ListGroup, Stack } from "react-bootstrap";
+import { Stack } from "react-bootstrap";
 
 const VariationList = ({ categoryKey, variations }: { categoryKey: ICategoryKey, variations: IVariation[] }) => {
 
-  const { canEdit } = useGlobalState();
+  //const { canEdit } = useGlobalState();
 
   const { state } = useCategoryContext();
-  const { topRows: categories, error } = state;
+  const {  error } = state; // topRows: categories,
 
 
   //const group = categories.find(c => c.id === parentId)!

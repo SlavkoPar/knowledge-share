@@ -1,5 +1,4 @@
-import { ActionMap, IWhoWhen, IRecord, IDto, Dto2WhoWhen, WhoWhen2Dto, IWhoWhenDto, IDtoKey } from 'global/types';
-import { IAnswer, IAnswerKey } from 'groups/types';
+import { ActionMap, IWhoWhen, IRecord, Dto2WhoWhen, WhoWhen2Dto, IWhoWhenDto, IDtoKey } from 'global/types';
 
 export enum FormMode {
 	None = 'None',
@@ -656,7 +655,7 @@ export interface IAssignedAnswerDtoEx {
 
 export class AssignedAnswerDto {
 	constructor(assignedAnswer: IAssignedAnswer) {
-		const { topId, id, answerTitle, answerLink, created, modified } = assignedAnswer;
+		const { topId, id, answerTitle, created } = assignedAnswer;
 		this.assignedAnswerDto = {
 			TopId: topId,
 			Id: id,

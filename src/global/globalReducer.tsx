@@ -1,8 +1,6 @@
 
 import { Reducer } from 'react'
 import { IGlobalState, GlobalActionTypes, GlobalActions, ROLES, IAuthUser, ILocStorage } from "./types";
-import { ICategoryRow } from 'categories/types';
-import { IGroupRow } from 'groups/types';
 
 export const initialAuthUser: IAuthUser = {
     nickName: '',
@@ -34,6 +32,7 @@ export const initialAuthUser: IAuthUser = {
 
 //let globalStateFromLocalStorage: IGlobalStateFromLocalStorage | undefined;
 
+/*
 const hasMissingProps = (): boolean => {
     let b = false;
     // const keys = Object.keys(globalStateFromLocalStorage!)
@@ -54,7 +53,7 @@ const hasMissingProps = (): boolean => {
     //     }
     // })
     return b;
-}
+} */
 
 /*
 if ('localStorage' in window) {
@@ -85,7 +84,7 @@ if ('localStorage' in window) {
 //     initialGlobalState.lastRouteVisited = lastRouteVisited;
 // }
 
-export const globalReducer: Reducer<IGlobalState, GlobalActions> = (state, action) => {
+export const GlobalReducer: Reducer<IGlobalState, GlobalActions> = (state, action) => {
     const newState = reducer(state, action);
     const aTypesToStore = [
         GlobalActionTypes.AUTHENTICATE,

@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { ListGroup } from "react-bootstrap";
 import CategoryRow from "categories/components/CategoryRow";
-import { CategoryKey, ICategory, ICategoryRow, IParentInfo } from "categories/types";
+import { ICategoryRow, IParentInfo } from "categories/types";
 import { useCategoryContext } from "categories/CategoryProvider";
 
-const CategoryList = ({ title, categoryRow, isExpanded }: IParentInfo) => {
+const CategoryList = ({ categoryRow }: IParentInfo) => {
 
     const { state } = useCategoryContext();
     const { keyExpanded } = state;

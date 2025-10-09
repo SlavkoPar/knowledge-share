@@ -11,15 +11,15 @@ const CatList = ({ selId, categoryKey, level, setParentId }: ICatInfo) => {
     const { getSubCats } = useGlobalContext();
 
     const { id } = categoryKey ?? { id: null };
-    const [catKey, setCatKey] = useState<ICategoryKey | null>(categoryKey)
+    const [catKey] = useState<ICategoryKey | null>(categoryKey)
 
     useEffect(() => {
         (async () => {
             const res = await getSubCats(id);
-            const { subCats, parentHeader } = res;
+            const { subCats } = res;
             dispatch({ type: CatActionTypes.SET_SUB_CATS, payload: { subCats } });
         })()
-    }, [getSubCats, catKey]);
+    }, [getSubCats, catKey, id]);
 
     const mySubCats = state.cats.filter(c => c.parentId === id);
 

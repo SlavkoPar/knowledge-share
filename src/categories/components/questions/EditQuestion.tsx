@@ -1,22 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import { useCategoryContext, useCategoryDispatch } from 'categories/CategoryProvider'
-import { useGlobalContext, useGlobalState } from 'global/GlobalProvider'
+import React from 'react';
+import { useCategoryContext } from 'categories/CategoryProvider'
+//import { useGlobalContext, useGlobalState } from 'global/GlobalProvider'
 
 import QuestionForm from "categories/components/questions/QuestionForm";
-import { ActionTypes, FormMode, IQuestion, IQuestionKey, QuestionKey } from "categories/types";
+import { IQuestion } from "categories/types";
 
 const EditQuestion = ({ inLine }: { inLine: boolean }) => {
     const { state, updateQuestion } = useCategoryContext();
-    const { loadingQuestion: questionLoading, activeQuestion } = state;
+    const { activeQuestion } = state;  // loadingQuestion: questionLoading, 
     if (!activeQuestion)
         return null;
 
-    const { topId } = activeQuestion!;
+    //const { topId } = activeQuestion!;
 
-    console.log("#################################### EditQuestion inLine:", { inLine }, { activeQuestion })
 
     if (!activeQuestion) {
-        console.log("#################################### EditQuestion loading ...")
         return <div>Loading question to edit...</div>
     }
 

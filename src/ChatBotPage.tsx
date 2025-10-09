@@ -1,19 +1,14 @@
-import React, { useEffect, useState, JSX } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom' // useRouteMatch
 
 import { AutoSuggestQuestions } from 'categories/AutoSuggestQuestions';
 
-import { Button, Col, Container, Form, ListGroup, Row } from 'react-bootstrap';
+import { Button, Col, Container, Form, Row } from 'react-bootstrap';
 import { useGlobalContext, useGlobalState } from 'global/GlobalProvider';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faQuestion } from '@fortawesome/free-solid-svg-icons'
-import CatList from 'global/Components/SelectCategory/CatList';
-import { ICategory, IQuestion, IQuestionEx, IQuestionKey, QuestionKey, ICategoryRow } from 'categories/types';
-import { IWhoWhen, IHistory, USER_ANSWER_ACTION, IHistoryFilterDto, IHistoryFilter } from 'global/types';
-import AssignedAnswersChatBot from 'global/ChatBotPage/AssignedAnswersChatBot';
+import { IQuestion, IQuestionEx, IQuestionKey, QuestionKey, ICategoryRow } from 'categories/types';
+import { IHistory, IHistoryFilter } from 'global/types';
 import { IChatBotAnswer, INewQuestion, INextAnswer, useAI } from './hooks/useAI'
-import { AnswerKey, IAnswer } from 'groups/types';
 //import AnswerList from 'groups/components/answers/AnswerList';
 
 import Q from 'assets/Q.png';
@@ -27,7 +22,7 @@ type ChatBotParams = {
 
 const ChatBotPage: React.FC = () => {
 
-	let { source, tekst, email } = useParams<ChatBotParams>();
+	let { tekst } = useParams<ChatBotParams>();
 	const [autoSuggestionValue, setAutoSuggestionValue] = useState(tekst!)
 
 	// TODO do we need this?
@@ -47,22 +42,20 @@ const ChatBotPage: React.FC = () => {
 	const [chatBotAnswer, setChatBotAnswer] = useState<IChatBotAnswer | null>(null);
 	const [hasMoreAnswers, setHasMoreAnswers] = useState<boolean>(false);
 
-	const { getCatsByKind, getQuestion, addHistory, addHistoryFilter, getAnswersRated, searchQuestions, setLastRouteVisited } = useGlobalContext();
-	const { dbp, canEdit, authUser, isDarkMode, variant, bg, allCategoryRows: cats, allCategoryRowsLoaded: catsLoaded, lastRouteVisited } = useGlobalState();
+	const { getCatsByKind, getQuestion, addHistory, addHistoryFilter, searchQuestions, setLastRouteVisited } = useGlobalContext();
+	const { authUser, isDarkMode, allCategoryRows: cats, allCategoryRowsLoaded: catsLoaded  } = useGlobalState();
 
-	const setParentId = (cat: ICategory) => {
-		alert(cat.title)
-	}
+	// const setParentId = (cat: ICategory) => {
+	// 	alert(cat.title)
+	// }
 	const [showUsage, setShowUsage] = useState(false);
 	const [catsSelected, setCatsSelected] = useState(false);
 	const [showAutoSuggest, setShowAutoSuggest] = useState(false);
 
 	const [catsOptions, setCatOptions] = useState<ICategoryRow[]>([]);
-	const [catsOptionsSel, setCatsOptionsSel] = useState<Map<string, boolean>>(new Map<string, boolean>());
-
+	
 	const [catsUsage, setCatUsage] = useState<ICategoryRow[]>([]);
-	const [catsUsageSel, setCatUsageSel] = useState<Map<string, boolean>>(new Map<string, boolean>());
-
+	
 	const [pastEvents, setPastEvents] = useState<IChild[]>([]);
 
 	enum ChildType {
@@ -94,7 +87,7 @@ const ChatBotPage: React.FC = () => {
 			setCatOptions(await getCatsByKind(2));
 			setCatUsage(await getCatsByKind(3));
 		})()
-	}, []) // [catsLoaded])
+	}, [getCatsByKind]) // [catsLoaded])
 
 	useEffect(() => {
 		//setLastRouteVisited(`/ChatBotPage/0/${encodeURIComponent('daljinski')}/xyz`);
@@ -105,9 +98,9 @@ const ChatBotPage: React.FC = () => {
 		return <div>cats not loaded...</div>
 
 	const onOptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const target = event.target;
-		const value = target.type === 'checkbox' ? target.checked : target.value;
-		const name = target.name as any;
+		//const target = event.target;
+		//const value = target.type === 'checkbox' ? target.checked : target.value;
+		//const name = target.name as any;
 		setShowUsage(true);
 		// setCatOptions((prevState) => ({ 
 		// 	stateName: prevState.stateName + 1 
@@ -119,9 +112,9 @@ const ChatBotPage: React.FC = () => {
 
 	//const onUsageChange = ({ target: { value } }) => {
 	const onUsageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const target = event.target;
-		const value = target.type === 'checkbox' ? target.checked : target.value;
-		const name = target.name as any;
+		//const target = event.target;
+		//const value = target.type === 'checkbox' ? target.checked : target.value;
+		//const name = target.name as any;
 		setCatsSelected(true);
 		setAutoSuggestId(autoSuggestId + 1);
 		setShowAutoSuggest(true);
@@ -298,7 +291,7 @@ const ChatBotPage: React.FC = () => {
 	}
 
 	const QuestionComponent = (props: IChild) => {
-		const { isDisabled, txt } = props;
+		const { txt } = props;
 		return (
 			<Row
 				className={`my-1 bg-warning text-dark mx-1 border border-1 rounded-1`}
@@ -332,7 +325,7 @@ const ChatBotPage: React.FC = () => {
 						{/* contentEditable="true" aria-multiline="true" */}
 						<div>
 							{txt} <br />
-							{link ? <a href={link} target="_blank" className="text-reset text-decoration-none fw-lighter fs-6" >{link}</a> : null}
+							{link ? <a href={link} target="_blank" rel="noopener noreferrer" className="text-reset text-decoration-none fw-lighter fs-6" >{link}</a> : null}
 						</div>
 						{!isDisabled && chatBotAnswer &&
 							<div>

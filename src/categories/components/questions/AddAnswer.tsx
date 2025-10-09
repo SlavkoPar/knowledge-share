@@ -1,10 +1,7 @@
-import React, { useState } from "react";
-import { useGlobalState } from 'global/GlobalProvider'
+import React from "react";
 
 //import AnswerForm from "groups/components/answers/AnswerForm"; PRE
-import { FormMode, IAnswer } from "groups/types";
-import { useCategoryContext } from "categories/CategoryProvider";
-import { initialAnswer } from "groups/GroupReducer";
+import { IAnswer } from "groups/types";
 
 interface IProps {
     inLine: boolean,
@@ -14,13 +11,14 @@ interface IProps {
 
 // const Add = ({ kind, answer, inLine } : { kind: IKind, answer: IAnswer, inLine: boolean}) => {
 const AddAnswer = ({ closeModal, onAnswerCreated }: IProps) => {
-    const globalState = useGlobalState();
-    const { nickName } = globalState.authUser;
-    const answer={...initialAnswer};
+    // const globalState = useGlobalState();
+    //const { nickName } = globalState.authUser;
+    //const answer={...initialAnswer};
 
-    //const { createAnswer } = useCategoryContext();
-    const [formValues] = useState(answer)
+    // const { createAnswer } = useCategoryContext();
+    // const [formValues] = useState(answer)
 
+    /*
     const submitAnswer = async (answerObject: IAnswer) => {
         //delete answerObject.id;  PROVERI
         const object: IAnswer = {
@@ -34,7 +32,9 @@ const AddAnswer = ({ closeModal, onAnswerCreated }: IProps) => {
         //const answer = await createAnswer(object);
         //TODO vrati ovo
         onAnswerCreated(answer)
+
     }
+    */
 
     return (
         <span>Posle</span>

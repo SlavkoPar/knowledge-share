@@ -2,12 +2,6 @@ import * as React from "react";
 
 import imageQuestionForm from 'screenshots/QuestionForm.png'
 
-import image5 from 'screenshots/image5.png'
-import image1 from 'screenshots/image1.png'
-import image2 from 'screenshots/image2.png'
-import image3 from 'screenshots/image3.png'
-import image4 from 'screenshots/image4.png'
-import { useGlobalContext } from "global/GlobalProvider";
 
 interface IAbout {
 }

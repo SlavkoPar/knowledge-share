@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { Button, ListGroup, Modal } from "react-bootstrap";
+import React from "react";
+import { ListGroup } from "react-bootstrap";
 import { IQuestionKey } from "categories/types";
 import { useCategoryContext } from "categories/CategoryProvider";
 import { useGlobalContext } from "global/GlobalProvider";
-import { IWhoWhen } from "global/types";
 import { IRelatedFilter } from "categories/types";
 import RelatedFilter from 'categories/components/questions/RelatedFilter'
 
@@ -13,19 +12,19 @@ interface IProps {
     relatedFilters: IRelatedFilter[]
 }
 
-const RelatedFilters = ({ questionKey, questionTitle, relatedFilters }: IProps) => {
+const RelatedFilters = ({ relatedFilters }: IProps) => {
 
     const { globalState } = useGlobalContext();
-    const { authUser, isDarkMode, variant, allGroupRows: shortGroups } = globalState;
+    const { variant } = globalState;
 
     //const [relatedFilters2, setAssignFilters2] = useState<IRelatedFilter[]>([]);
 
-    const [showAdd, setShowAdd] = useState(false);
-    const handleClose = () => setShowAdd(false);
+    //const [showAdd, setShowAdd] = useState(false);
+    //const handleClose = () => setShowAdd(false);
 
-    const closeModal = () => {
-        handleClose();
-    }
+    // const closeModal = () => {
+    //     handleClose();
+    // }
 
     // useEffect(() => {
     //     (async () => {
@@ -37,13 +36,13 @@ const RelatedFilters = ({ questionKey, questionTitle, relatedFilters }: IProps) 
     // }, [relatedFilters])
 
     const { state } = useCategoryContext();
-    const [showAssign, setShowAssign] = useState(false);
+    //const [showAssign, setShowAssign] = useState(false);
 
     const unAssignFilter = async (relatedFilter: IRelatedFilter) => {
-        const unAssigned: IWhoWhen = {
-            time: new Date(),
-            nickName: globalState.authUser.nickName
-        }
+        // const unAssigned: IWhoWhen = {
+        //     time: new Date(),
+        //     nickName: globalState.authUser.nickName
+        // }
         //await assignQuestionFilter('UnAssign', questionKey, answerKey, unAssigned);
 
         // TODO in next version do not update MongoDB immediately, wait until users presses Save

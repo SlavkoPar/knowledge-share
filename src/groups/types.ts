@@ -1,5 +1,4 @@
-import { ActionMap, IWhoWhen, IRecord, IDtoKey, Dto2WhoWhen, WhoWhen2Dto, IWhoWhenDto } from 'global/types';
-import { IChatBotAnswer } from 'hooks/useAI';
+import { ActionMap, IRecord, IDtoKey, Dto2WhoWhen, WhoWhen2Dto } from 'global/types';
 
 export enum FormMode {
 	None = 'None',
@@ -264,7 +263,7 @@ export class Group {
 
 export class GroupDto {
 	constructor(group: IGroup) {
-		const { topId, id, kind, parentId, title, link, header, level, variations, created, modified, doc1 } = group;
+		const { topId, id, kind, title, link, header, level, variations, created, modified, doc1 } = group;
 		
 		this.groupDto = {
 			TopId: topId!, // ?

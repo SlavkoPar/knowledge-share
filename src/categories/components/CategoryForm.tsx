@@ -1,23 +1,22 @@
-import React, { useEffect, useRef, JSX, ChangeEvent, useCallback, useState } from "react";
+import React, { useEffect, useRef, ChangeEvent } from "react";
 import * as Yup from "yup";
 import { useFormik } from "formik";
-import { Form, CloseButton, Row, Stack, Dropdown } from "react-bootstrap";
+import { Form, CloseButton, Row, Stack } from "react-bootstrap";
 import { CreatedModifiedForm } from "common/CreateModifiedForm"
 import { FormButtons } from "common/FormButtons"
-import { FormMode, ActionTypes, ICategoryFormProps, ICategory, IVariation, ICategoryKey, IQuestionKey, CategoryRow, CategoryKey } from "categories/types";
+import { FormMode, ActionTypes, ICategoryFormProps, ICategory, IVariation, ICategoryKey, CategoryKey } from "categories/types";
 
 import { useCategoryContext, useCategoryDispatch  } from "categories/CategoryProvider";
 import QuestionList from "categories/components/questions/QuestionList";
-import { useGlobalContext } from "global/GlobalProvider";
 import VariationList from "categories/VariationList";
 import { Select } from "common/components/Select";
 import { kindOptions } from "common/kindOptions ";
 import { debounce } from "common/utilities";
 
-const CategoryForm = ({ inLine, formMode, category, questionId, submitForm, children }: ICategoryFormProps) => {
+const CategoryForm = ({ formMode, category, submitForm, children }: ICategoryFormProps) => {
 
-  const { globalState } = useGlobalContext();
-  const { isDarkMode, variant, bg } = globalState;
+  //const { globalState } = useGlobalContext();
+  //const { isDarkMode, variant, bg } = globalState;
   
   const { onCategoryTitleChanged } = useCategoryContext();
 
@@ -25,7 +24,7 @@ const CategoryForm = ({ inLine, formMode, category, questionId, submitForm, chil
   const editing = formMode === FormMode.EditingCategory;
   const adding = formMode === FormMode.AddingCategory;
 
-  const { topId, id, title, variations, questionRows, kind } = category;
+  const { topId, id, variations, questionRows } = category;
   const categoryKey: ICategoryKey = new CategoryKey(category).categoryKey!;
   //const categoryKeyExpanded: IQuestionKey = { topId, id, questionId };
 
@@ -73,10 +72,10 @@ const CategoryForm = ({ inLine, formMode, category, questionId, submitForm, chil
   });
 
 
-  const debouncedTitleHandler = useCallback(
+  const debouncedTitleHandler = //useCallback(
     debounce((id: string, value: string) => {
         onCategoryTitleChanged(topId, id, value);
-    }, 500), []);
+    }) //, 500), []);
 
   const handleChangeTitle = (event: ChangeEvent<HTMLTextAreaElement>) => {
     formik.handleChange(event);
