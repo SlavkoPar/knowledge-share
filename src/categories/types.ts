@@ -375,6 +375,7 @@ export class CategoryDto {
 	categoryDto: ICategoryDto;
 }
 
+// dupliakt, ima u QuestionProvideru
 export class Question {
 	constructor(dto: IQuestionDto) { //, parentId: string) {
 		const assignedAnswers = dto.AssignedAnswerDtos ?

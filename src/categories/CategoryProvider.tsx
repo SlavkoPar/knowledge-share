@@ -5,7 +5,8 @@ import {
   ActionTypes, ICategory, IQuestion, ICategoriesContext,
   ICategoryDtoEx, ICategoryKey, CategoryKey, Category, CategoryDto,
   IQuestionDtoEx, IQuestionEx, IQuestionKey, IQuestionRow,
-  Question, QuestionDto,
+  Question,
+  QuestionDto,
   QuestionRowDto,
   ICategoryRow,
   ICategoryRowDtoEx,
@@ -20,17 +21,19 @@ import {
   IAssignedAnswerKey,
   QuestionKeyDto,
   ICategoriesState,
-  ILocStorage
+  ILocStorage,
+  IQuestionDto
 } from 'categories/types';
 
 import { CategoryReducer, initialQuestion, initialCategory } from 'categories/CategoryReducer';
 import { IAssignedAnswer, AssignedAnswerDto } from 'categories/types';
 import { protectedResources } from 'authConfig';
+import { Dto2WhoWhen } from 'global/types';
 
 const CategoriesContext = createContext<ICategoriesContext>({} as any);
 const CategoryDispatchContext = createContext<Dispatch<any>>(() => null);
 
-type Props = {
+type IProps = {
   children: React.ReactNode
 }
 
@@ -61,29 +64,28 @@ export const initialState: ICategoriesState = {
   rowExpanded: false
 }
 
-export const CategoryProvider: React.FC<Props> = ({ children }) => {
+export const CategoryProvider: React.FC<IProps> = ({ children }) => {
 
   const { loadAndCacheAllCategoryRows, getCat } = useGlobalContext()
   const globalState = useGlobalState();
-  const { isAuthenticated, workspace, allCategoryRows, allCategoryRowsLoaded, authUser, canEdit } = globalState;
+  const { KnowledgeAPI, isAuthenticated, workspace, allCategoryRows, allCategoryRowsLoaded, authUser, canEdit } = globalState;
   const { nickName } = authUser;
 
   const [state, dispatch] = useReducer(CategoryReducer, initialState);
 
   const { formMode, activeCategory, activeQuestion, keyExpanded } = state;
 
-  console.log('----->>> ----->>> ----->>> CategoryProvider')
+  console.log('----->>> ----->>> ----->>> CategoryProvider', { protectedResources })
 
   useEffect(() => {
 
     let keyExpanded: IKeyExpanded = workspace === 'SLINDZA'
       ? { topId: "QUESTIONS", categoryId: "QUESTIONS", questionId: "qqqqqq111" }
-      : {
-        topId: "MTS", categoryId: "REMOTECTRLS", questionId: "qqqqqq111"
-      }
+      : { topId: "MTS", categoryId: "REMOTECTRLS", questionId: "qqqqqq111" }
+
     if ('localStorage' in window) {
-      console.log('CATEGORIES_STATE loaded before signIn')
       let s = localStorage.getItem('CATEGORIES_STATE');
+      console.log('CATEGORIES_STATE loaded before signIn', s)
       if (s !== null) {
         const locStorage: ILocStorage = JSON.parse(s);
         keyExpanded = locStorage.keyExpanded!;
@@ -97,74 +99,109 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
       loadAndCacheAllCategoryRows();
   }, [isAuthenticated, allCategoryRowsLoaded, loadAndCacheAllCategoryRows]);
 
+  //const _question: IQuestion | null = null;
 
-  const Execute = async (
-    method: string,
-    endpoint: string,
-    data: Object | null = null,
-    whichRowId: string | undefined = undefined
-  ): Promise<any> => {
-    const accessToken = localStorage.getItem("accessToken");
-    if (accessToken) {
-      try {
-        console.log("------------&&&&&&&&&&&&&&&------Execute endpoint:", endpoint)
-        let response = null;
+  /*
+  class QQuestion {
+    // constructor(dto: IQuestionDto) { //, parentId: string) {
+    //   // TODO possible to call base class construtor
+    //   // this.question = { ...initialQuestion }
+    // }
+    static getQuestion(dto: IQuestionDto) {
+      //this.question = { ...initialQuestion }
+      QQuestion.question = new Question(dto).question
+      
+      this.question.topId = dto.TopId//'aha // TODO will be set later
+      this.question.parentId = dto.ParentId ?? ''
+      this.question.id = dto.Id
+      this.question.title = dto.Title
+      this.question.categoryTitle = dto.CategoryTitle
+      this.question.assignedAnswers = []
+      this.question.numOfAssignedAnswers = dto.NumOfAssignedAnswers ?? 0
+      this.question.relatedFilters = []
+      this.question.numOfRelatedFilters = dto.NumOfRelatedFilters ?? 0
+      this.question.source = dto.Source ?? 0
+      this.question.status = dto.Status ?? 0
+      this.question.included = dto.Included !== undefined
+      this.question.created = new Dto2WhoWhen(dto.Created!).whoWhen
+      this.question.modified = dto.Modified
+        ? new Dto2WhoWhen(dto.Modified).whoWhen
+        : undefined
+        
+      return QQuestion.question
+    }
+    static question: IQuestion
+  }
+  */
 
-        const headers = new Headers();
-        const bearer = `Bearer ${accessToken}`;
-        headers.append("Authorization", bearer);
+  const Execute = useCallback(
+    async (
+      method: string,
+      endpoint: string,
+      data: Object | null = null,
+      whichRowId: string | undefined = undefined
+    ): Promise<any> => {
+      const accessToken = localStorage.getItem("accessToken");
+      if (accessToken) {
+        try {
+          console.log("------------&&&&&&&&&&&&&&&------Execute endpoint:", endpoint)
+          let response = null;
 
-        if (data) headers.append('Content-Type', 'application/json');
+          const headers = new Headers();
+          const bearer = `Bearer ${accessToken}`;
+          headers.append("Authorization", bearer);
 
-        let options = {
-          method: method,
-          headers: headers,
-          body: data ? JSON.stringify(data) : null,
-        };
+          if (data) headers.append('Content-Type', 'application/json');
 
-        response = (await fetch(endpoint, options));
-        if (response.ok) {
-          if ((response.status === 200 || response.status === 201)) {
-            let responseData = null; //response;
-            try {
-              responseData = await response.json();
-            }
-            catch (error) {
-              dispatch({
-                type: ActionTypes.SET_ERROR, payload: {
-                  error: new Error(`Response status: ${response.status}`),
-                  whichRowId
-                }
-              });
-            }
-            finally {
-              return responseData;
+          let options = {
+            method: method,
+            headers: headers,
+            body: data ? JSON.stringify(data) : null,
+          };
+
+          response = (await fetch(endpoint, options));
+          if (response.ok) {
+            if ((response.status === 200 || response.status === 201)) {
+              let responseData = null; //response;
+              try {
+                responseData = await response.json();
+              }
+              catch (error) {
+                dispatch({
+                  type: ActionTypes.SET_ERROR, payload: {
+                    error: new Error(`Response status: ${response.status}`),
+                    whichRowId
+                  }
+                });
+              }
+              finally {
+                return responseData;
+              }
             }
           }
+          else {
+            const { errors } = await response.json();
+            const error = new Error(
+              errors?.map((e: { message: any; }) => e.message).join('\n') ?? 'unknown',
+            )
+            dispatch({ type: ActionTypes.SET_ERROR, payload: { error, whichRowId } });
+          }
         }
-        else {
-          const { errors } = await response.json();
-          const error = new Error(
-            errors?.map((e: { message: any; }) => e.message).join('\n') ?? 'unknown',
-          )
-          dispatch({ type: ActionTypes.SET_ERROR, payload: { error, whichRowId } });
+        catch (e) {
+          console.log('-------------->>> execute', method, endpoint, e)
+          dispatch({ type: ActionTypes.SET_ERROR, payload: { error: new Error(`fetch eror`), whichRowId } });
         }
       }
-      catch (e) {
-        console.log('-------------->>> execute', method, endpoint, e)
-        dispatch({ type: ActionTypes.SET_ERROR, payload: { error: new Error(`fetch eror`), whichRowId } });
-      }
-    }
-    return null;
-  }
-  // }, [dispatch]);
+      return null;
+    }, []);
+
 
   const loadTopRows = useCallback(async () => {
     return new Promise(async (resolve) => {
-      const { keyExpanded } = state;
+      //const { keyExpanded } = state;
       try {
         dispatch({ type: ActionTypes.SET_TOP_ROWS_LOADING, payload: {} });
-        const url = `${protectedResources.KnowledgeAPI.endpointCategoryRow}/${workspace}/null/topRows/all`;
+        const url = `${KnowledgeAPI.endpointCategoryRow}/${workspace}/null/topRows/all`;
         console.log('CategoryProvider loadTopRows url:', url)
         console.time();
         await Execute("GET", url)
@@ -186,7 +223,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
         dispatch({ type: ActionTypes.SET_ERROR, payload: { error } });
       }
     })
-  }, [state, workspace]);
+  }, [Execute, KnowledgeAPI.endpointCategoryRow, keyExpanded, workspace]); // state, 
 
 
   const openNode = useCallback(
@@ -210,7 +247,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
           console.time();
           const categoryKey: ICategoryKey = { topId, id, parentId: null };
           const query = new CategoryKey(categoryKey).toQuery(workspace);
-          const url = `${protectedResources.KnowledgeAPI.endpointCategoryRow}?${query}`;
+          const url = `${KnowledgeAPI.endpointCategoryRow}?${query}`;
           await Execute("GET", url)
             .then(async (categoryRowDtoEx: ICategoryRowDtoEx) => {
               //dispatch({ type: ActionTypes.CLEAN_SUB_TREE, payload: { categoryKey: categoryKey! } });
@@ -238,7 +275,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
           dispatch({ type: ActionTypes.SET_ERROR, payload: { error } });
         }
       })
-    }, [workspace, allCategoryRows]);
+    }, [workspace, KnowledgeAPI.endpointCategoryRow, Execute, allCategoryRows]);
 
 
   // get category With subcategoryRows and questionRows
@@ -248,7 +285,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
       console.log({ categoryKey, includeQuestionId })
       return new Promise(async (resolve) => {
         try {
-          const url = `${protectedResources.KnowledgeAPI.endpointCategory}/${workspace}/${topId}/${id}/${PAGE_SIZE}/${includeQuestionId}`;
+          const url = `${KnowledgeAPI.endpointCategory}/${workspace}/${topId}/${id}/${PAGE_SIZE}/${includeQuestionId}`;
           console.time()
           await Execute("GET", url)
             .then((categoryDtoEx: ICategoryDtoEx) => {
@@ -267,14 +304,14 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
           resolve(error);
         }
       })
-    }, [workspace]);
+    }, [Execute, KnowledgeAPI.endpointCategory, workspace]);
 
   const getCategoryRow = useCallback(
     async (categoryKey: ICategoryKey, hidrate: boolean = false, includeQuestionId: string | null = null): Promise<any> => {
       const query = new CategoryKey(categoryKey).toQuery(workspace);
       return new Promise(async (resolve) => {
         try {
-          const url = `${protectedResources.KnowledgeAPI.endpointCategoryRow}/${hidrate}/${PAGE_SIZE}/${includeQuestionId}?${query}`;
+          const url = `${KnowledgeAPI.endpointCategoryRow}/${hidrate}/${PAGE_SIZE}/${includeQuestionId}?${query}`;
           console.time()
           await Execute("GET", url)
             .then((categoryRowDtoEx: ICategoryRowDtoEx) => {
@@ -294,7 +331,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
           resolve(error);
         }
       })
-    }, [workspace]);
+    }, [Execute, KnowledgeAPI.endpointCategoryRow, workspace]);
 
   const expandCategory = useCallback(
     async ({ categoryKey, includeQuestionId, newCategoryRow, newQuestionRow, formMode }: IExpandInfo): Promise<any> => {
@@ -434,7 +471,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
       try {
         const categoryDto = new CategoryDto(category, workspace).categoryDto;
         console.log("categoryDto", { categoryDto })
-        const url = `${protectedResources.KnowledgeAPI.endpointCategory}`; //
+        const url = `${KnowledgeAPI.endpointCategory}`; //
         console.time()
         await Execute("POST", url, categoryDto, id)
           .then(async (categoryDtoEx: ICategoryDtoEx) => {   //  | null
@@ -474,7 +511,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
         console.log(error)
         dispatch({ type: ActionTypes.SET_ERROR, payload: { error: new Error('Server Error'), whichRowId: id } });
       }
-    }, [expandCategory, loadAndCacheAllCategoryRows, workspace]);
+    }, [Execute, KnowledgeAPI.endpointCategory, expandCategory, loadAndCacheAllCategoryRows, workspace]);
 
   const cancelAddQuestion = useCallback(
     async () => {
@@ -556,7 +593,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
       dispatch({ type: ActionTypes.SET_LOADING_CATEGORY, payload: {} });
       try {
         const categoryDto = new CategoryDto(category, workspace).categoryDto;
-        const url = `${protectedResources.KnowledgeAPI.endpointCategory}`;
+        const url = `${KnowledgeAPI.endpointCategory}`;
         console.time()
         await Execute("PUT", url, categoryDto)
           .then((categoryDtoEx: ICategoryDtoEx) => {
@@ -582,7 +619,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
         dispatch({ type: ActionTypes.SET_ERROR, payload: { error: new Error("Karambol") } });
         return error;
       }
-    }, [workspace]);
+    }, [KnowledgeAPI.endpointCategory, workspace]);
 
 
   const deleteCategory = useCallback(async (categoryRow: ICategoryRow) => {
@@ -590,7 +627,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
     try {
       const { topId, parentId } = categoryRow;
       const categoryDto = new CategoryRowDto(categoryRow, workspace).categoryRowDto;
-      const url = `${protectedResources.KnowledgeAPI.endpointCategory}`;
+      const url = `${KnowledgeAPI.endpointCategory}`;
       console.time()
       await Execute("DELETE", url, categoryDto)    //Modified: {  Time: new Date(), NickName: globalState.authUser.nickName }
         .then(async (categoryDtoEx: ICategoryDtoEx) => {
@@ -626,7 +663,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
       console.log(error)
       return error;
     }
-  }, [expandCategory, loadAndCacheAllCategoryRows, workspace]);
+  }, [KnowledgeAPI.endpointCategory, expandCategory, loadAndCacheAllCategoryRows, workspace]);
 
 
   const deleteCategoryVariation = async (categoryKey: ICategoryKey, variationName: string) => {
@@ -663,7 +700,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
       const { topId, id } = categoryKey;
       dispatch({ type: ActionTypes.SET_CATEGORY_QUESTIONS_LOADING, payload: { loadingQuestion: true } })
       try {
-        const url = `${protectedResources.KnowledgeAPI.endpointQuestion}/${workspace}/${topId}/${id}/${startCursor}/${PAGE_SIZE}/${includeQuestionId}`;
+        const url = `${KnowledgeAPI.endpointQuestion}/${workspace}/${topId}/${id}/${startCursor}/${PAGE_SIZE}/${includeQuestionId}`;
         console.time()
         await Execute!("GET", url).then((categoryDtoEx: ICategoryDtoEx) => {
           console.timeEnd();
@@ -699,7 +736,8 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
       console.log(error);
       dispatch({ type: ActionTypes.SET_ERROR, payload: error });
     }
-  }, [workspace]);
+  }, [KnowledgeAPI.endpointQuestion, workspace]);
+
 
   const findCategory = useCallback(
     (categoryRows: ICategoryRow[], id: string): ICategoryRow | undefined => {
@@ -771,9 +809,6 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
     }, [expandCategory, findCategory, getCat, state.topRows]);
 
 
-
-
-
   const createQuestion = useCallback(
     async (question: IQuestion) => {
       const { topId, id, parentId } = question; // title, modified, 
@@ -782,7 +817,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
       try {
         question.created!.nickName = nickName;
         const questionDto = new QuestionDto(question, workspace).questionDto;
-        const url = `${protectedResources.KnowledgeAPI.endpointQuestion}`;
+        const url = `${KnowledgeAPI.endpointQuestion}`;
         console.time()
         console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> createQuestion', questionDto)
         await Execute("POST", url, questionDto)
@@ -815,7 +850,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
         console.log(error)
         dispatch({ type: ActionTypes.SET_ERROR, payload: { error: new Error('Server Error'), whichRowId: id } });
       }
-    }, [expandCategory, loadAndCacheAllCategoryRows, nickName, workspace]);
+    }, [KnowledgeAPI.endpointQuestion, expandCategory, loadAndCacheAllCategoryRows, nickName, workspace]);
 
 
   const updateQuestion = useCallback(
@@ -825,7 +860,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
       try {
         question.modified!.nickName = nickName;
         const questionDto = new QuestionDto(question, workspace).questionDto;
-        const url = `${protectedResources.KnowledgeAPI.endpointQuestion}`;
+        const url = `${KnowledgeAPI.endpointQuestion}`;
         console.time()
         questionDto.oldParentId = oldParentId;
         console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> updateQuestion', questionDto)
@@ -870,7 +905,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
         console.log(error)
         dispatch({ type: ActionTypes.SET_ERROR, payload: { error: new Error('Server Error'), whichRowId: id } });
       }
-    }, [expandCategory, nickName, workspace]);
+    }, [KnowledgeAPI.endpointQuestion, expandCategory, nickName, workspace]);
 
 
   const deleteQuestion = useCallback(
@@ -879,7 +914,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
       dispatch({ type: ActionTypes.SET_LOADING_QUESTION, payload: {} });
       try {
         const questionDto = new QuestionRowDto(questionRow, workspace).questionRowDto;
-        const url = `${protectedResources.KnowledgeAPI.endpointQuestion}`;
+        const url = `${KnowledgeAPI.endpointQuestion}`;
         console.time()
         await Execute("DELETE", url, questionDto)
           .then(async (questionDtoEx: IQuestionDtoEx) => {
@@ -914,7 +949,35 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
         console.log(error)
         dispatch({ type: ActionTypes.SET_ERROR, payload: { error: new Error('Server Error'), whichRowId: id } });
       }
-    }, [expandCategory, workspace]);
+    }, [KnowledgeAPI.endpointQuestion, expandCategory, workspace]);
+
+
+  const gggetQuestion = useCallback(
+    async (questionKey: IQuestionKey): Promise<any> => {
+      return new Promise(async (resolve) => {
+        console.time()
+        console.log('getQuestion', questionKey)
+
+        const query = new QuestionKey(questionKey).toQuery(workspace);
+        const url = `${KnowledgeAPI.endpointQuestion}?${query}`;
+        console.time()
+        console.log('getQuestion', questionKey)
+        await Execute("GET", url)
+          .then((questionDtoEx: IQuestionDtoEx) => {
+            const { questionDto, msg } = questionDtoEx;
+            if (questionDto) {
+              //const question = new Question(questionDto).question;
+              const question = new Question(questionDto).question;
+              const questionEx: IQuestionEx = {
+                question,
+                msg
+              }
+              resolve(questionEx);
+            }
+          })
+        console.timeEnd();
+      })
+    }, [Execute, KnowledgeAPI.endpointQuestion, workspace]); // Question, Otherwise 
 
 
   const getQuestion = useCallback(
@@ -922,8 +985,9 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
       return new Promise(async (resolve) => {
         try {
           const query = new QuestionKey(questionKey).toQuery(workspace);
-          const url = `${protectedResources.KnowledgeAPI.endpointQuestion}?${query}`;
+          const url = `${KnowledgeAPI.endpointQuestion}?${query}`;
           console.time()
+          console.log('getQuestion', questionKey)
           await Execute("GET", url)
             .then((questionDtoEx: IQuestionDtoEx) => {
               console.timeEnd();
@@ -954,7 +1018,8 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
           resolve(questionEx);
         }
       })
-    }, [workspace]);
+    }, [Execute, KnowledgeAPI.endpointQuestion, workspace]);
+
 
   const viewQuestion = useCallback(async (questionRow: IQuestionRow) => {
     const questionKey = new QuestionKey(questionRow).questionKey;
@@ -976,6 +1041,25 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
   }, [cancelAddCategory, cancelAddQuestion, formMode, getQuestion]);
 
 
+  // const editQuestion = useCallback(async (questionRow: IQuestionRow) => {
+  //   const questionKey: IQuestionKey = new QuestionKey(questionRow).questionKey!;
+  //   if (formMode === FormMode.AddingQuestion) {
+  //     await cancelAddQuestion();
+  //   }
+  //   else if (formMode === FormMode.AddingCategory) {
+  //     await cancelAddCategory();
+  //   }
+  //   dispatch({ type: ActionTypes.SET_LOADING_QUESTION, payload: {} });
+  //   console.log("editQuestion:", questionKey)
+  //   const question = initialQuestion;
+  //   if (question) {
+  //     // we don't reload categoryRows, just use isSelected from activeQuestion
+  //     question.topId = questionRow.topId;
+  //     dispatch({ type: ActionTypes.SET_QUESTION_TO_EDIT, payload: { question } });
+  //   }
+  // }, [cancelAddCategory, cancelAddQuestion, formMode]);
+
+
   const editQuestion = useCallback(async (questionRow: IQuestionRow) => {
     const questionKey: IQuestionKey = new QuestionKey(questionRow).questionKey!;
     if (formMode === FormMode.AddingQuestion) {
@@ -985,6 +1069,7 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
       await cancelAddCategory();
     }
     dispatch({ type: ActionTypes.SET_LOADING_QUESTION, payload: {} });
+    console.log("editQuestion:", questionKey)
     const questionEx: IQuestionEx = await getQuestion(questionKey!);
     const { question, msg } = questionEx;
     if (question) {
@@ -998,58 +1083,59 @@ export const CategoryProvider: React.FC<Props> = ({ children }) => {
 
 
   // action: 'Assign' or 'UnAssign'
-  const assignQuestionAnswer = useCallback(async (action: 'Assign' | 'UnAssign', questionKey: IQuestionKey, assignedAnswerKey: IAssignedAnswerKey): Promise<any> => {
-    try {
-      var { topId, id } = assignedAnswerKey;
-      var assignedAnswer: IAssignedAnswer = {
-        topId,
-        id,
-        created: {
-          time: new Date(),
-          nickName
-        }
-      }
-      const dto = new AssignedAnswerDto(assignedAnswer).assignedAnswerDto;
-      dto.QuestionKeyDto = new QuestionKeyDto(questionKey, workspace).dto;
-      let question: IQuestion | null = null;
-      const url = `${protectedResources.KnowledgeAPI.endpointQuestionAnswer}/${action}`;
-      console.time()
-      await Execute("POST", url, dto)
-        .then(async (questionDtoEx: IQuestionDtoEx) => {
-          console.timeEnd();
-          const { questionDto } = questionDtoEx;
-          console.log("::::::::::::::::::::", { questionDtoEx });
-          if (questionDto) {
-            question = new Question(questionDto).question;
-            console.log('Question successfully modified')
-            //dispatch({ type: ActionTypes.SET_QUESTION, payload: { question: assignedAnswer } });
-            //dispatch({ type: ActionTypes.CLOSE_QUESTION_FORM })
+  const assignQuestionAnswer = useCallback(
+    async (action: 'Assign' | 'UnAssign', questionKey: IQuestionKey, assignedAnswerKey: IAssignedAnswerKey): Promise<any> => {
+      try {
+        var { topId, id } = assignedAnswerKey;
+        var assignedAnswer: IAssignedAnswer = {
+          topId,
+          id,
+          created: {
+            time: new Date(),
+            nickName
           }
-        });
-      if (question) {
-        dispatch({ type: ActionTypes.SET_QUESTION_AFTER_ASSIGN_ANSWER, payload: { question } });
+        }
+        const dto = new AssignedAnswerDto(assignedAnswer).assignedAnswerDto;
+        dto.QuestionKeyDto = new QuestionKeyDto(questionKey, workspace).dto;
+        let question: IQuestion | null = null;
+        const url = `${KnowledgeAPI.endpointQuestionAnswer}/${action}`;
+        console.time()
+        await Execute("POST", url, dto)
+          .then(async (questionDtoEx: IQuestionDtoEx) => {
+            console.timeEnd();
+            const { questionDto } = questionDtoEx;
+            console.log("::::::::::::::::::::", { questionDtoEx });
+            if (questionDto) {
+              question = new Question(questionDto).question;
+              console.log('Question successfully modified')
+              //dispatch({ type: ActionTypes.SET_QUESTION, payload: { question: assignedAnswer } });
+              //dispatch({ type: ActionTypes.CLOSE_QUESTION_FORM })
+            }
+          });
+        if (question) {
+          dispatch({ type: ActionTypes.SET_QUESTION_AFTER_ASSIGN_ANSWER, payload: { question } });
+        }
+        /*
+        const assignedAnswers = [...question.assignedAnswers, newAssignedAnwser];
+        const obj: IQuestion = {
+          ...question,
+          assignedAnswers,
+          numOfAssignedAnswers: assignedAnswers.length
+        }
+        await dbp!.put('Questions', obj, questionId);
+        console.log("Question Answer successfully assigned", obj);
+        */
+        ///////////////////
+        // newAssignedAnwser.answer.title = answer.title;
+        // obj.assignedAnswers = [...question.assignedAnswers, newAssignedAnwser];;
+        // dispatch({ type: ActionTypes.SET_QUESTION, payload: { question: obj } });
+        //dispatch({ type: ActionTypes.SET_QUESTION_AFTER_ASSIGN_ANSWER, payload: { question: { ...obj } } });
       }
-      /*
-      const assignedAnswers = [...question.assignedAnswers, newAssignedAnwser];
-      const obj: IQuestion = {
-        ...question,
-        assignedAnswers,
-        numOfAssignedAnswers: assignedAnswers.length
+      catch (error: any) {
+        console.log('error', error);
+        dispatch({ type: ActionTypes.SET_ERROR, payload: { error } });
       }
-      await dbp!.put('Questions', obj, questionId);
-      console.log("Question Answer successfully assigned", obj);
-      */
-      ///////////////////
-      // newAssignedAnwser.answer.title = answer.title;
-      // obj.assignedAnswers = [...question.assignedAnswers, newAssignedAnwser];;
-      // dispatch({ type: ActionTypes.SET_QUESTION, payload: { question: obj } });
-      //dispatch({ type: ActionTypes.SET_QUESTION_AFTER_ASSIGN_ANSWER, payload: { question: { ...obj } } });
-    }
-    catch (error: any) {
-      console.log('error', error);
-      dispatch({ type: ActionTypes.SET_ERROR, payload: { error } });
-    }
-  }, [nickName, workspace]);
+    }, [KnowledgeAPI.endpointQuestionAnswer, nickName, workspace]);
 
 
   const onCategoryTitleChanged = (topId: string, id: string, title: string): void => {
@@ -1110,3 +1196,4 @@ export function useCategoryContext() {
 export const useCategoryDispatch = () => {
   return useContext(CategoryDispatchContext)
 };
+

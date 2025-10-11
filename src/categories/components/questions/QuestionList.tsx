@@ -8,7 +8,7 @@ import QuestionRow from "categories/components/questions/QuestionRow";
 //const QuestionList = ({ title, categoryRow, level }: IParentInfo) => {
 const QuestionList = ({ categoryRow }: { categoryRow: ICategoryRow }) => {
   const { state, loadCategoryQuestions } = useCategoryContext();
-  const { keyExpanded, loadingQuestion, error } = state;
+  const { keyExpanded, loadingQuestion, error, selectedQuestionId } = state;
   const { questionId } = keyExpanded!;
   //? keyExpanded
 
@@ -73,7 +73,7 @@ const QuestionList = ({ categoryRow }: { categoryRow: ICategoryRow }) => {
           <label>No questions</label>
         }
         {questionRows.map((questionRow: IQuestionRow) => {
-          return <QuestionRow key={questionRow.id} questionRow={questionRow} />
+          return <QuestionRow key={questionRow.id} questionRow={questionRow} isSelected={questionRow.id === selectedQuestionId} />
         })}
         {hasMoreQuestions && (
           <ListItem ref={infiniteRef}>

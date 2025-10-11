@@ -144,6 +144,18 @@ export enum ROLES {
 
 
 export interface IGlobalState {
+	KnowledgeAPI: {
+		 endpointCategoryRow: string;
+		 endpointCategory: string;
+		 endpointQuestion: string;
+		 endpointQuestionAnswer: string;
+		 //endpointShortGroup: : string;
+		 endpointGroupRow: string;
+		 endpointGroup: string;
+		 endpointAnswer: string;
+		 endpointHistory: string;
+		 endpointHistoryFilter: string;
+	};
 	isAuthenticated: boolean | null;
 	workspace: string;
 	dbp: IDBPDatabase | null;
@@ -184,7 +196,7 @@ export interface IParentInfo {
 export interface IGlobalContext {
 	globalState: IGlobalState;
 	getUser: (nickName: string) => Promise<any>;
-	OpenDB: () => Promise<any>;
+	//OpenDB: () => Promise<any>;
 	setLastRouteVisited: (lastRouteVisited: string) => void;
 	health: () => void;
 	loadAndCacheAllCategoryRows: () => Promise<boolean>;

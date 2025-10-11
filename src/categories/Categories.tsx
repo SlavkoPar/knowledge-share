@@ -27,7 +27,6 @@ interface IProps {
 }
 
 const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
-    console.log("===//////////////////====\\\\\\\\\\\\\\\\===== Categories", categoryId_questionId)
     const { state, openNode, loadTopRows } = useCategoryContext();
     const {
         topRows, topRowsLoading, topRowsLoaded,
@@ -37,10 +36,8 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
         activeCategory,
         activeQuestion,
         formMode,
-        loadingCategories,
-        loadingQuestions,
-        loadingCategory,
-        loadingQuestion
+        loadingCategories, loadingCategory,
+        loadingQuestions, loadingQuestion
     } = state;
 
     const { setLastRouteVisited, searchQuestions } = useGlobalContext();
@@ -137,7 +134,7 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
 
     console.log('===>>> Categories !!!!!!!!!!!!!!!!!')
     //if (!nodeOpened)
-    if (topRows.length === 0 || !allCategoryRowsLoaded)
+    if (topRows.length === 0 || !allCategoryRowsLoaded || !topRowsLoaded)
         return null
 
     return (

@@ -26,7 +26,7 @@ export const NavigationBar = () => {
 
     const request = {
         loginHint: "name@example.com",
-        scopes: protectedResources.KnowledgeAPI.scopes.read
+        scopes: protectedResources.scopes.read
     }
     const { result } = useMsalAuthentication(InteractionType.Silent, request);
 

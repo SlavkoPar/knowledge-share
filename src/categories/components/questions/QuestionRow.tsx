@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRemove } from '@fortawesome/free-solid-svg-icons'
 
@@ -17,7 +17,7 @@ import QPlus from 'assets/QPlus.png';
 
 
 //const QuestionRow = ({ question, categoryInAdding }: { ref: React.ForwardedRef<HTMLLIElement>, question: IQuestion, categoryInAdding: boolean | undefined }) => {
-const QuestionRow = ({ questionRow }: { questionRow: IQuestionRow }) => {
+const QuestionRow = ({ questionRow, isSelected }: { questionRow: IQuestionRow, isSelected: boolean }) => {
     const { id, topId, parentId, title, numOfAssignedAnswers } = questionRow; // , isSelected
     //const questionKey: IQuestionKey = new QuestionKey(questionRow).questionKey!;
     const categoryKey: ICategoryKey = { topId, parentId, id: parentId! } // proveri
@@ -25,8 +25,8 @@ const QuestionRow = ({ questionRow }: { questionRow: IQuestionRow }) => {
     const { canEdit, authUser } = useGlobalState();
     const { state, viewQuestion, addQuestion, editQuestion, deleteQuestion } = useCategoryContext();
 
-    const { activeQuestion, formMode, selectedQuestionId } = state;
-    const isSelected = id === selectedQuestionId;
+    const { activeQuestion, formMode } = state;
+    //const isSelected = useState(id === selectedQuestionId);
 
     const showForm = activeQuestion !== null && activeQuestion.id === id;
 
@@ -63,6 +63,7 @@ const QuestionRow = ({ questionRow }: { questionRow: IQuestionRow }) => {
                         await viewQuestion(questionRow);
                         break;
                     case FormMode.EditingQuestion:
+                        console.log('Zovem from QuestionRow')
                         canEdit
                             ? await editQuestion(questionRow)
                             : await viewQuestion(questionRow);
@@ -71,7 +72,8 @@ const QuestionRow = ({ questionRow }: { questionRow: IQuestionRow }) => {
                 hoverRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
             }
         })()
-    }, [canEdit, editQuestion, formMode, hoverRef, isSelected, questionRow, viewQuestion]);
+        // after using new Question() in getQuestion() editQuestion gets modified
+    }, [canEdit, formMode, hoverRef, isSelected, questionRow]); // , viewQuestion, editQuestion
 
 
     const Row1 =

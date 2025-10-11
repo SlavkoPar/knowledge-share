@@ -442,6 +442,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
       //const { id, topId: topId, questionRows, hasMoreQuestions } = categoryRow;
       return {
         ...state,
+        loadingQuestion: false,
         loadingQuestions: false
       }
     }

@@ -12,9 +12,10 @@ import { GlobalReducer, initialAuthUser } from "global/GlobalReducer";
 
 import {
   IQuestionRow, IQuestionRowDto, IQuestionRowDtosEx,
-  IQuestionDtoEx, IQuestionEx, IQuestionKey, Question,
+  IQuestionDtoEx, IQuestionEx, IQuestionKey, 
   ICategoryRowDto, ICategoryRow, CategoryRow,
-  QuestionKey
+  QuestionKey,
+  Question
 } from "categories/types";
 
 import {
@@ -37,8 +38,8 @@ interface Props {
   children: React.ReactNode
 }
 
-
 const initGlobalState: IGlobalState = {
+  KnowledgeAPI: protectedResources.KnowledgeAPI,
   dbp: null,
   workspace: 'unknown',
   authUser: initialAuthUser,
@@ -63,7 +64,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
   // we reset changes, and again we use initialGlobalState
   // so, don't use globalDispatch inside of inner Provider, like Categories Provider
   const [globalState, dispatch] = useReducer(GlobalReducer, initGlobalState);
-  const { workspace, allCategoryRows } = globalState;
+  const { KnowledgeAPI, workspace, allCategoryRows, allGroupRows, allGroupRowsLoaded } = globalState;
 
   console.log('--------> GlobalProvider')
 
@@ -167,7 +168,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
     return new Promise(async (resolve) => {
       try {
         console.time();
-        const url = `${protectedResources.KnowledgeAPI.endpointCategoryRow}/${workspace}`;
+        const url = `${KnowledgeAPI.endpointCategoryRow}/${workspace}`;
         await Execute("GET", url, null)
           .then((catRowDtos: ICategoryRowDto[]) => {   //  | Response
             const allCategoryRows = new Map<string, ICategoryRow>();
@@ -195,7 +196,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
       }
       resolve(true);
     });
-  }, [dispatch, workspace]);
+  }, [KnowledgeAPI.endpointCategoryRow, workspace]);
 
 
   // ---------------------------
@@ -205,10 +206,10 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
     return new Promise(async (resolve) => {
       try {
         console.time();
-        const url = `${protectedResources.KnowledgeAPI.endpointGroupRow}/${workspace}`;
+        const url = `${KnowledgeAPI.endpointGroupRow}/${workspace}`;
         await Execute("GET", url, null)
           .then((rowDtos: IGroupRowDto[]) => {   //  | Response
-            console.log('loadAndCacheAllGroupRows', protectedResources.KnowledgeAPI.endpointGroupRow)
+            console.log('loadAndCacheAllGroupRows', KnowledgeAPI.endpointGroupRow)
             const allGroupRows = new Map<string, IGroupRow>();
             console.timeEnd();
             // if (groupDtos instanceof Response) {
@@ -239,7 +240,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
       }
       resolve(true);
     });
-  }, [dispatch, workspace]);
+  }, [KnowledgeAPI.endpointGroupRow, workspace]);
 
   //const searchQuestions = useCallback(async (execute: (method: string, endpoint: string) => Promise<any>, filter: string, count: number): Promise<any> => {
   const searchQuestions = async (filter: string, count: number): Promise<any> => {
@@ -247,10 +248,10 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
       try {
         console.time();
         const filterEncoded = encodeURIComponent(filter);
-        const url = `${protectedResources.KnowledgeAPI.endpointQuestion}/${workspace}/${filterEncoded}/${count}/null`;
+        const url = `${KnowledgeAPI.endpointQuestion}/${workspace}/${filterEncoded}/${count}/null`;
         await Execute("GET", url).then((dtosEx: IQuestionRowDtosEx) => {
           const { questionRowDtos } = dtosEx;
-          console.log('questionRowDtos:', { dtos: dtosEx }, protectedResources.KnowledgeAPI.endpointCategory);
+          console.log('questionRowDtos:', { dtos: dtosEx }, KnowledgeAPI.endpointCategory);
           console.timeEnd();
           if (questionRowDtos) {
             const questionRows: IQuestionRow[] = questionRowDtos.map((dto: IQuestionRowDto) => {
@@ -293,16 +294,15 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
 
 
   const getGroupRows = useCallback(async (groupId: string | null) => {
-    const { allGroupRowsLoaded } = globalState;
+    //const { allGroupRowsLoaded } = globalState;
     if (!allGroupRowsLoaded) {
       await loadAndCacheAllGroupRows();
     }
     try {
-      const { allGroupRows: groupRows } = globalState;
+      //const { allGroupRows: groupRows } = globalState;
       let parentHeader = "";
-      console.log('globalState.groupRows', { groupRows }, groupId)
       const subGroupRows: IGroupRow[] = [];
-      groupRows.forEach((groupRow, id) => {  // globalState.shortGroups is Map<string, IShortGroup>
+      allGroupRows.forEach((groupRow, id) => {  // globalState.shortGroups is Map<string, IShortGroup>
         if (groupRow.id === groupId) {
           parentHeader = groupRow.header!;
         }
@@ -335,7 +335,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
       dispatch({ type: GlobalActionTypes.SET_ERROR, payload: { error } });
       return { groupRows: [], parentHeader: 'Kiks' };
     }
-  }, [globalState, loadAndCacheAllGroupRows]);
+  }, [allGroupRows, allGroupRowsLoaded, loadAndCacheAllGroupRows]);
 
 
   const searchAnswers = async (filter: string, count: number): Promise<any> => {
@@ -344,7 +344,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
       try {
         console.time();
         const filterEncoded = encodeURIComponent(filter);
-        const url = `${protectedResources.KnowledgeAPI.endpointAnswer}/${workspace}/${filterEncoded}/${count}/nesto`;
+        const url = `${KnowledgeAPI.endpointAnswer}/${workspace}/${filterEncoded}/${count}/nesto`;
         await Execute("GET", url).then((answerRowDtosEx: IAnswerRowDtosEx) => {
           const { answerRowDtos: dtos, msg } = answerRowDtosEx;
           console.log('ANSWERSSSSS', { answerRowDtos: dtos }, url);
@@ -377,6 +377,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
     });
   }
 
+  /*
   const OpenDB = useCallback(async (): Promise<any> => {
     try {
       // await loadAndCacheAllCategoryRows();
@@ -395,47 +396,49 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
       return false;
     }
   }, []);
+  */
 
   // differs from CategoryProvider, here we don't dispatch
-  const getQuestion = async (questionKey: IQuestionKey): Promise<any> => {
+  const getQuestion = useCallback(
+    async (questionKey: IQuestionKey): Promise<any> => {
 
-    return new Promise(async (resolve) => {
-      try {
-        //const { topId, id } = questionKey;
-        const query = new QuestionKey(questionKey).toQuery(workspace);
-        const url = `${protectedResources.KnowledgeAPI.endpointQuestion}?${query}`;
-        console.time()
-        await Execute("GET", url)
-          .then((questionDtoEx: IQuestionDtoEx) => {
-            console.timeEnd();
-            const { questionDto, msg } = questionDtoEx;
-            if (questionDto) {
-              const questionEx: IQuestionEx = {
-                question: new Question(questionDto).question,
-                msg
+      return new Promise(async (resolve) => {
+        try {
+          //const { topId, id } = questionKey;
+          const query = new QuestionKey(questionKey).toQuery(workspace);
+          const url = `${KnowledgeAPI.endpointQuestion}?${query}`;
+          console.time()
+          await Execute("GET", url)
+            .then((questionDtoEx: IQuestionDtoEx) => {
+              console.timeEnd();
+              const { questionDto, msg } = questionDtoEx;
+              if (questionDto) {
+                const questionEx: IQuestionEx = {
+                  question: new Question(questionDto).question,
+                  msg
+                }
+                resolve(questionEx);
               }
-              resolve(questionEx);
-            }
-            else {
-              const questionEx: IQuestionEx = {
-                question: null,
-                msg
+              else {
+                const questionEx: IQuestionEx = {
+                  question: null,
+                  msg
+                }
+                resolve(questionEx);
               }
-              resolve(questionEx);
-            }
-            //}
-          });
-      }
-      catch (error: any) {
-        console.log(error);
-        const questionEx: IQuestionEx = {
-          question: null,
-          msg: "Problemos"
+              //}
+            });
         }
-        resolve(questionEx);
-      }
-    })
-  }
+        catch (error: any) {
+          console.log(error);
+          const questionEx: IQuestionEx = {
+            question: null,
+            msg: "Problemos"
+          }
+          resolve(questionEx);
+        }
+      })
+    }, [KnowledgeAPI.endpointQuestion, workspace]);
 
   const getCatsByKind = async (kind: number): Promise<ICategoryRow[]> => {
     try {
@@ -590,15 +593,13 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
             console.log('FETCHING --->>>', error);
           });
         */
-        const url = `${protectedResources.KnowledgeAPI.endpointAnswer}/${topId}/${id}`;
+        const url = `${KnowledgeAPI.endpointAnswer}/${topId}/${id}`;
         await Execute("GET", url).then((answerDto: IAnswerDto) => {
           console.timeEnd();
           console.log({ response: answerDto });
           const answer: IAnswer = new Answer(answerDto).answer;
           resolve(answer);
         });
-
-
       }
       catch (error: any) {
         console.log(error);
@@ -609,8 +610,8 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
 
   const globalGetGroupRow = useCallback(async (id: string): Promise<IGroupRow | undefined> => {
     try {
-      const { allGroupRows: groupRows } = globalState;
-      const groupRow: IGroupRow | undefined = groupRows.get(id);  // globalState.cats is Map<string, ICat>
+      //const { allGroupRows: groupRows } = globalState;
+      const groupRow: IGroupRow | undefined = allGroupRows.get(id);  // globalState.cats is Map<string, ICat>
       return groupRow!;
     }
     catch (error: any) {
@@ -618,7 +619,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
       dispatch({ type: GlobalActionTypes.SET_ERROR, payload: { error } });
     }
     return undefined;
-  }, [globalState]);
+  }, [allGroupRows]);
 
 
   const getGroupRowsByKind = async (kind: number): Promise<IGroupRow[]> => {
@@ -666,7 +667,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
       try {
         const historyDto = new HistoryDto(history, workspace).historyDto;
         console.log("historyDto", { historyDto })
-        const url = `${protectedResources.KnowledgeAPI.endpointHistory}`;
+        const url = `${KnowledgeAPI.endpointHistory}`;
         console.time()
         await Execute("POST", url, historyDto)
           .then(async (questionDtoEx: IQuestionDtoEx) => {
@@ -685,13 +686,13 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
         console.log(error)
         //dispatch({ type: ActionTypes.SET_ERROR, payload: { error: new Error('Server Error') } });
       }
-    }, [workspace]);
+    }, [KnowledgeAPI.endpointHistory, workspace]);
 
   const getAnswersRated = async (questionKey: IQuestionKey): Promise<any> => {
     // const mapAnswerRating = new Map<string, IAssignedAnswer>();
     // try {
     //   console.log("getAnswersRated", { questionKey })
-    //   const url = `${protectedResources.KnowledgeAPI.endpointHistory}/${questionKey.topId}/${questionKey.id}`;
+    //   const url = `${KnowledgeAPI.endpointHistory}/${questionKey.topId}/${questionKey.id}`;
     //   console.time()
     //   const answerRatedListEx: IAnswerRatedListEx = { answerRatedList: null, msg: "" }
     //   await Execute("GET", url)
@@ -754,7 +755,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
     try {
       const historyFilterDto = new HistoryFilterDto(historyFilter, workspace).historyFilterDto;
       //console.log("historyDto", { historyDto })
-      const url = `${protectedResources.KnowledgeAPI.endpointHistoryFilter}`;
+      const url = `${KnowledgeAPI.endpointHistoryFilter}`;
       console.time()
       await Execute("POST", url, historyFilterDto)
         .then(async (questionDtoEx: IQuestionDtoEx) => {
@@ -773,7 +774,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
       console.log(error)
       //dispatch({ type: ActionTypes.SET_ERROR, payload: { error: new Error('Server Error') } });
     }
-  }, [workspace]);
+  }, [KnowledgeAPI.endpointHistoryFilter, workspace]);
 
   const setLastRouteVisited = useCallback((lastRouteVisited: string): void => {
     dispatch({ type: GlobalActionTypes.SET_LAST_ROUTE_VISITED, payload: { lastRouteVisited } });
@@ -781,13 +782,13 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
 
   useEffect(() => {
     (async () => {
-      await OpenDB();
+      //await OpenDB();
     })()
-  }, [OpenDB])
+  }, [])
 
   return (
     <GlobalContext.Provider value={{
-      globalState, OpenDB, setLastRouteVisited,
+      globalState, setLastRouteVisited,
       getUser, health,
       loadAndCacheAllCategoryRows, getCat, getSubCats, getCatsByKind,
       searchQuestions, getQuestion,

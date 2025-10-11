@@ -20,10 +20,9 @@ import AboutShort from 'AboutShort';
 import ChatBotDlg from 'ChatBotDlg';
 
 function App() {
-  console.log('-----------> App')
-
+  
   //const { getUser, OpenDB, setLastRouteVisited } = useGlobalContext();
-  const { dbp, authUser, isAuthenticated, everLoggedIn, allCategoryRowsLoaded, lastRouteVisited } = useGlobalState()
+  const { authUser, isAuthenticated, everLoggedIn, allCategoryRowsLoaded, lastRouteVisited } = useGlobalState();
   const { nickName } = authUser;
 
 
@@ -56,7 +55,9 @@ function App() {
   }, [dispatch, instance, isAuthenticated]) // , isAuthenticated
 
   const locationPathname = location.pathname;
-  console.log('---------------- ================== App locationPathname ===>>>', locationPathname);
+  console.log('----------->')
+  console.log('----------- ====== App locationPathname ===>>>', locationPathname);
+  console.log('----------->')
 
     // const showChatBotDlg = (locationPathname.startsWith('/categories') && allCategoryRowsLoaded) ||
   //   (locationPathname.startsWith('/groups') && groupRowsLoaded);
@@ -68,7 +69,7 @@ function App() {
         locationPathname.startsWith('/register') ||
         locationPathname.startsWith('/sign-in') ||
         locationPathname.startsWith('/about');  // allow about without registration
-      if (!isAuthenticated && !isAuthRoute && dbp) {
+      if (!isAuthenticated && !isAuthRoute) {
         if (everLoggedIn) {
         }
         else {
@@ -90,7 +91,7 @@ function App() {
         navigate(`/supporter/${source}/${question}`);
       }
     })()
-  }, [dbp, isAuthenticated, nickName, everLoggedIn, locationPathname, navigate, location.search])
+  }, [isAuthenticated, nickName, everLoggedIn, locationPathname, navigate, location.search])
 
   useEffect(() => {
     console.log('----------->>>>>>>>>> App lastRouteVisited', lastRouteVisited);
@@ -100,6 +101,8 @@ function App() {
   if (!isAuthenticated) // || !categoryRowsLoaded) // || !groupRowsLoaded)
     return <div>App loading</div>
 
+  //alert(process.env.REACT_APP_API_URL)
+  
   return (
     <Container fluid className="App" data-bs-theme="light">
       {/* <header className="App-header">
