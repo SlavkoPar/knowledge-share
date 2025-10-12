@@ -552,7 +552,7 @@ export interface ICategoriesState {
 	loadingCategories: boolean,
 	loadingQuestions: boolean,
 	loadingCategory: boolean,
-	loadingQuestion: boolean,
+	loadingQuestion: boolean, questionLoaded: boolean,
 	error?: Error;
 	whichRowId?: string; // category.id or question.id
 }
@@ -782,7 +782,6 @@ export type Payload = {
 
 	[ActionTypes.SET_CATEGORY_QUESTIONS_LOADING]: {
 		categoryRow?: ICategoryRow;
-		loadingQuestion: boolean;
 	}
 
 	[ActionTypes.NODE_OPENING]: {

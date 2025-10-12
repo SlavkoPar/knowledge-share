@@ -25,7 +25,7 @@ const QuestionRow = ({ questionRow, isSelected }: { questionRow: IQuestionRow, i
     const { canEdit, authUser } = useGlobalState();
     const { state, viewQuestion, addQuestion, editQuestion, deleteQuestion } = useCategoryContext();
 
-    const { activeQuestion, formMode } = state;
+    const { activeQuestion, formMode, questionLoaded } = state;
     //const isSelected = useState(id === selectedQuestionId);
 
     const showForm = activeQuestion !== null && activeQuestion.id === id;
@@ -57,7 +57,7 @@ const QuestionRow = ({ questionRow, isSelected }: { questionRow: IQuestionRow, i
 
     useEffect(() => {
         (async () => {
-            if (isSelected) {
+            if (isSelected && !questionLoaded) {
                 switch (formMode) {
                     case FormMode.ViewingQuestion:
                         await viewQuestion(questionRow);
@@ -72,9 +72,8 @@ const QuestionRow = ({ questionRow, isSelected }: { questionRow: IQuestionRow, i
                 hoverRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
             }
         })()
-        // after using new Question() in getQuestion() editQuestion gets modified
-    }, [canEdit, formMode, hoverRef, isSelected, questionRow]); // , viewQuestion, editQuestion
-
+        // after using new Question() in getQuestion() editQuestion gets modified // viewQuestion, editQuestion
+    }, [canEdit, formMode, hoverRef, isSelected, questionLoaded, questionRow, viewQuestion, editQuestion]);
 
     const Row1 =
         <div ref={hoverRef} className={`p-0 d-flex justify-content-start align-items-center w-100 position-relative question-row${showForm ? '-selected' : ''}`}>

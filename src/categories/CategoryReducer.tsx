@@ -246,7 +246,8 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         loadingCategories: false,
         loadingQuestions: false,
         loadingCategory: false,
-        loadingQuestion: false
+        loadingQuestion: false,
+        questionLoaded: false
       };
     }
 
@@ -340,6 +341,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         activeQuestion: null,
         selectedQuestionId: selectedQuestionId ?? null, 
         loadingQuestion: false,
+        questionLoaded: false,
         rowExpanding: false,
         rowExpanded: true,
         formMode
@@ -434,7 +436,8 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
       //const { loadingQuestion } = action.payload; // category doesn't contain inAdding 
       return {
         ...state,
-        loadingQuestions: true
+        loadingQuestions: true,
+        questionLoaded: false
       }
 
     case ActionTypes.CATEGORY_QUESTIONS_LOADED: {
@@ -442,7 +445,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
       //const { id, topId: topId, questionRows, hasMoreQuestions } = categoryRow;
       return {
         ...state,
-        loadingQuestion: false,
+        //loadingQuestion: false,
         loadingQuestions: false
       }
     }
@@ -502,7 +505,8 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
     case ActionTypes.SET_LOADING_QUESTION:
       return {
         ...state,
-        loadingQuestion: true
+        loadingQuestion: true,
+        questionLoaded: false
       }
 
     case ActionTypes.CANCEL_ADD_QUESTION: {
@@ -551,7 +555,8 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         activeQuestion: question,
         formMode,
         error: undefined,
-        loadingQuestion: false
+        loadingQuestion: false,
+        questionLoaded: true
       };
     }
 
@@ -580,7 +585,8 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         ...state,
         //formMode: state.formMode, // keep mode
         activeQuestion: question,
-        loadingQuestion: false
+        loadingQuestion: false,
+        questionLoaded: true
       };
     }
 
@@ -594,7 +600,8 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         formMode: FormMode.ViewingQuestion,
         keyExpanded,
         activeQuestion: question,
-        loadingQuestion: false
+        loadingQuestion: false,
+        questionLoaded: true
       }
     }
 
@@ -610,7 +617,8 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         keyExpanded: { topId, categoryId: parentId, questionId: id },
         activeQuestion: question,
         formMode: FormMode.EditingQuestion,
-        loadingQuestion: false
+        loadingQuestion: false,
+        questionLoaded: true
       }
     }
 
@@ -622,7 +630,8 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         activeQuestion: null,
         selectedQuestionId: null,
         formMode: FormMode.None,
-        loadingQuestion: false
+        loadingQuestion: false,
+        questionLoaded: true
       }
     }
 

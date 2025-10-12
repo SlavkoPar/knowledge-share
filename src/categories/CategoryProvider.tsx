@@ -58,7 +58,7 @@ export const initialState: ICategoriesState = {
   loadingCategories: false,
   loadingQuestions: false,
   loadingCategory: false,
-  loadingQuestion: false,
+  loadingQuestion: false, questionLoaded: false,
 
   rowExpanding: false,
   rowExpanded: false
@@ -698,7 +698,7 @@ export const CategoryProvider: React.FC<IProps> = ({ children }) => {
   const loadCategoryQuestions = useCallback(async ({ categoryKey, startCursor, includeQuestionId }: ILoadCategoryQuestions): Promise<any> => {
     try {
       const { topId, id } = categoryKey;
-      dispatch({ type: ActionTypes.SET_CATEGORY_QUESTIONS_LOADING, payload: { loadingQuestion: true } })
+      dispatch({ type: ActionTypes.SET_CATEGORY_QUESTIONS_LOADING, payload: { } })
       try {
         const url = `${KnowledgeAPI.endpointQuestion}/${workspace}/${topId}/${id}/${startCursor}/${PAGE_SIZE}/${includeQuestionId}`;
         console.time()
