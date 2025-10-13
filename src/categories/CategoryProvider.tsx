@@ -57,7 +57,7 @@ export const initialState: ICategoriesState = {
 
   loadingCategories: false,
   loadingQuestions: false,
-  loadingCategory: false,
+  loadingCategory: false, categoryLoaded: false,
   loadingQuestion: false, questionLoaded: false,
 
   rowExpanding: false,
@@ -619,7 +619,7 @@ export const CategoryProvider: React.FC<IProps> = ({ children }) => {
         dispatch({ type: ActionTypes.SET_ERROR, payload: { error: new Error("Karambol") } });
         return error;
       }
-    }, [KnowledgeAPI.endpointCategory, workspace]);
+    }, [Execute, KnowledgeAPI.endpointCategory, workspace]);
 
 
   const deleteCategory = useCallback(async (categoryRow: ICategoryRow) => {
@@ -736,7 +736,7 @@ export const CategoryProvider: React.FC<IProps> = ({ children }) => {
       console.log(error);
       dispatch({ type: ActionTypes.SET_ERROR, payload: error });
     }
-  }, [KnowledgeAPI.endpointQuestion, workspace]);
+  }, [Execute, KnowledgeAPI.endpointQuestion, workspace]);
 
 
   const findCategory = useCallback(
@@ -850,7 +850,7 @@ export const CategoryProvider: React.FC<IProps> = ({ children }) => {
         console.log(error)
         dispatch({ type: ActionTypes.SET_ERROR, payload: { error: new Error('Server Error'), whichRowId: id } });
       }
-    }, [KnowledgeAPI.endpointQuestion, expandCategory, loadAndCacheAllCategoryRows, nickName, workspace]);
+    }, [Execute, KnowledgeAPI.endpointQuestion, expandCategory, loadAndCacheAllCategoryRows, nickName, workspace]);
 
 
   const updateQuestion = useCallback(
@@ -949,7 +949,7 @@ export const CategoryProvider: React.FC<IProps> = ({ children }) => {
         console.log(error)
         dispatch({ type: ActionTypes.SET_ERROR, payload: { error: new Error('Server Error'), whichRowId: id } });
       }
-    }, [KnowledgeAPI.endpointQuestion, expandCategory, workspace]);
+    }, [Execute, KnowledgeAPI.endpointQuestion, expandCategory, workspace]);
 
 
   const gggetQuestion = useCallback(
@@ -1135,7 +1135,7 @@ export const CategoryProvider: React.FC<IProps> = ({ children }) => {
         console.log('error', error);
         dispatch({ type: ActionTypes.SET_ERROR, payload: { error } });
       }
-    }, [KnowledgeAPI.endpointQuestionAnswer, nickName, workspace]);
+    }, [Execute, KnowledgeAPI.endpointQuestionAnswer, nickName, workspace]);
 
 
   const onCategoryTitleChanged = (topId: string, id: string, title: string): void => {
@@ -1150,16 +1150,20 @@ export const CategoryProvider: React.FC<IProps> = ({ children }) => {
     dispatch({ type: ActionTypes.CATEGORY_TITLE_CHANGED, payload: { categoryRow } })
   }
 
+
   const onQuestionTitleChanged = (topId: string, categoryId: string, id: string, title: string): void => {
+    console.log(topId, id)
     const { topRows } = state;
     const topRow: ICategoryRow = topRows.find(c => c.id === topId)!;
+    console.log(topRow)
     //const { categoryRows } = topRow;
     //const categoryRow: ICategoryRow = findCategory(categoryRows, categoryId)!;
-    const categoryRow: ICategoryRow = (topRow.id === topRow.topId)
+    const categoryRow: ICategoryRow = (topRow.id === categoryId)
       ? topRow
-      : findCategory(topRow.categoryRows, id)!;
+      : findCategory(topRow.categoryRows, categoryId)!;
     if (categoryRow) {
       const questionRow = categoryRow.questionRows.find(q => q.id === id)!;
+      console.log(categoryRow.questionRows, id)
       questionRow.title = title;
     }
     // rerender
@@ -1170,7 +1174,7 @@ export const CategoryProvider: React.FC<IProps> = ({ children }) => {
     state, openNode, loadTopRows,
     addSubCategory, cancelAddCategory, createCategory,
     viewCategory, editCategory, updateCategory, deleteCategory, deleteCategoryVariation,
-    expandCategory, collapseCategory, findCategory, onCategoryTitleChanged,
+    expandCategory, collapseCategory, onCategoryTitleChanged,
     loadCategoryQuestions,
     addQuestion, cancelAddQuestion, createQuestion,
     viewQuestion, editQuestion, updateQuestion, deleteQuestion, onQuestionTitleChanged,

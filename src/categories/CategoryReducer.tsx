@@ -189,7 +189,8 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
     case ActionTypes.SET_LOADING_CATEGORY:
       return {
         ...state,
-        loadingCategory: true
+        loadingCategory: true,
+        categoryLoaded: false
       }
 
 
@@ -232,7 +233,8 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
       })
       return {
         ...state,
-        loadingCategory: false
+        loadingCategory: false,
+        //categoryLoaded: false proveri
       };
     }
 
@@ -245,9 +247,8 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         whichRowId,
         loadingCategories: false,
         loadingQuestions: false,
-        loadingCategory: false,
-        loadingQuestion: false,
-        questionLoaded: false
+        loadingCategory: false, categoryLoaded: false,
+        loadingQuestion: false, questionLoaded: false
       };
     }
 
@@ -424,7 +425,8 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
       return {
         ...state,
         formMode: FormMode.EditingCategory,
-        loadingCategory: false,
+        loadingCategory: false, 
+        categoryLoaded: true,
         //categoryKeyExpanded: state.categoryKeyExpanded ? { ...state.categoryKeyExpanded, questionId: null } : null,
         activeCategory,
         activeQuestion: null,
@@ -555,6 +557,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         activeQuestion: question,
         formMode,
         error: undefined,
+        loadingCategory: false,
         loadingQuestion: false,
         questionLoaded: true
       };
@@ -653,6 +656,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
       }
   }
 };
+
 
 
 /* -----------------------------

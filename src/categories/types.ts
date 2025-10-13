@@ -551,7 +551,7 @@ export interface ICategoriesState {
 	selectedQuestionId: string | null;
 	loadingCategories: boolean,
 	loadingQuestions: boolean,
-	loadingCategory: boolean,
+	loadingCategory: boolean, categoryLoaded: boolean,
 	loadingQuestion: boolean, questionLoaded: boolean,
 	error?: Error;
 	whichRowId?: string; // category.id or question.id
@@ -581,7 +581,7 @@ export interface ICategoriesContext {
 	deleteCategoryVariation: (categoryKey: ICategoryKey, name: string) => void,
 	expandCategory: (expandInfo: IExpandInfo) => Promise<any>,
 	collapseCategory: (categoryRow: ICategoryRow) => void,
-	findCategory: (categoryRows: ICategoryRow[], id: string) => ICategoryRow | undefined;
+	// findCategory: (categoryRows: ICategoryRow[], id: string) => ICategoryRow | undefined;
 	onCategoryTitleChanged: (topId: string, id: string, title: string) => void;
 	//////////////
 	// questions

@@ -29,7 +29,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
     const { canEdit, authUser } = useGlobalState();
 
     const { state, addSubCategory, viewCategory, editCategory, deleteCategory, expandCategory, collapseCategory, addQuestion } = useCategoryContext();
-    let { formMode: initialFormMode, keyExpanded, activeCategory, rowExpanding } = state;
+    let { formMode: initialFormMode, keyExpanded, activeCategory, rowExpanding, categoryLoaded } = state;
     const isSelected = activeCategory !== null && (activeCategory.id === id);
 
     const showForm = isSelected;
@@ -103,7 +103,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
 
     useEffect(() => {
         (async () => {
-            if (isSelected) {
+            if (isSelected && !categoryLoaded) {
                 switch (formMode.current) {
                     case FormMode.ViewingCategory:
                         await viewCategory(categoryRow, questionId ?? 'null');
@@ -116,7 +116,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
                 }
             }
         })()
-    }, [canEdit, categoryRow, editCategory, isSelected, questionId, viewCategory]);
+    }, [canEdit, categoryLoaded, categoryRow, editCategory, isSelected, questionId, viewCategory]);
 
     const [hoverRef, hoverProps] = useHover();
 

@@ -81,7 +81,8 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
     }
   }, [formik, nameRef, source])
 
-  const debouncedTitleHandler = //useCallback(
+  const debouncedTitleHandler = 
+  //useCallback(
     debounce((value: string) => {
       //dispatch({ type: ActionTypes.QUESTION_TITLE_CHANGED, payload: { categoryId, id, value } })
       onQuestionTitleChanged(topId, parentId!, id, value);
