@@ -75,8 +75,6 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
 
     let tekst = '';
 
-    
-
     useEffect(() => {
         (async () => {
             // SET_TOP_ROWS  Level:1
@@ -132,10 +130,12 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
         }
     }
 
-    console.log('===>>> Categories !!!!!!!!!!!!!!!!!')
+    console.log('===>>> Categories !!!!!!!!!!!!!!!!!', activeCategory)
     //if (!nodeOpened)
-    if (topRows.length === 0 || !allCategoryRowsLoaded || !topRowsLoaded)
+    if (topRows.length === 0 || !allCategoryRowsLoaded || !topRowsLoaded) {
+        console.log('===>>> Categories  VRATIO')
         return null
+    }
 
     return (
         <>

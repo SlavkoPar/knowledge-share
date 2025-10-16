@@ -41,7 +41,11 @@ export const initialCategory: ICategory = {
 
 export const CategoryReducer: Reducer<ICategoriesState, Actions> = (state, action) => {
 
+  console.log('------------------------------->')
+  console.log('------------------------------->')
   console.log('------------------------------->', action.type)
+  console.log('------------------------------->')
+  console.log('------------------------------->')
   // ----------------------------------------------------------------------
   // Rubljov: "By giving the right name, you reveal the essence of things"
   // ----------------------------------------------------------------------
@@ -86,7 +90,7 @@ export const CategoryReducer: Reducer<ICategoriesState, Actions> = (state, actio
     : innerReducer(state, action);
 
   // return { ...state } // calling this, state would be destroyed, because of shallow copy
-
+console.log(111111111111111, newState.activeCategory)
   // Action that modify Tree
   // Actually part topRows of state
   if (modifyTree) {
@@ -124,6 +128,10 @@ export const CategoryReducer: Reducer<ICategoriesState, Actions> = (state, actio
     }
     localStorage.setItem('CATEGORIES_STATE', JSON.stringify(locStorage));
   }
+
+  console.log(222222222222222222, newState.activeCategory)
+
+  
   return newState;
 }
 
@@ -349,25 +357,26 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
       }
     }
 
-    case ActionTypes.SET_ROW_COLLAPSING: {
-      return {
-        ...state,
-        // keep mode
-        loadingCategories: true, 
-        rowExpanding: true, // actually collapsing
-        rowExpanded: false
-      }
-    }
+    // case ActionTypes.SET_ROW_COLLAPSING: {
+    //   return {
+    //     ...state,
+    //     // keep mode
+    //     loadingCategories: true, 
+    //     rowExpanding: true, // actually collapsing
+    //     rowExpanded: false
+    //   }
+    // }
 
+    
     case ActionTypes.SET_ROW_COLLAPSED: {
       const { categoryRow } = action.payload; // category doesn't contain  inAdding 
-      const { topId, id } = categoryRow;
+      const { topId, id, parentId } = categoryRow;
       //const categoryKey = new CategoryKey(categoryRow).categoryKey
       return {
         ...state,
         // keep mode
         loadingCategories: false,
-        keyExpanded: { topId, categoryId: id, questionId: null },
+        keyExpanded: { topId, categoryId: parentId!, questionId: null },
         rowExpanding: false, // actually collapsing
         rowExpanded: true,
         activeCategory: null,
@@ -375,7 +384,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         selectedQuestionId: null
       }
     }
-
+    
 
     case ActionTypes.SET_CATEGORY_TO_VIEW: {
       const { categoryRow } = action.payload;
@@ -416,19 +425,21 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
 
     case ActionTypes.SET_CATEGORY_TO_EDIT:   // doesn't modify Tree
     case ActionTypes.SET_CATEGORY_UPDATED: { // modifies Tree
-      const { categoryRow } = action.payload; // ICategory extends ICategoryRow
+      const { categoryRow, category } = action.payload; // ICategory extends ICategoryRow
       console.assert(IsCategory(categoryRow))
       // TODO what about instanceof?
-      const category: ICategory = categoryRow as ICategory;
-      const activeCategory: ICategory = { ...category, isExpanded: false }
-      //const { topId, id, parentId } = category;
+      //const activeCategory: ICategory = { ...category, isExpanded: false }
+      const { topId, id, parentId } = category;
+      console.log('ActionTypes.SET_CATEGORY_TO_EDITTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT')
       return {
         ...state,
         formMode: FormMode.EditingCategory,
         loadingCategory: false, 
         categoryLoaded: true,
+        keyExpanded: { topId, categoryId: parentId!, questionId: null },
+        //keyExpanded: null, //{ topId, categoryId: parentId!, questionId: null },
         //categoryKeyExpanded: state.categoryKeyExpanded ? { ...state.categoryKeyExpanded, questionId: null } : null,
-        activeCategory,
+        activeCategory: category,
         activeQuestion: null,
         selectedQuestionId: null
       };

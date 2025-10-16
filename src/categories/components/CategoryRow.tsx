@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faRemove, faCaretRight, faCaretDown, faPlus, faFolder } from '@fortawesome/free-solid-svg-icons'
 import QPlus from 'assets/QPlus.png';
@@ -20,7 +20,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
 
     const { id, title, hasSubCategories, numOfQuestions, isExpanded } = categoryRow;
     categoryRow.level += 1;
-
+   
     const categoryKey: ICategoryKey = new CategoryKey(categoryRow).categoryKey!;
 
     // const [categoryKey] = useState<ICategoryKey>({ topId, id }); // otherwise reloads
@@ -29,14 +29,12 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
     const { canEdit, authUser } = useGlobalState();
 
     const { state, addSubCategory, viewCategory, editCategory, deleteCategory, expandCategory, collapseCategory, addQuestion } = useCategoryContext();
-    let { formMode: initialFormMode, keyExpanded, activeCategory, rowExpanding, categoryLoaded } = state;
+    let { formMode, keyExpanded, activeCategory, rowExpanding, categoryLoaded } = state;
+   
     const isSelected = activeCategory !== null && (activeCategory.id === id);
-
     const showForm = isSelected;
 
-    const formMode = useRef<FormMode>(initialFormMode);
-
-    const alreadyAdding = formMode.current === FormMode.AddingCategory;
+    const alreadyAdding = formMode === FormMode.AddingCategory;
     // TODO proveri ovo
     const showQuestions = isExpanded && numOfQuestions > 0 // || questions.find(q => q.inAdding) // && !questions.find(q => q.inAdding); // We don't have questions loaded
 
@@ -61,10 +59,10 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
         }
     }
 
-    const edit = async () => {
-        // Load data from server and reinitialize category
-        await editCategory(categoryRow, questionId ?? 'null');
-    }
+    // const edit = async () => {
+    //     // Load data from server and reinitialize category
+    //     await editCategory(categoryRow, questionId ?? 'null');
+    // }
 
     // const onSelectCategory = useCallback(() =>
     //     async (): Promise<any> => {
@@ -86,25 +84,26 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
         (async () => {
             if (numOfQuestions > 0 && !isExpanded) { //!isExpanded && !isSelected) {
                 if (keyExpanded && keyExpanded.categoryId === id && !rowExpanding) { // catKeyExpanded.id) {
-                    if (formMode.current !== FormMode.AddingCategory) {
-                        formMode.current = FormMode.None  // TODO popravi
-                    }
+                    // JEBENO PROVERI
+                    // if (formMode !== FormMode.AddingCategory) {
+                    //     formMode = FormMode.None  // TODO popravi
+                    // }
                     const expandInfo: IExpandInfo = {
                         categoryKey,
                         includeQuestionId: questionId ?? undefined,
-                        formMode: formMode.current as FormMode // ??? proveri // differs from handleExpandClick
+                        formMode // ??? proveri // differs from handleExpandClick
                     }
                     await expandCategory(expandInfo);
                 }
             }
         })()
-    }, [id, isExpanded, isSelected, expandCategory, keyExpanded, numOfQuestions, rowExpanding, categoryKey, questionId]);
+    }, [id, isExpanded, isSelected, expandCategory, keyExpanded, numOfQuestions, rowExpanding, categoryKey, questionId, formMode]);
 
 
     useEffect(() => {
         (async () => {
             if (isSelected && !categoryLoaded) {
-                switch (formMode.current) {
+                switch (formMode) {
                     case FormMode.ViewingCategory:
                         await viewCategory(categoryRow, questionId ?? 'null');
                         break;
@@ -116,13 +115,13 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
                 }
             }
         })()
-    }, [canEdit, categoryLoaded, categoryRow, editCategory, isSelected, questionId, viewCategory]);
+    }, [canEdit, categoryLoaded, categoryRow, editCategory, formMode, isSelected, questionId, viewCategory]);
 
     const [hoverRef, hoverProps] = useHover();
 
     const Row1 =
         <>
-            <div ref={hoverRef} className={`d-flex justify-content-start align-items-center w-100 category-row${isSelected ? '-selected' : ''}`}>
+            <div ref={hoverRef} className={`d-flex justify-content-start align-items-center w-100 category-row${isSelected ? '-selected' : ''}`} style={{marginTop: '1px'}}>
                 <Button
                     variant='link'
                     size="sm"
@@ -162,12 +161,12 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
 
                 {canEdit && !alreadyAdding && hoverProps.isHovered &&
                     <>
-                        <Button variant='link' size="sm" className="ms-1 py-0 px-0"
+                        {/* <Button variant='link' size="sm" className="ms-1 py-0 px-0"
                             //onClick={() => { dispatch({ type: ActionTypes.EDIT, category }) }}>
                             onClick={() => edit()}
                         >
                             <FontAwesomeIcon icon={faEdit} size='lg' />
-                        </Button>
+                        </Button> */}
                         <Button
                             variant='link'
                             size="sm"
@@ -236,7 +235,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
                 className="py-0 px-1 w-100 category-bg"
                 as="li"
             >
-                {/*inAdding &&*/showForm && formMode.current === FormMode.AddingCategory &&
+                {/*inAdding &&*/showForm && formMode === FormMode.AddingCategory &&
                     <>
                         <div className="ms-0 d-md-none w-100">
                             <AddCategory />
@@ -246,11 +245,11 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
                         </div>
                     </>
                 }
-                {showForm && formMode.current === FormMode.EditingCategory &&
+                {showForm && formMode === FormMode.EditingCategory &&
                     <>
                         {/* <div class="d-lg-none">hide on lg and wider screens</div> */}
                         <div id='divInLine' className="ms-0 d-md-none w-100">
-                            {formMode.current === FormMode.EditingCategory && <EditCategory inLine={false} />}
+                            {formMode === FormMode.EditingCategory && <EditCategory inLine={false} />}
                         </div>
                         <div className="d-none d-md-block">
                             {Row1}
@@ -258,7 +257,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
                     </>
                 }
 
-                {showForm && formMode.current === FormMode.ViewingCategory &&
+                {showForm && formMode === FormMode.ViewingCategory &&
                     <>
                         {/* <div class="d-lg-none">hide on lg and wider screens</div> */}
                         <div id='divInLine' className="ms-0 d-md-none w-100">

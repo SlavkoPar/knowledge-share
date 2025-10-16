@@ -843,10 +843,12 @@ export type Payload = {
 
 	[ActionTypes.SET_CATEGORY_TO_EDIT]: {
 		categoryRow: ICategoryRow; // ICategory extends ICategoryRow
+		category: ICategory
 	};
 
 	[ActionTypes.SET_CATEGORY_UPDATED]: {
-		categoryRow: ICategoryRow; // ICategory extends ICategoryRow
+		categoryRow?: ICategoryRow; // ICategory extends ICategoryRow
+		category: ICategory
 	};
 
 
