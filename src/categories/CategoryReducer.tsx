@@ -90,7 +90,6 @@ export const CategoryReducer: Reducer<ICategoriesState, Actions> = (state, actio
     : innerReducer(state, action);
 
   // return { ...state } // calling this, state would be destroyed, because of shallow copy
-console.log(111111111111111, newState.activeCategory)
   // Action that modify Tree
   // Actually part topRows of state
   if (modifyTree) {
@@ -129,9 +128,6 @@ console.log(111111111111111, newState.activeCategory)
     localStorage.setItem('CATEGORIES_STATE', JSON.stringify(locStorage));
   }
 
-  console.log(222222222222222222, newState.activeCategory)
-
-  
   return newState;
 }
 
@@ -332,7 +328,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
       const { categoryRow, formMode, selectedQuestionId } = action.payload;
       const { topId, id } = categoryRow;
       const { keyExpanded } = state;
-      const questionId = (topId === keyExpanded?.topId && id === keyExpanded.categoryId) 
+      const questionId = (topId === keyExpanded?.topId && id === keyExpanded.categoryId)
         ? keyExpanded.questionId
         : null;
       // Do not work with categoryRow, 
@@ -348,7 +344,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         },
         activeCategory: null,
         activeQuestion: null,
-        selectedQuestionId: selectedQuestionId ?? null, 
+        selectedQuestionId: selectedQuestionId ?? null,
         loadingQuestion: false,
         questionLoaded: false,
         rowExpanding: false,
@@ -367,7 +363,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
     //   }
     // }
 
-    
+
     case ActionTypes.SET_ROW_COLLAPSED: {
       const { categoryRow } = action.payload; // category doesn't contain  inAdding 
       const { topId, id, parentId } = categoryRow;
@@ -384,7 +380,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         selectedQuestionId: null
       }
     }
-    
+
 
     case ActionTypes.SET_CATEGORY_TO_VIEW: {
       const { categoryRow } = action.payload;
@@ -434,7 +430,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
       return {
         ...state,
         formMode: FormMode.EditingCategory,
-        loadingCategory: false, 
+        loadingCategory: false,
         categoryLoaded: true,
         keyExpanded: { topId, categoryId: parentId!, questionId: null },
         //keyExpanded: null, //{ topId, categoryId: parentId!, questionId: null },
@@ -444,7 +440,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         selectedQuestionId: null
       };
     }
-
+    
     case ActionTypes.SET_CATEGORY_QUESTIONS_LOADING:
       //const { loadingQuestion } = action.payload; // category doesn't contain inAdding 
       return {
@@ -454,7 +450,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
       }
 
     case ActionTypes.CATEGORY_QUESTIONS_LOADED: {
-     // const { categoryRow } = action.payload;
+      // const { categoryRow } = action.payload;
       //const { id, topId: topId, questionRows, hasMoreQuestions } = categoryRow;
       return {
         ...state,

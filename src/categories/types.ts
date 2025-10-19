@@ -582,7 +582,7 @@ export interface ICategoriesContext {
 	expandCategory: (expandInfo: IExpandInfo) => Promise<any>,
 	collapseCategory: (categoryRow: ICategoryRow) => void,
 	// findCategory: (categoryRows: ICategoryRow[], id: string) => ICategoryRow | undefined;
-	onCategoryTitleChanged: (topId: string, id: string, title: string) => void;
+	onCategoryTitleChanged: (top: ICategoryRow, id: string, title: string) => void;
 	//////////////
 	// questions
 	loadCategoryQuestions: (catParams: ILoadCategoryQuestions) => void;  //(parentInfo: IParentInfo) => void,
@@ -594,7 +594,7 @@ export interface ICategoriesContext {
 	updateQuestion: (oldParentId: string, question: IQuestion, categoryChanged: boolean) => Promise<any>;
 	assignQuestionAnswer: (action: 'Assign' | 'UnAssign', questionKey: IQuestionKey, assignedAnswerKey: IAssignedAnswerKey) => Promise<any>;
 	deleteQuestion: (questionRow: IQuestionRow, isActive: boolean) => void;
-	onQuestionTitleChanged: (topId: string, categoryId: string, id: string, title: string) => void;
+	onQuestionTitleChanged: (topRow: ICategoryRow, categoryId: string, id: string, title: string) => void;
 }
 
 export interface ICategoryFormProps {

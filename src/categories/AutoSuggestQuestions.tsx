@@ -1,4 +1,4 @@
-import React, { JSX } from 'react';
+import React, { JSX, useEffect } from 'react';
 import Autosuggest from 'react-autosuggest';
 import AutosuggestHighlightMatch from "autosuggest-highlight/match";
 import AutosuggestHighlightParse from "autosuggest-highlight/parse";
@@ -70,6 +70,7 @@ export class AutoSuggestQuestions extends React.Component<{
 		this.loadSuggestions = this.loadSuggestions.bind(this);
 		this.debouncedLoadSuggestions = debounce(this.loadSuggestions, 300);
 	}
+
 
 	async loadSuggestions(value: string) {
 		this.setState({
@@ -414,6 +415,8 @@ export class AutoSuggestQuestions extends React.Component<{
 	// }
 	// endregion region Event handlers
 
+
+	
 	protected onChange(event: /*React.ChangeEvent<HTMLInputElement>*/ React.FormEvent<any>, { newValue, method }: Autosuggest.ChangeEvent): void {
 		this.setState({ value: newValue });
 	}

@@ -72,7 +72,7 @@ export const CategoryProvider: React.FC<IProps> = ({ children }) => {
 
   const [state, dispatch] = useReducer(CategoryReducer, initialState);
 
-  const { formMode, activeCategory, activeQuestion, keyExpanded } = state;
+  const { formMode, activeCategory, activeQuestion, keyExpanded, topRows } = state;
 
   console.log('----->>> ----->>> ----->>> CategoryProvider')
 
@@ -277,6 +277,7 @@ export const CategoryProvider: React.FC<IProps> = ({ children }) => {
       })
     }, [workspace, KnowledgeAPI.endpointCategoryRow, Execute, allCategoryRows]);
 
+
   const findCategory = useCallback(
     (categoryRows: ICategoryRow[], id: string): ICategoryRow | undefined => {
       let cat: ICategoryRow | undefined = categoryRows.find(c => c.id === (id ?? 'null'));
@@ -393,7 +394,7 @@ export const CategoryProvider: React.FC<IProps> = ({ children }) => {
   const collapseCategory = useCallback(
     async (categoryRow: ICategoryRow) => {
       const { topId, id } = categoryRow;
-      const { topRows } = state;
+      //const { topRows } = state;
       const topRow: ICategoryRow = topRows.find(c => c.id === topId)!;
       //const categoryRow: ICategoryRow = findCategory(topRow.categoryRows, id)!;
       const catRow: ICategoryRow = (topRow.id === id)
@@ -402,7 +403,7 @@ export const CategoryProvider: React.FC<IProps> = ({ children }) => {
       categoryRow = { ...catRow, isExpanded: false, categoryRows: [], questionRows: [] }
       // rerender
       dispatch({ type: ActionTypes.SET_ROW_COLLAPSED, payload: { categoryRow } })
-    }, [findCategory, state]);
+    }, [findCategory, topRows]);
 
 
   const addSubCategory = useCallback(
@@ -577,8 +578,8 @@ export const CategoryProvider: React.FC<IProps> = ({ children }) => {
     if (category instanceof Error)
       dispatch({ type: ActionTypes.SET_ERROR, payload: { error: category } });
     else {
-       const catRow: ICategoryRow = { ...category, isExpanded: false, categoryRows: [], questionRows: []}
-       dispatch({ type: ActionTypes.SET_CATEGORY_TO_EDIT, payload: { categoryRow: catRow, category } });
+      const catRow: ICategoryRow = { ...category, isExpanded: false, categoryRows: [], questionRows: [] }
+      dispatch({ type: ActionTypes.SET_CATEGORY_TO_EDIT, payload: { categoryRow: catRow, category } });
       /*
       if (parentId === null) { // topRow
         category.topId = categoryRow.topId;
@@ -1131,37 +1132,35 @@ export const CategoryProvider: React.FC<IProps> = ({ children }) => {
     }, [Execute, KnowledgeAPI.endpointQuestionAnswer, nickName, workspace]);
 
 
-  const onCategoryTitleChanged = (topId: string, id: string, title: string): void => {
-    const { topRows } = state;
-    const topRow: ICategoryRow = topRows.find(c => c.id === topId)!;
-    //const categoryRow: ICategoryRow = findCategory(topRow.categoryRows, id)!;
-    const categoryRow: ICategoryRow = (topRow.id === id)
-      ? topRow
-      : findCategory(topRow.categoryRows, id)!;
-    categoryRow.title = title;
-    // rerender
-    dispatch({ type: ActionTypes.CATEGORY_TITLE_CHANGED, payload: { categoryRow } })
-  }
+  const onCategoryTitleChanged = useCallback(
+    (topRow: ICategoryRow, id: string, title: string): void => {
+      //const { topRows } = state;
+      //const topRow: ICategoryRow = topRows.find(c => c.id === topId)!;
+      //const categoryRow: ICategoryRow = findCategory(topRow.categoryRows, id)!;
+      const categoryRow: ICategoryRow = (topRow.id === id)
+        ? topRow
+        : findCategory(topRow.categoryRows, id)!;
+      categoryRow.title = title;
+      // rerender
+      dispatch({ type: ActionTypes.CATEGORY_TITLE_CHANGED, payload: { categoryRow } })
+    }, [findCategory])
 
 
-  const onQuestionTitleChanged = (topId: string, categoryId: string, id: string, title: string): void => {
-    console.log(topId, id)
-    const { topRows } = state;
-    const topRow: ICategoryRow = topRows.find(c => c.id === topId)!;
-    console.log(topRow)
-    //const { categoryRows } = topRow;
-    //const categoryRow: ICategoryRow = findCategory(categoryRows, categoryId)!;
-    const categoryRow: ICategoryRow = (topRow.id === categoryId)
-      ? topRow
-      : findCategory(topRow.categoryRows, categoryId)!;
-    if (categoryRow) {
-      const questionRow = categoryRow.questionRows.find(q => q.id === id)!;
-      console.log(categoryRow.questionRows, id)
-      questionRow.title = title;
-    }
-    // rerender
-    dispatch({ type: ActionTypes.QUESTION_TITLE_CHANGED, payload: { categoryRow } })
-  }
+  const onQuestionTitleChanged = useCallback(
+    (topRow: ICategoryRow, categoryId: string, id: string, title: string): void => {
+      //const { categoryRows } = topRow;
+      //const categoryRow: ICategoryRow = findCategory(categoryRows, categoryId)!;
+      const categoryRow: ICategoryRow = (topRow.id === categoryId)
+        ? topRow
+        : findCategory(topRow.categoryRows, categoryId)!;
+      if (categoryRow) {
+        const questionRow = categoryRow.questionRows.find(q => q.id === id)!;
+        console.log(categoryRow.questionRows, id)
+        questionRow.title = title;
+      }
+      // rerender
+      dispatch({ type: ActionTypes.QUESTION_TITLE_CHANGED, payload: { categoryRow } })
+    }, [findCategory])
 
   const contextValue: ICategoriesContext = {
     state, openNode, loadTopRows,

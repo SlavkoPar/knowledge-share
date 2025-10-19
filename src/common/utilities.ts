@@ -19,14 +19,25 @@ export const escapeRegexCharacters = (str: string): string => {
 //   }
 // };
 
+
 export function debounce<T extends Function>(cb: T, wait = 20) {
   let h: ReturnType<typeof setTimeout>;
-  let callable = (...args: any) => {
+  const callable = (...args: []) => {
       clearTimeout(h);
       h = setTimeout(() => cb(...args), wait);
   };
-  return <T>(<any>callable);
+  return (callable as unknown) as T;
 }
+
+// export function debounce<T extends Function>(cb: T, wait = 20) {
+//   let h: ReturnType<typeof setTimeout>;
+//   let callable = (...args: any) => {
+//       clearTimeout(h);
+//       h = setTimeout(() => cb(...args), wait);
+//   };
+//   return <T>(<any>callable);
+// }
 
 // usage
 //let f = debounce((a: string, b: number, c?: number) => console.log(a.length + b + c || 0));
+

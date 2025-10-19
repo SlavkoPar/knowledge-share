@@ -1,24 +1,26 @@
-import React, { useEffect, useRef, ChangeEvent } from "react";
+import React, { useEffect, useRef, ChangeEvent, useState } from "react";
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import { Form, CloseButton, Row, Stack } from "react-bootstrap";
 import { CreatedModifiedForm } from "common/CreateModifiedForm"
 import { FormButtons } from "common/FormButtons"
-import { FormMode, ActionTypes, ICategoryFormProps, ICategory, IVariation, ICategoryKey, CategoryKey } from "categories/types";
+import { FormMode, ActionTypes, ICategoryFormProps, ICategory, IVariation, ICategoryKey, CategoryKey, ICategoryRow } from "categories/types";
 
-import { useCategoryContext, useCategoryDispatch  } from "categories/CategoryProvider";
+import { useCategoryContext, useCategoryDispatch } from "categories/CategoryProvider";
 import QuestionList from "categories/components/questions/QuestionList";
 import VariationList from "categories/VariationList";
 import { Select } from "common/components/Select";
 import { kindOptions } from "common/kindOptions ";
-import { debounce } from "common/utilities";
+import { useDebounce } from "hooks/useDebounce";
+//import { debounce } from "common/utilities";
 
 const CategoryForm = ({ formMode, category, submitForm, children }: ICategoryFormProps) => {
 
   //const { globalState } = useGlobalContext();
   //const { isDarkMode, variant, bg } = globalState;
-  
-  const { onCategoryTitleChanged } = useCategoryContext();
+
+  const { state, onCategoryTitleChanged } = useCategoryContext();
+  const { topRows } = state;
 
   const viewing = formMode === FormMode.ViewingCategory;
   const editing = formMode === FormMode.EditingCategory;
@@ -71,16 +73,31 @@ const CategoryForm = ({ formMode, category, submitForm, children }: ICategoryFor
     }
   });
 
+  const [title, setTitle] = useState(formik.values.title === "new Category" ? "" : formik.values.title)
 
-  const debouncedTitleHandler = //useCallback(
-    debounce((id: string, value: string) => {
-        onCategoryTitleChanged(topId, id, value);
-    }) //, 500), []);
+  const [topRow] = useState<ICategoryRow>(topRows.find(c => c.id === topId)!);
+
+  const debouncedTitle = useDebounce(title, 300);
+  useEffect(() => {
+    if (debouncedTitle) {
+      // Perform API call or heavy computation with debouncedSearchTerm
+      console.log('>>>>>>------------')
+      console.log('>>>>>>------------', title, debouncedTitle)
+      console.log('>>>>>>------------')
+      console.log('>>>>>>Fetching data for:', debouncedTitle);
+      onCategoryTitleChanged(topRow, id, debouncedTitle);
+    }
+  }, [debouncedTitle, id, onCategoryTitleChanged, title, topId, topRow]);
+
+  // const debouncedTitleHandler = //useCallback(
+  //   debounce((id: string, value: string) => {
+  //       onCategoryTitleChanged(topId, id, value);
+  //   }) //, 500), []);
 
   const handleChangeTitle = (event: ChangeEvent<HTMLTextAreaElement>) => {
     formik.handleChange(event);
     const value = event.target.value;
-    debouncedTitleHandler(id, value)
+    setTitle(value);
   };
 
   // eslint-disable-next-line no-self-compare
@@ -144,14 +161,14 @@ const CategoryForm = ({ formMode, category, submitForm, children }: ICategoryFor
             as="textarea"
             name="title"
             placeholder={formik.values.title === "new Category" ? "new Category" : "category text"}
-            ref={nameRef}
+            value={title}
             onChange={handleChangeTitle}
+            ref={nameRef}
+            //onChange={handleChangeTitle}
             // onChange={(e: any, value: any): {e: ChangeEvent<HTMLTextAreaElement>, value: string} => {
             //         formik.handleChange(e, value);
             //         console.log(value)
             //       }}
-
-
             //onBlur={formik.handleBlur}
             // onBlur={(e: React.FocusEvent<HTMLTextAreaElement>): void => {
             //   if (isEdit && formik.initialValues.title !== formik.values.title)
@@ -159,7 +176,6 @@ const CategoryForm = ({ formMode, category, submitForm, children }: ICategoryFor
             // }}
             rows={3}
             className="text-primary w-100"
-            value={formik.values.title === "new Category" ? "" : formik.values.title}
             disabled={viewing}
           />
           <Form.Text className="text-danger">

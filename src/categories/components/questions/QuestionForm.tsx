@@ -1,4 +1,4 @@
-import React, { ChangeEvent } from 'react';
+import React, { ChangeEvent, useState } from 'react';
 import { useEffect, useRef } from "react";
 import * as Yup from "yup";
 import { useFormik } from "formik";
@@ -16,7 +16,7 @@ import { useCategoryContext, useCategoryDispatch } from "categories/CategoryProv
 import Dropdown from 'react-bootstrap/Dropdown';
 import AssignedAnswers from './AssignedAnswers';
 import RelatedFilters from './RelatedFilters';
-import { debounce } from 'common/utilities';
+import { useDebounce } from 'hooks/useDebounce';
 
 const QuestionForm = ({ question, submitForm, children, showCloseButton, source = 0, closeModal }: IQuestionFormProps) => {
 
@@ -24,7 +24,7 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
   // const { isDarkMode, variant, bg } = globalState;
 
   const { state, onQuestionTitleChanged } = useCategoryContext();
-  let { formMode } = state;
+  let { formMode, topRows } = state;
 
   const viewing = formMode === FormMode.ViewingQuestion;
   const editing = formMode === FormMode.EditingQuestion;
@@ -32,12 +32,14 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
 
   const isDisabled = viewing;
 
-  const { topId, parentId, title, id, assignedAnswers, relatedFilters } = question;
+  const { topId, parentId, id, assignedAnswers, relatedFilters } = question;
   const questionKey = new QuestionKey(question).questionKey;
   // const categoryKey: ICategoryKey = { topId, parentId, id: parentId! }; // proveri
 
   const dispatch = useCategoryDispatch();
 
+
+ 
   const closeForm = () => {
     if (closeModal) {
       closeModal();
@@ -81,6 +83,24 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
     }
   }, [formik, nameRef, source])
 
+  const [title, setTitle] = React.useState(formik.values.title === "new Question" ? "new Question" : "question text")
+
+
+  const [topRow] = useState<ICategoryRow>(topRows.find(c => c.id === topId)!);
+  
+    const debouncedTitle = useDebounce(title, 300);
+    useEffect(() => {
+      if (debouncedTitle) {
+        // Perform API call or heavy computation with debouncedSearchTerm
+        console.log('>>>>>>------------')
+        console.log('>>>>>>------------', title, debouncedTitle)
+        console.log('>>>>>>------------')
+        console.log('>>>>>>Fetching data for:', debouncedTitle);
+        onQuestionTitleChanged(topRow, parentId!, id, debouncedTitle);
+      }
+    }, [debouncedTitle, id, onQuestionTitleChanged, parentId, title, topRow]);
+
+  /*
   const debouncedTitleHandler = 
   //useCallback(
     debounce((value: string) => {
@@ -88,13 +108,13 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
       onQuestionTitleChanged(topId, parentId!, id, value);
     }, 500);
     //, []);
+  */
 
   const handleChangeTitle = (event: ChangeEvent<HTMLTextAreaElement>) => {
     formik.handleChange(event);
     const value = event.target.value;
-    debouncedTitleHandler(value)
+    setTitle(value);
   };
-
 
   const setParentId = (cat: ICategoryRow) => {
     formik.setFieldValue('parentId', cat.id);
@@ -167,7 +187,7 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
             //   if (isEdit && formik.initialValues.title !== formik.values.title)
             //     formik.submitForm();
             // }}
-            value={formik.values.title === "new Question" ? "" : formik.values.title}
+            value={title}
             rows={3}
             className="text-primary w-100"
             disabled={isDisabled}
