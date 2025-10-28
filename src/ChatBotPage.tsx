@@ -43,7 +43,7 @@ const ChatBotPage: React.FC = () => {
 	const [hasMoreAnswers, setHasMoreAnswers] = useState<boolean>(false);
 
 	const { getCatsByKind, getQuestion, addHistory, addHistoryFilter, searchQuestions, setLastRouteVisited } = useGlobalContext();
-	const { authUser, isDarkMode, allCategoryRows: cats, allCategoryRowsLoaded: catsLoaded  } = useGlobalState();
+	const { authUser, isDarkMode, allCategoryRowsGlobal: cats, allCategoryRowsGlobalLoaded: catsLoaded } = useGlobalState();
 
 	// const setParentId = (cat: ICategory) => {
 	// 	alert(cat.title)
@@ -53,9 +53,9 @@ const ChatBotPage: React.FC = () => {
 	const [showAutoSuggest, setShowAutoSuggest] = useState(false);
 
 	const [catsOptions, setCatOptions] = useState<ICategoryRow[]>([]);
-	
+
 	const [catsUsage, setCatUsage] = useState<ICategoryRow[]>([]);
-	
+
 	const [pastEvents, setPastEvents] = useState<IChild[]>([]);
 
 	enum ChildType {

@@ -106,6 +106,10 @@ export const GlobalReducer: Reducer<IGlobalState, GlobalActions> = (state, actio
         }
         localStorage.setItem('GLOBAL_STATE', JSON.stringify(obj));
     }
+
+    console.log('==============================================================================')
+    console.log('=========================' + action.type + '=======================================')
+    console.log('==============================================================================')
     return newState;
 }
 
@@ -191,12 +195,12 @@ const reducer: Reducer<IGlobalState, GlobalActions> = (state, action) => {
             };
         }
 
-        case GlobalActionTypes.SET_ALL_CATEGORY_ROWS: {
+        case GlobalActionTypes.SET_ALL_CATEGORY_ROWS_GLOBAL: {
             const { allCategoryRows } = action.payload;
             return {
                 ...state,
-                allCategoryRows,
-                allCategoryRowsLoaded: Date.now()
+                allCategoryRowsGlobal: allCategoryRows,
+                allCategoryRowsGlobalLoaded: Date.now()
             };
         }
 

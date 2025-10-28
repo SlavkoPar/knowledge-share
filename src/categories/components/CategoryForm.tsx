@@ -26,7 +26,7 @@ const CategoryForm = ({ formMode, category, submitForm, children }: ICategoryFor
   const editing = formMode === FormMode.EditingCategory;
   const adding = formMode === FormMode.AddingCategory;
 
-  const { topId, id, variations, questionRows } = category;
+  const { topId, id, variations, questionRows, title: catTitle} = category;
   const categoryKey: ICategoryKey = new CategoryKey(category).categoryKey!;
   //const categoryKeyExpanded: IQuestionKey = { topId, id, questionId };
 
@@ -52,6 +52,9 @@ const CategoryForm = ({ formMode, category, submitForm, children }: ICategoryFor
     dispatch({ type: ActionTypes.CANCEL_CATEGORY_FORM, payload: {} })
   }
 
+  const [title, setTitle] = useState(catTitle);
+  const debouncedTitle = useDebounce(title, 300);
+
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: category,
@@ -68,26 +71,19 @@ const CategoryForm = ({ formMode, category, submitForm, children }: ICategoryFor
     onSubmit: (values: ICategory) => {
       //alert(JSON.stringify(values, null, 2));
       console.log('CategoryForm.onSubmit', JSON.stringify(values, null, 2))
-      submitForm(values)
+      submitForm(values);
       //props.handleClose(false);
     }
   });
 
-  const [title, setTitle] = useState(formik.values.title === "new Category" ? "" : formik.values.title)
 
-  const [topRow] = useState<ICategoryRow>(topRows.find(c => c.id === topId)!);
+  const [topRow] = useState<ICategoryRow>(topRows.find(c => c.id === id)!);
 
-  const debouncedTitle = useDebounce(title, 300);
   useEffect(() => {
     if (debouncedTitle) {
-      // Perform API call or heavy computation with debouncedSearchTerm
-      console.log('>>>>>>------------')
-      console.log('>>>>>>------------', title, debouncedTitle)
-      console.log('>>>>>>------------')
-      console.log('>>>>>>Fetching data for:', debouncedTitle);
       onCategoryTitleChanged(topRow, id, debouncedTitle);
     }
-  }, [debouncedTitle, id, onCategoryTitleChanged, title, topId, topRow]);
+  }, [debouncedTitle, id, onCategoryTitleChanged, topRow]);
 
   // const debouncedTitleHandler = //useCallback(
   //   debounce((id: string, value: string) => {
@@ -97,7 +93,8 @@ const CategoryForm = ({ formMode, category, submitForm, children }: ICategoryFor
   const handleChangeTitle = (event: ChangeEvent<HTMLTextAreaElement>) => {
     formik.handleChange(event);
     const value = event.target.value;
-    setTitle(value);
+    if (value !== debouncedTitle)
+      setTitle(value);
   };
 
   // eslint-disable-next-line no-self-compare
@@ -126,7 +123,10 @@ const CategoryForm = ({ formMode, category, submitForm, children }: ICategoryFor
             <div className="px-1 border border-1 border-secondary rounded">
               <VariationList
                 categoryKey={categoryKey}
-                variations={variations.map(variation => ({ name: variation } as IVariation))}
+                variations={variations
+                  ? variations.map(variation => ({ name: variation } as IVariation))
+                  : []
+                }
               />
             </div>
             <div className="ps-2"><Form.Label>Kind:</Form.Label></div>

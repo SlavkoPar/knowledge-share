@@ -49,7 +49,7 @@ const ChatBotDlg = ({ show, onHide }: IProps) => {
     const [hasMoreAnswers, setHasMoreAnswers] = useState<boolean>(false);
 
     const { getSubCats, getQuestion, addHistory, addHistoryFilter, searchQuestions } = useGlobalContext();
-    const { authUser, isDarkMode, allCategoryRows, allCategoryRowsLoaded: catsLoaded } = useGlobalState();
+    const { authUser, isDarkMode, allCategoryRowsGlobal: allCategoryRows, allCategoryRowsGlobalLoaded: catsLoaded } = useGlobalState();
     //const navigate = useNavigate();
 
     const [catsSelected] = useState(true);
@@ -81,7 +81,7 @@ const ChatBotDlg = ({ show, onHide }: IProps) => {
 
     const onEntering = async (node: HTMLElement, isAppearing: boolean): Promise<any> => {
         setCatLevels([]);
-        const parentId = 'MTS'; // null
+        const parentId = 'MTS';
         const res = await getSubCats(parentId);
         const { subCats, parentHeader } = res;
         setCatLevels((prevState) => ([

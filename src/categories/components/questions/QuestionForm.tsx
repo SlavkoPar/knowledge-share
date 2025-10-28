@@ -58,6 +58,8 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
     }
   }
 
+    const [submited, setSubmited] = useState(false);
+
   // eslint-disable-next-line no-self-compare
   // const nameRef = useRef<HTMLAreaElement | null>(null);
   const nameRef = useRef<HTMLTextAreaElement>(null);
@@ -71,6 +73,7 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
     }),
     onSubmit: (values: IQuestion) => {
       // console.log('QuestionForm.onSubmit', JSON.stringify(values, null, 2))
+      setSubmited(true)
       submitForm(values)
       //props.handleClose(false);
     }
@@ -88,9 +91,9 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
 
   const [topRow] = useState<ICategoryRow>(topRows.find(c => c.id === topId)!);
   
-    const debouncedTitle = useDebounce(title, 300);
+    const  debouncedTitle = useDebounce(title, 300);
     useEffect(() => {
-      if (debouncedTitle) {
+      if (debouncedTitle && !submited) {
         // Perform API call or heavy computation with debouncedSearchTerm
         console.log('>>>>>>------------')
         console.log('>>>>>>------------', title, debouncedTitle)
@@ -98,7 +101,7 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
         console.log('>>>>>>Fetching data for:', debouncedTitle);
         onQuestionTitleChanged(topRow, parentId!, id, debouncedTitle);
       }
-    }, [debouncedTitle, id, onQuestionTitleChanged, parentId, title, topRow]);
+    }, [debouncedTitle, id, onQuestionTitleChanged, parentId, submited, title, topRow]);
 
   /*
   const debouncedTitleHandler = 

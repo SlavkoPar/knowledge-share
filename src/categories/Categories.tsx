@@ -27,8 +27,9 @@ interface IProps {
 }
 
 const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
-    const { state, openNode, loadTopRows } = useCategoryContext();
+    const { state, openNode, loadTopRows, addSubCategory } = useCategoryContext();
     const {
+        allCategoryRows, //allCategoryRowsLoaded,
         topRows, topRowsLoading, topRowsLoaded,
         keyExpanded,
         categoryId_questionId_done,
@@ -41,7 +42,7 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
     } = state;
 
     const { setLastRouteVisited, searchQuestions } = useGlobalContext();
-    const { isDarkMode, allCategoryRows, allCategoryRowsLoaded } = useGlobalState();
+    const { isDarkMode } = useGlobalState();
 
     const [modalShow, setModalShow] = useState(false);
     // const handleClose = () => {
@@ -57,32 +58,46 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
         dispatch({ type: ActionTypes.SET_QUESTION_SELECTED, payload: { questionKey } })
     }
 
-    const categoryRow: ICategoryRow = {
-        topId: '',
-        id: '',
-        parentId: null,
-        kind: 0,
-        title: '',
-        link: '',
-        header: '',
-        level: 1,
-        hasSubCategories: false,
-        categoryRows: topRows,
-        variations: [],
-        numOfQuestions: 0,
-        questionRows: []
-    }
+    // const categoryRow: ICategoryRow = {
+    //     topId: '',
+    //     id: '',
+    //     parentId: null,
+    //     kind: 0,
+    //     title: '',
+    //     link: '',
+    //     header: '',
+    //     level: 1,
+    //     hasSubCategories: false,
+    //     categoryRows: topRows,
+    //     variations: [],
+    //     numOfQuestions: 0,
+    //     questionRows: []
+    // }
+
 
     let tekst = '';
 
+    // useEffect(() => {
+    //     (async () => {
+    //         // SET_TOP_ROWS  Level:1
+    //         if (!allCategoryRowsLoaded) {
+    //             console.log('Zovem loadAllCategoryRows()')
+    //             await loadAllCategoryRows();
+    //         }
+    //     })()
+    // }, [allCategoryRowsLoaded, loadAllCategoryRows]);
+
+   
     useEffect(() => {
         (async () => {
             // SET_TOP_ROWS  Level:1
             if (!topRowsLoading && !topRowsLoaded) {
+                console.log('ZOVEM 111 loadTopRows()')
                 await loadTopRows()
             }
         })()
     }, [topRowsLoading, topRowsLoaded, loadTopRows]);
+   
 
     useEffect(() => {
         (async () => {
@@ -102,7 +117,7 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
                         const arr = categoryId_questionId.split('_');
                         const categoryId = arr[0];
                         const questionId = arr[1];
-                        const catKey: ICategoryKey = { topId: '', id: categoryId, parentId: null };
+                        const catKey: ICategoryKey = { topId: '', id: categoryId, parentId: 'ROOT' };
                         console.log('zovem openNode 1111111111111111111)', { categoryId_questionId }, { categoryId_questionId_done })
                         await openNode(catKey, questionId, fromChatBotDlg ?? 'false')
                             .then(() => { return null; });
@@ -111,13 +126,15 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
                 else if (keyExpanded && !nodeOpened) {
                     console.log('zovem openNode 2222222222222)', { keyExpanded }, { nodeOpened })
                     const { topId, categoryId, questionId } = keyExpanded;
-                    const catKey: ICategoryKey = { topId, id: categoryId, parentId: null }
-                    await openNode(catKey, questionId)
-                        .then(() => { return null; });
+                    if (categoryId !== '') {
+                        const catKey: ICategoryKey = { topId, id: categoryId, parentId: 'ROOT' }
+                        await openNode(catKey, questionId)
+                            .then(() => { return null; });
+                    }
                 }
             }
         })()
-    }, [keyExpanded, nodeOpening, nodeOpened, openNode, categoryId_questionId, categoryId_questionId_done, topRowsLoaded, topRows.length, fromChatBotDlg])
+    }, [keyExpanded, nodeOpening, nodeOpened, openNode, categoryId_questionId, categoryId_questionId_done, topRows, fromChatBotDlg])
 
     useEffect(() => {
         setLastRouteVisited(`/categories`);
@@ -130,12 +147,15 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
         }
     }
 
-    console.log('===>>> Categories !!!!!!!!!!!!!!!!!', activeCategory)
+   
     //if (!nodeOpened)
-    if (topRows.length === 0 || !allCategoryRowsLoaded || !topRowsLoaded) {
+    //if (!allCategoryRowsLoaded || !topRowsLoaded || topRows.length === 0) {
+    if (!topRowsLoaded || topRows.length === 0) {
         console.log('===>>> Categories  VRATIO')
         return null
     }
+    
+    console.log('===>>> Categories !!!!!!!!!!!!!!!!!', activeCategory)
 
     return (
         <>
@@ -158,13 +178,24 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
                 </Row>
 
                 <Button variant="secondary" size="sm" type="button" style={{ padding: '1px 4px' }}
-                    onClick={() => dispatch({
-                        type: ActionTypes.ADD_SUB_CATEGORY,
-                        payload: {
-                            categoryKey: { topId: '', id: '', parentId: null },
-                            level: 1
-                        }
-                    })}
+                    onClick={
+                        () => addSubCategory({
+                            topId: 'generateId', // for top rows: topId = ToUpperCase(id)
+                            id: 'generateId',
+                            parentId: null,
+                            level: 1,
+                            isExpanded: false,
+                            categoryRows: [],
+                            kind: 0,
+                            title: '',
+                            link: null,
+                            header: '',
+                            hasSubCategories: false,
+                            variations: [],
+                            numOfQuestions: 0,
+                            questionRows: []
+                        })
+                    }
                 >
                     Add Category
                 </Button>
@@ -172,19 +203,22 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
                 <Row className="my-1 h-auto">
                     <Col xs={12} md={5}>
                         <div className="categories-border" style={{ position: 'relative' }}>
-                            <CategoryList categoryRow={categoryRow} title="root" isExpanded={true} />
+                            <CategoryList categoryRow={null} title="ROOT" isExpanded={true} />
                         </div>
-
                     </Col>
                     <Col xs={0} md={7}>
                         {/* <div class="d-none d-lg-block">hide on screens smaller than lg</div> */}
                         <div id='div-details' className="d-none d-md-block">
                             {activeCategory && formMode === FormMode.ViewingCategory && <ViewCategory inLine={false} />}
-                            {activeCategory && formMode === FormMode.EditingCategory && <EditCategory inLine={false} />}
+                            {activeCategory && formMode === FormMode.EditingCategory &&
+                                <EditCategory inLine={false} />
+                            }
                             {activeCategory && formMode === FormMode.AddingCategory && <AddCategory />}
 
                             {activeQuestion && formMode === FormMode.ViewingQuestion && <ViewQuestion inLine={false} />}
-                            {activeQuestion && formMode === FormMode.EditingQuestion && <EditQuestion inLine={false} />}
+                            {activeQuestion && formMode === FormMode.EditingQuestion &&
+                                <EditQuestion inLine={false} />
+                            }
                             {activeQuestion && formMode === FormMode.AddingQuestion && <AddQuestion />}
                         </div>
                     </Col>
@@ -232,6 +266,7 @@ type Params = {
 };
 
 const Categories = () => {
+    
     let { categoryId_questionId, fromChatBotDlg } = useParams<Params>();
 
     if (categoryId_questionId && categoryId_questionId === 'categories')

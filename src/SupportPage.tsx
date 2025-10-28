@@ -29,7 +29,7 @@ const SupportPage: React.FC = () => {
 	//     return <div>loading...</div>;
 
 	const { searchQuestions } = useGlobalContext();
-	const { canEdit, isDarkMode, variant, allCategoryRows: cats, allCategoryRowsLoaded } = useGlobalState();
+	const { canEdit, isDarkMode, variant, allCategoryRowsGlobal: cats, allCategoryRowsGlobalLoaded: allCategoryRowsLoaded } = useGlobalState();
 
 	const onSelectQuestion = async (questionKey: IQuestionKey) => {
 		navigate(`/categories/${questionKey.topId}_${questionKey.id}`)

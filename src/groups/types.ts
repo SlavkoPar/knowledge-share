@@ -41,7 +41,7 @@ export interface IGroupDto extends IGroupRowDto {
 export interface IGroupKey { //extends IRecord {
 	topId: string,
 	id: string;
-	parentId: string | null;
+	parentId: string;
 }
 
 
@@ -268,6 +268,7 @@ export class GroupDto {
 		this.groupDto = {
 			TopId: topId!, // ?
 			Id: id,
+			ParentId: '',
 			Kind: kind,
 			Title: title,
 			Link: link??undefined,

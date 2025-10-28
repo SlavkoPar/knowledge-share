@@ -28,7 +28,7 @@ export interface IDtoKey extends IDto {
 	Workspace?: string; // will be set during fetch
 	TopId: string,
 	Id: string,
-	ParentId?: string;
+	ParentId: string | null;
 }
 
 export class Dto2WhoWhen {
@@ -60,12 +60,12 @@ export class WhoWhen2Dto {
 
 export class HistoryDto {
 	constructor(history: IHistory, Workspace: string) {
-		const { questionKey, assignedAnswerKey, created} = history;
+		const { questionKey, assignedAnswerKey, created } = history;
 
 		this.historyDto = {
-			Workspace, 
+			Workspace,
 			QuestionKey: { TopId: questionKey.topId, Id: questionKey.id },
-			AnswerKey: { TopId: assignedAnswerKey.topId, Id: assignedAnswerKey.id},
+			AnswerKey: { TopId: assignedAnswerKey.topId, Id: assignedAnswerKey.id },
 			UserAction: history.userAction,
 			Created: new WhoWhen2Dto(created).whoWhenDto!,
 		}
@@ -76,9 +76,9 @@ export class HistoryDto {
 
 export class HistoryFilterDto {
 	constructor(historyFilter: IHistoryFilter, Workspace: string) {
-		const { questionKey, filter, created} = historyFilter;
+		const { questionKey, filter, created } = historyFilter;
 		this.historyFilterDto = {
-			Workspace, 
+			Workspace,
 			Filter: filter,
 			QuestionKey: { Workspace, TopId: questionKey.topId, Id: questionKey.id },
 			Created: new WhoWhen2Dto(created).whoWhenDto!,
@@ -145,16 +145,16 @@ export enum ROLES {
 
 export interface IGlobalState {
 	KnowledgeAPI: {
-		 endpointCategoryRow: string;
-		 endpointCategory: string;
-		 endpointQuestion: string;
-		 endpointQuestionAnswer: string;
-		 //endpointShortGroup: : string;
-		 endpointGroupRow: string;
-		 endpointGroup: string;
-		 endpointAnswer: string;
-		 endpointHistory: string;
-		 endpointHistoryFilter: string;
+		endpointCategoryRow: string;
+		endpointCategory: string;
+		endpointQuestion: string;
+		endpointQuestionAnswer: string;
+		//endpointShortGroup: : string;
+		endpointGroupRow: string;
+		endpointGroup: string;
+		endpointAnswer: string;
+		endpointHistory: string;
+		endpointHistoryFilter: string;
 	};
 	isAuthenticated: boolean | null;
 	workspace: string;
@@ -168,8 +168,8 @@ export interface IGlobalState {
 	bg: string,
 	loading: boolean;
 	error?: Error;
-	allCategoryRows: Map<string, ICategoryRow>;
-	allCategoryRowsLoaded?: number;
+	allCategoryRowsGlobal: Map<string, ICategoryRow>;
+	allCategoryRowsGlobalLoaded?: number;
 	allGroupRows: Map<string, IGroupRow>;
 	allGroupRowsLoaded?: number;
 	nodesReLoaded: boolean; // categoryNodeLoaded || groupNodeLoaded  ( to prevent showing of ChatBotDlg)
@@ -199,7 +199,7 @@ export interface IGlobalContext {
 	//OpenDB: () => Promise<any>;
 	setLastRouteVisited: (lastRouteVisited: string) => void;
 	health: () => void;
-	loadAndCacheAllCategoryRows: () => Promise<boolean>;
+	loadAllCategoryRowsGlobal: () => Promise<boolean>;
 	getCat: (categoryId: string) => Promise<ICategoryRow | undefined>;
 	getSubCats: (categoryId: string | null) => Promise<any>;
 	getCatsByKind: (kind: number) => Promise<ICategoryRow[]>;
@@ -226,7 +226,7 @@ export enum GlobalActionTypes {
 	SET_ERROR = 'SET_ERROR',
 	DARK_MODE = "DARK_MODE",
 	LIGHT_MODE = "LIGHT_MODE",
-	SET_ALL_CATEGORY_ROWS = 'SET_ALL_CATEGORY_ROWS',
+	SET_ALL_CATEGORY_ROWS_GLOBAL = 'SET_ALL_CATEGORY_ROWS_GLOBAL',
 	SET_ALL_GROUP_ROWS = 'SET_ALL_GROUP_ROWS',
 	SET_NODES_RELOADED = 'SET_NODES_RELOADED',
 	SET_QUESTION_AFTER_ASSIGN_ANSWER = 'SET_QUESTION_AFTER_ASSIGN_ANSWER',
@@ -296,7 +296,7 @@ export type GlobalPayload = {
 
 	[GlobalActionTypes.DARK_MODE]: undefined;
 
-	[GlobalActionTypes.SET_ALL_CATEGORY_ROWS]: {
+	[GlobalActionTypes.SET_ALL_CATEGORY_ROWS_GLOBAL]: {
 		allCategoryRows: Map<string, ICategoryRow>
 	};
 
@@ -421,7 +421,7 @@ export interface IRoleData {
 
 
 
-export type USER_ANSWER_ACTION =	'NotFixed' | 'Fixed' | 'NotClicked';
+export type USER_ANSWER_ACTION = 'NotFixed' | 'Fixed' | 'NotClicked';
 
 
 export interface IHistory {

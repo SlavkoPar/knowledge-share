@@ -20,7 +20,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
 
     const { id, title, hasSubCategories, numOfQuestions, isExpanded } = categoryRow;
     categoryRow.level += 1;
-   
+
     const categoryKey: ICategoryKey = new CategoryKey(categoryRow).categoryKey!;
 
     // const [categoryKey] = useState<ICategoryKey>({ topId, id }); // otherwise reloads
@@ -30,7 +30,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
 
     const { state, addSubCategory, viewCategory, editCategory, deleteCategory, expandCategory, collapseCategory, addQuestion } = useCategoryContext();
     let { formMode, keyExpanded, activeCategory, rowExpanding, categoryLoaded } = state;
-   
+
     const isSelected = activeCategory !== null && (activeCategory.id === id);
     const showForm = isSelected;
 
@@ -79,10 +79,10 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
             await viewCategory(categoryRow, questionId ?? 'null');
     }
 
-  
+
     useEffect(() => {
         (async () => {
-            if (numOfQuestions > 0 && !isExpanded) { //!isExpanded && !isSelected) {
+            if (numOfQuestions > 0 || !isExpanded) { //!isExpanded && !isSelected) {
                 if (keyExpanded && keyExpanded.categoryId === id && !rowExpanding) { // catKeyExpanded.id) {
                     // JEBENO PROVERI
                     // if (formMode !== FormMode.AddingCategory) {
@@ -107,11 +107,11 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
                     case FormMode.ViewingCategory:
                         await viewCategory(categoryRow, questionId ?? 'null');
                         break;
-                    case FormMode.EditingQuestion:
-                        canEdit
-                            ? await editCategory(categoryRow, questionId ?? 'null')
-                            : await viewCategory(categoryRow, questionId ?? 'null');
-                        break;
+                    // case FormMode.EditingQuestion:
+                    //     canEdit
+                    //         ? await editCategory(categoryRow, questionId ?? 'null')
+                    //         : await viewCategory(categoryRow, questionId ?? 'null');
+                    //     break;
                 }
             }
         })()
@@ -121,7 +121,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
 
     const Row1 =
         <>
-            <div ref={hoverRef} className={`d-flex justify-content-start align-items-center w-100 category-row${isSelected ? '-selected' : ''}`} style={{marginTop: '1px'}}>
+            <div ref={hoverRef} className={`d-flex justify-content-start align-items-center w-100 category-row${isSelected ? '-selected' : ''}`} style={{ marginTop: '1px' }}>
                 <Button
                     variant='link'
                     size="sm"
@@ -145,7 +145,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
                 <Button
                     variant='link'
                     size="sm"
-                    className={`py-0 ms-0 me-1 category-row-title ${isSelected ? 'fw-bold' : ''}`}
+                    className={`py-0 ms-0 me-1 category-row-title ${isSelected ? 'fw-bold text-white' : ''}`}
                     title={id}
                     onClick={onSelectCategory}
                     disabled={alreadyAdding}
@@ -228,6 +228,8 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
     // if (category.level !== 1)
     //     return (<div>CategoryRow {category.id}</div>)
 
+    console.log('categoryRow:', id)
+
     return (
         <>
             <ListGroup.Item
@@ -249,7 +251,9 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
                     <>
                         {/* <div class="d-lg-none">hide on lg and wider screens</div> */}
                         <div id='divInLine' className="ms-0 d-md-none w-100">
-                            {formMode === FormMode.EditingCategory && <EditCategory inLine={false} />}
+                            {formMode === FormMode.EditingCategory &&
+                                <EditCategory inLine={false} />
+                            }
                         </div>
                         <div className="d-none d-md-block">
                             {Row1}

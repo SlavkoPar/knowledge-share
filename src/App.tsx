@@ -20,9 +20,9 @@ import AboutShort from 'AboutShort';
 import ChatBotDlg from 'ChatBotDlg';
 
 function App() {
-  
+
   //const { getUser, OpenDB, setLastRouteVisited } = useGlobalContext();
-  const { authUser, isAuthenticated, everLoggedIn, allCategoryRowsLoaded, lastRouteVisited } = useGlobalState();
+  const { authUser, isAuthenticated, everLoggedIn, allCategoryRowsGlobalLoaded: allCategoryRowsLoaded, lastRouteVisited } = useGlobalState();
   const { nickName } = authUser;
 
 
@@ -59,7 +59,7 @@ function App() {
   console.log('----------- ====== App locationPathname ===>>>', locationPathname);
   console.log('----------->')
 
-    // const showChatBotDlg = (locationPathname.startsWith('/categories') && allCategoryRowsLoaded) ||
+  // const showChatBotDlg = (locationPathname.startsWith('/categories') && allCategoryRowsLoaded) ||
   //   (locationPathname.startsWith('/groups') && groupRowsLoaded);
 
   useEffect(() => {
@@ -102,7 +102,12 @@ function App() {
     return <div>App loading</div>
 
   //alert(process.env.REACT_APP_API_URL)
-  
+  console.log('Appppppppppppppppppppppppppppppppppppppppppppppppp')
+  console.log('Appppppppppppppppppppppppppppppppppppppppppppppppp')
+  console.log('Appppppppppppppppppppppppppppppppppppppppppppppppp')
+  console.log('Appppppppppppppppppppppppppppppppppppppppppppppppp')
+  console.log('Appppppppppppppppppppppppppppppppppppppppppppppppp')
+
   return (
     <Container fluid className="App" data-bs-theme="light">
       {/* <header className="App-header">
@@ -134,7 +139,9 @@ function App() {
       {/* {<ModalChatBot show={modalChatBotShow} onHide={() => { setModalChatBotShow(false) }} />} */}
       {allCategoryRowsLoaded && //nodesReLoaded &&
         <>
-          <ChatBotDlg show={modalChatBotShow} onHide={() => { setModalChatBotShow(false) }} />
+          {modalChatBotShow &&
+            <ChatBotDlg show={modalChatBotShow} onHide={() => { setModalChatBotShow(false) }} />
+          }
           <Button onClick={(e) => {
             setModalChatBotShow(!modalChatBotShow);
             e.stopPropagation();

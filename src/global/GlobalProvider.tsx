@@ -12,7 +12,7 @@ import { GlobalReducer, initialAuthUser } from "global/GlobalReducer";
 
 import {
   IQuestionRow, IQuestionRowDto, IQuestionRowDtosEx,
-  IQuestionDtoEx, IQuestionEx, IQuestionKey, 
+  IQuestionDtoEx, IQuestionEx, IQuestionKey,
   ICategoryRowDto, ICategoryRow, CategoryRow,
   QuestionKey,
   Question
@@ -51,8 +51,8 @@ const initGlobalState: IGlobalState = {
   variant: 'dark',
   bg: 'dark',
   loading: false,
-  allCategoryRows: new Map<string, ICategoryRow>(),
-  allCategoryRowsLoaded: undefined,
+  allCategoryRowsGlobal: new Map<string, ICategoryRow>(),
+  allCategoryRowsGlobalLoaded: undefined,
   allGroupRows: new Map<string, IGroupRow>(),
   allGroupRowsLoaded: undefined,
   nodesReLoaded: false,
@@ -64,7 +64,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
   // we reset changes, and again we use initialGlobalState
   // so, don't use globalDispatch inside of inner Provider, like Categories Provider
   const [globalState, dispatch] = useReducer(GlobalReducer, initGlobalState);
-  const { KnowledgeAPI, workspace, allCategoryRows, allGroupRows, allGroupRowsLoaded } = globalState;
+  const { KnowledgeAPI, workspace, allCategoryRowsGlobal: allCategoryRows, allGroupRows, allGroupRowsLoaded } = globalState;
 
   console.log('--------> GlobalProvider')
 
@@ -164,7 +164,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
   // ---------------------------
   // load all categoryRows
   // ---------------------------
-  const loadAndCacheAllCategoryRows = useCallback(async (): Promise<any> => {
+  const loadAllCategoryRowsGlobal = useCallback(async (): Promise<any> => {
     return new Promise(async (resolve) => {
       try {
         console.time();
@@ -186,7 +186,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
               cat.titlesUpTheTree = titlesUpTheTree;
               allCategoryRows.set(id, cat);
             })
-            dispatch({ type: GlobalActionTypes.SET_ALL_CATEGORY_ROWS, payload: { allCategoryRows } });
+            dispatch({ type: GlobalActionTypes.SET_ALL_CATEGORY_ROWS_GLOBAL, payload: { allCategoryRows } });
             resolve(true)
           });
       }
@@ -442,7 +442,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
 
   const getCatsByKind = async (kind: number): Promise<ICategoryRow[]> => {
     try {
-      const { allCategoryRows } = globalState;
+      const { allCategoryRowsGlobal: allCategoryRows } = globalState;
       const categories: ICategoryRow[] = [];
       allCategoryRows.forEach((c, id) => {
         if (c.kind === kind) {
@@ -777,6 +777,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
   }, [KnowledgeAPI.endpointHistoryFilter, workspace]);
 
   const setLastRouteVisited = useCallback((lastRouteVisited: string): void => {
+    console.log('GlobalActionTypes.SET_LAST_ROUTE_VISITEDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD')
     dispatch({ type: GlobalActionTypes.SET_LAST_ROUTE_VISITED, payload: { lastRouteVisited } });
   }, []);
 
@@ -790,7 +791,7 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
     <GlobalContext.Provider value={{
       globalState, setLastRouteVisited,
       getUser, health,
-      loadAndCacheAllCategoryRows, getCat, getSubCats, getCatsByKind,
+      loadAllCategoryRowsGlobal, getCat, getSubCats, getCatsByKind,
       searchQuestions, getQuestion,
       loadAndCacheAllGroupRows, globalGetGroupRow, getGroupRows, getGroupRowsByKind, searchAnswers, getAnswer,
       setNodesReloaded,

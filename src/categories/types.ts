@@ -82,7 +82,7 @@ export class CategoryRowDto {
 			Workspace,
 			TopId: topId,
 			Id: id,
-			ParentId: parentId ?? undefined,
+			ParentId: parentId,
 			Title: '',
 			Link: '',
 			Header: '',
@@ -327,7 +327,7 @@ export class Category {
 		this.category = {
 			topId: TopId,
 			id: Id,
-			parentId: ParentId!,
+			parentId: ParentId ?? null,
 			kind: Kind,
 			title: Title,
 			link: Link,
@@ -357,7 +357,7 @@ export class CategoryDto {
 			TopId: topId,
 			Id: id,
 			Kind: kind,
-			ParentId: parentId ?? undefined,
+			ParentId: parentId,
 			Title: title,
 			Link: link,
 			Header: header ?? '',
@@ -525,11 +525,11 @@ export interface IParentInfo {
 	// topId: string | null,
 	// parentId: string | null,
 	//categoryKey: ICategoryKey,
-	categoryRow: ICategoryRow,
+	categoryRow: ICategoryRow | null,
 	startCursor?: number,
 	includeQuestionId?: string | null
 	level?: number,
-	title?: string, // to easier follow getting the list of sub-categories
+	title: string, // to easier follow getting the list of sub-categories
 	inAdding?: boolean,
 	isExpanded?: boolean
 	//subCategories?: ICategory[]
@@ -538,6 +538,8 @@ export interface IParentInfo {
 export interface ICategoriesState {
 	formMode: FormMode;
 	topRows: ICategoryRow[];
+	allCategoryRows: Map<string, ICategoryRow>;
+	allCategoryRowsLoaded?: number;
 	topRowsLoading: boolean;
 	topRowsLoaded: boolean;
 	keyExpanded: IKeyExpanded | null; // ICategoryKey + questionId
@@ -555,6 +557,7 @@ export interface ICategoriesState {
 	loadingQuestion: boolean, questionLoaded: boolean,
 	error?: Error;
 	whichRowId?: string; // category.id or question.id
+	ignore_all_CATEGORY_TITLE_CHANGED: boolean
 }
 
 export interface ILocStorage {
@@ -569,6 +572,7 @@ export interface ILoadCategoryQuestions {
 
 export interface ICategoriesContext {
 	state: ICategoriesState,
+	loadAllCategoryRows: () => Promise<boolean>;
 	openNode: (catKey: ICategoryKey, questionId: string | null, fromChatBotDlg?: string) => Promise<any>;
 	loadTopRows: () => Promise<any>,
 	addSubCategory: (categoryRow: ICategoryRow) => Promise<any>;
@@ -705,7 +709,10 @@ export enum ActionTypes {
 	SET_ROW_EXPANDED = 'SET_ROW_EXPANDED',
 	SET_ROW_COLLAPSING = 'SET_ROW_COLLAPSING',
 	SET_ROW_COLLAPSED = 'SET_ROW_COLLAPSED',
+	SET_CATEGORY_TO_ADD = 'SET_CATEGORY_TO_ADD',
 	SET_CATEGORY_ADDED = 'SET_CATEGORY_ADDED',
+	SET_ALL_CATEGORY_ROWS = 'SET_ALL_CATEGORY_ROWS',
+
 	SET_CATEGORY_TO_VIEW = 'SET_CATEGORY_TO_VIEW',
 	SET_CATEGORY_TO_EDIT = 'SET_CATEGORY_TO_EDIT',
 	SET_CATEGORY_UPDATED = 'SET_CATEGORY_UPDATED',
@@ -741,6 +748,7 @@ export const actionStoringToLocalStorage = [
 	// ActionTypes.SET_CATEGORY_NODE_OPENED
 	ActionTypes.SET_ROW_EXPANDED,
 	ActionTypes.SET_ROW_COLLAPSED,
+	ActionTypes.SET_CATEGORY_ADDED,
 	ActionTypes.SET_CATEGORY_TO_VIEW,
 	ActionTypes.SET_CATEGORY_TO_EDIT,
 	ActionTypes.SET_QUESTION_TO_VIEW,
@@ -748,17 +756,22 @@ export const actionStoringToLocalStorage = [
 	ActionTypes.FORCE_OPEN_NODE
 ];
 
-export const doNotCloneActions = [
-	ActionTypes.SET_TOP_ROWS,
+export const doNotModifyTree = [
+	//ActionTypes.SET_TOP_ROWS_LOADING,
+	//ActionTypes.SET_TOP_ROWS,
 	ActionTypes.NODE_OPENING,
-	ActionTypes.SET_NODE_OPENED
+	ActionTypes.SET_NODE_OPENED,
+	ActionTypes.SET_CATEGORY_TO_ADD,
+	ActionTypes.SET_CATEGORY_UPDATED,
+	ActionTypes.ADD_NEW_QUESTION_TO_ROW,
+	ActionTypes.CANCEL_CATEGORY_FORM,
+	ActionTypes.CLOSE_CATEGORY_FORM
 ]
 
 export const doNotCallInnerReducerActions = [
 	ActionTypes.CATEGORY_TITLE_CHANGED,
 	ActionTypes.QUESTION_TITLE_CHANGED,
-	ActionTypes.ADD_SUB_CATEGORY,
-	ActionTypes.ADD_NEW_QUESTION_TO_ROW
+	ActionTypes.ADD_SUB_CATEGORY
 ]
 
 export type Payload = {
@@ -817,6 +830,11 @@ export type Payload = {
 		level: number
 	}
 
+	[ActionTypes.SET_ALL_CATEGORY_ROWS]: {
+		categoryRow?: ICategoryRow;
+		allCategoryRows: Map<string, ICategoryRow>
+	};
+
 	[ActionTypes.CATEGORY_TITLE_CHANGED]: {
 		categoryRow?: ICategoryRow;
 	}
@@ -874,6 +892,11 @@ export type Payload = {
 
 	[ActionTypes.SET_ROW_COLLAPSED]: {
 		categoryRow: ICategoryRow;
+	};
+
+	[ActionTypes.SET_CATEGORY_TO_ADD]: {
+		categoryRow?: ICategoryRow;
+		category: ICategory;
 	};
 
 	[ActionTypes.SET_CATEGORY_ADDED]: {
