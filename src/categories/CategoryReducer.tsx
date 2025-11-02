@@ -83,10 +83,8 @@ export const CategoryReducer: Reducer<ICategoriesState, Actions> = (state, actio
     ? doNotModifyTree.includes(action.type) ? false : true
     : false;
 
-  const { topRows, ignore_all_CATEGORY_TITLE_CHANGED } = state;
+  const { topRows } = state;
 
-  if (ignore_all_CATEGORY_TITLE_CHANGED) // give chance all CATEGORY_TITLE_CHANGED to complete
-    modifyTree = false;
 
   const newState = doNotCallInnerReducerActions.includes(action.type)
     ? { ...state }
@@ -95,7 +93,7 @@ export const CategoryReducer: Reducer<ICategoriesState, Actions> = (state, actio
   // return { ...state } // calling this, state would be destroyed, because of shallow copy
   // Action that modify Tree
   // Actually part topRows of state
-  if (modifyTree && categoryRow && categoryRow.topId !== 'ROOT') {
+  if (modifyTree && categoryRow) { //} && categoryRow.topId !== 'ROOT') {
     let newTopRows: ICategoryRow[];
     const { topId, id } = categoryRow!;
     if (id === topId) {
@@ -143,7 +141,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
     case ActionTypes.SET_TOP_ROWS_LOADING:
       return {
         ...state,
-        //loadingCategories: false,
+        loadingCategories: true,
         topRowsLoading: true,
         //topRowsLoaded: false
       }
@@ -156,7 +154,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         topRows,
         topRowsLoading: false,
         topRowsLoaded: true,
-        //loadingCategories: false
+        loadingCategories: false
       };
     }
 
@@ -185,15 +183,12 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
     }
 
     case ActionTypes.SET_NODE_OPENED: {
-      const { categoryRow, catKey, questionId } = action.payload;
+      const { category, catKey, questionId, canEdit } = action.payload;
       const { id } = catKey; //;
-      const { topRows } = state;
       return {
         ...state,
-        topRows: topRows.map(c => c.id === categoryRow.id
-          ? { ...categoryRow }
-          : { ...c }
-        ),
+        activeCategory: category,
+        formMode: canEdit ? FormMode.EditingCategory : FormMode.ViewingCategory,
         categoryId_questionId_done: `${id}_${questionId}`,
         nodeOpening: false,
         nodeOpened: true,
@@ -205,10 +200,9 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
     case ActionTypes.SET_LOADING_CATEGORY:
       return {
         ...state,
-        //activeCategory: null,
+        // activeCategory: null,
         loadingCategory: true,
-        categoryLoaded: false,
-        ignore_all_CATEGORY_TITLE_CHANGED: true
+        categoryLoaded: false
       }
 
 
@@ -431,7 +425,6 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         selectedQuestionId: null,
         topRows: [categoryRow!, ...state.topRows],
         formMode: FormMode.AddingCategory,
-        ignore_all_CATEGORY_TITLE_CHANGED: false
       };
     }
 
@@ -441,19 +434,20 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
       // TODO what about instanceof?
       const category: ICategory = categoryRow as ICategory;
       const activeCategory: ICategory = { ...category, isExpanded: false }
+      const { topId, id } = activeCategory;
       //const { parentId } = category;
       //const topRowsLoaded = parentId ? true : false;
       return {
         ...state,
-        formMode: FormMode.None, //EditingCategory,
+        formMode: FormMode.None,
         loadingCategory: false,
-        categoryLoaded: true,
+        categoryLoaded: false,
         //topRowsLoaded,
         //categoryKeyExpanded: state.categoryKeyExpanded ? { ...state.categoryKeyExpanded, questionId: null } : null,
-        activeCategory,
+        activeCategory, //: null,
         activeQuestion: null,
         selectedQuestionId: null,
-        keyExpanded: { topId: '', categoryId: '', questionId: null },
+        keyExpanded: { topId, categoryId: id, questionId: null } // set id to call openNode from categories
         //nodeOpened: true
       };
     }
@@ -465,19 +459,17 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
       // TODO what about instanceof?
       //const activeCategory: ICategory = { ...category, isExpanded: false }
       const { topId, id, parentId } = category;
-      console.log('ActionTypes.SET_CATEGORY_TO_EDITTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT')
       return {
         ...state,
         formMode: FormMode.EditingCategory,
         loadingCategory: false,
         categoryLoaded: true,
-        keyExpanded: { topId, categoryId: parentId!, questionId: null },
+        keyExpanded: { topId, categoryId: id, questionId: null },
         //keyExpanded: null, //{ topId, categoryId: parentId!, questionId: null },
         //categoryKeyExpanded: state.categoryKeyExpanded ? { ...state.categoryKeyExpanded, questionId: null } : null,
         activeCategory: category,
         activeQuestion: null,
         selectedQuestionId: null,
-        ignore_all_CATEGORY_TITLE_CHANGED: false
       };
     }
 

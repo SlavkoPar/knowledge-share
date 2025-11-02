@@ -87,7 +87,7 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
     //     })()
     // }, [allCategoryRowsLoaded, loadAllCategoryRows]);
 
-   
+
     useEffect(() => {
         (async () => {
             // SET_TOP_ROWS  Level:1
@@ -97,7 +97,7 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
             }
         })()
     }, [topRowsLoading, topRowsLoaded, loadTopRows]);
-   
+
 
     useEffect(() => {
         (async () => {
@@ -124,10 +124,10 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
                     }
                 }
                 else if (keyExpanded && !nodeOpened) {
-                    console.log('zovem openNode 2222222222222)', { keyExpanded }, { nodeOpened })
                     const { topId, categoryId, questionId } = keyExpanded;
                     if (categoryId !== '') {
                         const catKey: ICategoryKey = { topId, id: categoryId, parentId: 'ROOT' }
+                        console.log('zovem openNode 2222222222222)', { keyExpanded, catKey })
                         await openNode(catKey, questionId)
                             .then(() => { return null; });
                     }
@@ -136,9 +136,9 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
         })()
     }, [keyExpanded, nodeOpening, nodeOpened, openNode, categoryId_questionId, categoryId_questionId_done, topRows, fromChatBotDlg])
 
-    useEffect(() => {
-        setLastRouteVisited(`/categories`);
-    }, [setLastRouteVisited])
+    // useEffect(() => {
+    //     setLastRouteVisited(`/categories`);
+    // }, [setLastRouteVisited])
 
     if (categoryId_questionId !== 'add_question') {
         if (/*keyExpanded ||*/ (categoryId_questionId && categoryId_questionId !== categoryId_questionId_done)) {
@@ -147,14 +147,14 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
         }
     }
 
-   
+
     //if (!nodeOpened)
     //if (!allCategoryRowsLoaded || !topRowsLoaded || topRows.length === 0) {
     if (!topRowsLoaded || topRows.length === 0) {
         console.log('===>>> Categories  VRATIO')
         return null
     }
-    
+
     console.log('===>>> Categories !!!!!!!!!!!!!!!!!', activeCategory)
 
     return (
@@ -207,11 +207,13 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
                         </div>
                     </Col>
                     <Col xs={0} md={7}>
-                        {/* <div class="d-none d-lg-block">hide on screens smaller than lg</div> */}
+                        {/* visible on medium screens and above. */}
                         <div id='div-details' className="d-none d-md-block">
                             {activeCategory && formMode === FormMode.ViewingCategory && <ViewCategory inLine={false} />}
                             {activeCategory && formMode === FormMode.EditingCategory &&
-                                <EditCategory inLine={false} />
+                                <>
+                                    <EditCategory inLine={false} />
+                                </>
                             }
                             {activeCategory && formMode === FormMode.AddingCategory && <AddCategory />}
 
@@ -266,7 +268,7 @@ type Params = {
 };
 
 const Categories = () => {
-    
+
     let { categoryId_questionId, fromChatBotDlg } = useParams<Params>();
 
     if (categoryId_questionId && categoryId_questionId === 'categories')

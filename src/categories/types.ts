@@ -115,7 +115,7 @@ export class CategoryRow {
 			header: Header,
 			titlesUpTheTree: '', // traverse up the tree, until root
 			variations: Variations,
-			hasSubCategories: HasSubCategories!,
+			hasSubCategories: HasSubCategories, //!, Odakle ovo
 			categoryRows: SubCategoryRowDtos.map(dto => new CategoryRow({ ...dto, TopId }).categoryRow),
 			numOfQuestions: NumOfQuestions,
 			questionRows: QuestionRowDtos
@@ -341,7 +341,7 @@ export class Category {
 				? new Dto2WhoWhen(Modified).whoWhen
 				: undefined,
 			numOfQuestions: NumOfQuestions!,
-			questionRows,
+			questionRows: questionRows??[],
 			isExpanded: IsExpanded === true,
 			doc1: Doc1
 		}
@@ -517,6 +517,7 @@ export interface IExpandInfo {
 	includeQuestionId?: string;
 	newCategoryRow?: ICategoryRow;
 	newQuestionRow?: IQuestionRow;
+	byClick?: boolean;
 }
 
 
@@ -557,7 +558,6 @@ export interface ICategoriesState {
 	loadingQuestion: boolean, questionLoaded: boolean,
 	error?: Error;
 	whichRowId?: string; // category.id or question.id
-	ignore_all_CATEGORY_TITLE_CHANGED: boolean
 }
 
 export interface ILocStorage {
@@ -760,7 +760,7 @@ export const doNotModifyTree = [
 	//ActionTypes.SET_TOP_ROWS_LOADING,
 	//ActionTypes.SET_TOP_ROWS,
 	ActionTypes.NODE_OPENING,
-	ActionTypes.SET_NODE_OPENED,
+	//ActionTypes.SET_NODE_OPENED,
 	ActionTypes.SET_CATEGORY_TO_ADD,
 	ActionTypes.SET_CATEGORY_UPDATED,
 	ActionTypes.ADD_NEW_QUESTION_TO_ROW,
@@ -805,7 +805,10 @@ export type Payload = {
 
 	[ActionTypes.SET_NODE_OPENED]: {
 		// categoryNodesUpTheTree: ICategoryKeyExtended[]; /// we could have used Id only
-		categoryRow: ICategoryRow;
+		categoryRow?: ICategoryRow;
+		category: ICategory,
+		//formMode: FormMode,
+		canEdit: boolean;
 		catKey: ICategoryKey;
 		questionId: string | null,
 		fromChatBotDlg?: boolean;

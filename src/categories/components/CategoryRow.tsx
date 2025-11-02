@@ -29,10 +29,9 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
     const { canEdit, authUser } = useGlobalState();
 
     const { state, addSubCategory, viewCategory, editCategory, deleteCategory, expandCategory, collapseCategory, addQuestion } = useCategoryContext();
-    let { formMode, keyExpanded, activeCategory, rowExpanding, categoryLoaded } = state;
+    let { formMode, keyExpanded, activeCategory, rowExpanding, loadingCategory, categoryLoaded } = state;
 
     const isSelected = activeCategory !== null && (activeCategory.id === id);
-    const showForm = isSelected;
 
     const alreadyAdding = formMode === FormMode.AddingCategory;
     // TODO proveri ovo
@@ -53,6 +52,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
         else {
             const expandInfo: IExpandInfo = {
                 categoryKey,
+                byClick: true,
                 formMode: canEdit ? FormMode.EditingCategory : FormMode.ViewingCategory
             }
             await expandCategory(expandInfo);
@@ -79,43 +79,24 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
             await viewCategory(categoryRow, questionId ?? 'null');
     }
 
-
+    
     useEffect(() => {
         (async () => {
-            if (numOfQuestions > 0 || !isExpanded) { //!isExpanded && !isSelected) {
-                if (keyExpanded && keyExpanded.categoryId === id && !rowExpanding) { // catKeyExpanded.id) {
-                    // JEBENO PROVERI
-                    // if (formMode !== FormMode.AddingCategory) {
-                    //     formMode = FormMode.None  // TODO popravi
-                    // }
-                    const expandInfo: IExpandInfo = {
-                        categoryKey,
-                        includeQuestionId: questionId ?? undefined,
-                        formMode // ??? proveri // differs from handleExpandClick
-                    }
-                    await expandCategory(expandInfo);
-                }
-            }
-        })()
-    }, [id, isExpanded, isSelected, expandCategory, keyExpanded, numOfQuestions, rowExpanding, categoryKey, questionId, formMode]);
-
-
-    useEffect(() => {
-        (async () => {
-            if (isSelected && !categoryLoaded) {
+            if (isSelected && !loadingCategory && !categoryLoaded) {
+                console.log('editCategoryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy')
                 switch (formMode) {
                     case FormMode.ViewingCategory:
                         await viewCategory(categoryRow, questionId ?? 'null');
                         break;
-                    // case FormMode.EditingQuestion:
-                    //     canEdit
-                    //         ? await editCategory(categoryRow, questionId ?? 'null')
-                    //         : await viewCategory(categoryRow, questionId ?? 'null');
-                    //     break;
+                    case FormMode.EditingCategory:
+                        canEdit
+                            ? await editCategory(categoryRow, questionId ?? 'null')
+                            : await viewCategory(categoryRow, questionId ?? 'null');
+                        break;
                 }
             }
         })()
-    }, [canEdit, categoryLoaded, categoryRow, editCategory, formMode, isSelected, questionId, viewCategory]);
+    }, [canEdit, categoryLoaded, categoryRow, editCategory, formMode, isSelected, loadingCategory, questionId, viewCategory]);
 
     const [hoverRef, hoverProps] = useHover();
 
@@ -145,7 +126,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
                 <Button
                     variant='link'
                     size="sm"
-                    className={`py-0 ms-0 me-1 category-row-title ${isSelected ? 'fw-bold text-white' : ''}`}
+                    className={`py-0 ms-0 me-1 category-row-title ${isSelected ? 'fw-bold text-white bg-transparent' : ''}`}
                     title={id}
                     onClick={onSelectCategory}
                     disabled={alreadyAdding}
@@ -237,47 +218,58 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
                 className="py-0 px-1 w-100 category-bg"
                 as="li"
             >
-                {/*inAdding &&*/showForm && formMode === FormMode.AddingCategory &&
+                {/*inAdding &&*/isSelected && formMode === FormMode.AddingCategory &&
                     <>
+                        <div className="">
+                            {Row1}
+                        </div>
                         <div className="ms-0 d-md-none w-100">
                             <AddCategory />
                         </div>
-                        <div className="d-none d-md-block">
-                            {Row1}
-                        </div>
                     </>
                 }
-                {showForm && formMode === FormMode.EditingCategory &&
+                {isSelected && formMode === FormMode.EditingCategory &&
                     <>
-                        {/* <div class="d-lg-none">hide on lg and wider screens</div> */}
+                        {/* <div class="d-none d-md-block">
+                            This content will be hidden on small screens and below, 
+                            but visible on medium screens and above.</div> */}
+                        <div className="">
+                            {Row1}
+                        </div>
+
                         <div id='divInLine' className="ms-0 d-md-none w-100">
                             {formMode === FormMode.EditingCategory &&
                                 <EditCategory inLine={false} />
                             }
                         </div>
-                        <div className="d-none d-md-block">
-                            {Row1}
-                        </div>
                     </>
                 }
 
-                {showForm && formMode === FormMode.ViewingCategory &&
+                {isSelected && formMode === FormMode.ViewingCategory &&
                     <>
                         {/* <div class="d-lg-none">hide on lg and wider screens</div> */}
+                        <div className="">
+                            {Row1}
+                        </div>
                         <div id='divInLine' className="ms-0 d-md-none w-100">
                             <ViewCategory inLine={false} />
                         </div>
-                        <div className="d-none d-md-block">
-                            {Row1}
-                        </div>
+
                     </>
                 }
 
-                {!showForm &&
-                    <div className="d-none d-md-block">
+                { (formMode === FormMode.None || !isSelected) &&
+                    <div className="">
                         {Row1}
                     </div>
                 }
+
+                {/* {isSelected &&
+                    <div className="d-md-none">
+                        {Row1}
+                    </div>
+                } */}
+
 
             </ListGroup.Item>
 

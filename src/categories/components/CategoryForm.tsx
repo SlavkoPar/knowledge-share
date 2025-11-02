@@ -26,7 +26,7 @@ const CategoryForm = ({ formMode, category, submitForm, children }: ICategoryFor
   const editing = formMode === FormMode.EditingCategory;
   const adding = formMode === FormMode.AddingCategory;
 
-  const { topId, id, variations, questionRows, title: catTitle} = category;
+  const { topId, id, variations, questionRows, title: catTitle } = category;
   const categoryKey: ICategoryKey = new CategoryKey(category).categoryKey!;
   //const categoryKeyExpanded: IQuestionKey = { topId, id, questionId };
 
@@ -40,7 +40,6 @@ const CategoryForm = ({ formMode, category, submitForm, children }: ICategoryFor
     <EditCategory inLine={false} />
     so we execute loadCategoryQuestions() twice in QuestionList, but OK
   */
-
 
   const dispatch = useCategoryDispatch();
 
@@ -76,35 +75,32 @@ const CategoryForm = ({ formMode, category, submitForm, children }: ICategoryFor
     }
   });
 
-
-  const [topRow] = useState<ICategoryRow>(topRows.find(c => c.id === id)!);
+  const [topRow] = useState<ICategoryRow>(topRows.find(c => c.id === topId)!);
 
   useEffect(() => {
-    if (debouncedTitle) {
-      onCategoryTitleChanged(topRow, id, debouncedTitle);
-    }
-  }, [debouncedTitle, id, onCategoryTitleChanged, topRow]);
-
-  // const debouncedTitleHandler = //useCallback(
-  //   debounce((id: string, value: string) => {
-  //       onCategoryTitleChanged(topId, id, value);
-  //   }) //, 500), []);
+    //if (debouncedTitle !== title) {
+    //console.log('onCategoryTitleChanged --->>>', debouncedTitle, title)
+    //const topRow = topRows.find(c => c.id === id)!;
+    onCategoryTitleChanged(topRow, id, debouncedTitle);
+    //}
+  }, [topRow, id, onCategoryTitleChanged, debouncedTitle]);
 
   const handleChangeTitle = (event: ChangeEvent<HTMLTextAreaElement>) => {
     formik.handleChange(event);
     const value = event.target.value;
-    if (value !== debouncedTitle)
-      setTitle(value);
+    //if (value !== debouncedTitle)
+    setTitle(value);
   };
 
   // eslint-disable-next-line no-self-compare
   // const nameRef = useRef<HTMLAreaElement | null>(null);
   const nameRef = useRef<HTMLTextAreaElement>(null);
-  //const nameRef = useRef<HTMLInputElement>(null);
-
+ 
+ 
   useEffect(() => {
+    setTitle(category.title);
     nameRef.current!.focus()
-  }, [nameRef])
+  }, [category.title, nameRef])
 
   const isDisabled = false;
 
