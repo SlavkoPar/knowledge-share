@@ -28,7 +28,7 @@ const AboutShort: React.FC<IAboutShort> = (props: IAboutShort) => {
 
         <div className="card card-block col-5 m-3" style={{ backgroundColor: 'rgb(206.6, 226, 254.6)' }}>
           <div className="card-body">
-            <h5 className="card-title">Implement Chatbot at your site</h5>
+            <h5 className="card-title">Implement Chatbot at your Web site</h5>
             {/* <h6 className="card-subtitle mb-2 text-muted">Knowledge is asset for each company !</h6> */}
             <h6 className="card-subtitle my-2 text-muted">Three steps:</h6>
 
@@ -37,7 +37,7 @@ const AboutShort: React.FC<IAboutShort> = (props: IAboutShort) => {
               <li className="my-1">Use our Web App for maintenace of your Q/A</li>
               <li className="my-1">
                 Integrate our KnowledgeLIB<br />
-                <i>'ChatBot JavaScript Library'</i> at your site &nbsp;&nbsp;
+                <i>'ChatBot JavaScript Library'</i> at your Web site &nbsp;&nbsp;
                 <br />
                 <a href="https://knowledge-share-demo.com" target="_blank" rel="noopener noreferrer">Try it</a>
               </li>

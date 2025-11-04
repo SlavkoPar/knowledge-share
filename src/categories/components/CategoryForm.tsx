@@ -52,7 +52,7 @@ const CategoryForm = ({ formMode, category, submitForm, children }: ICategoryFor
   }
 
   const [title, setTitle] = useState(catTitle);
-  const debouncedTitle = useDebounce(title, 300);
+  const {Id, Value} = useDebounce(id, title, 300);
 
   const formik = useFormik({
     enableReinitialize: true,
@@ -76,14 +76,15 @@ const CategoryForm = ({ formMode, category, submitForm, children }: ICategoryFor
   });
 
   const [topRow] = useState<ICategoryRow>(topRows.find(c => c.id === topId)!);
-
+  
   useEffect(() => {
     //if (debouncedTitle !== title) {
-    //console.log('onCategoryTitleChanged --->>>', debouncedTitle, title)
     //const topRow = topRows.find(c => c.id === id)!;
-    onCategoryTitleChanged(topRow, id, debouncedTitle);
-    //}
-  }, [topRow, id, onCategoryTitleChanged, debouncedTitle]);
+    if (topRow && Id === id) {
+      console.log('onCategoryTitleChanged --->>>', id, Value, title)
+      onCategoryTitleChanged(topRow, Id, Value);
+    }
+  }, [Id, Value, id, onCategoryTitleChanged, title, topRows]);
 
   const handleChangeTitle = (event: ChangeEvent<HTMLTextAreaElement>) => {
     formik.handleChange(event);
@@ -95,8 +96,8 @@ const CategoryForm = ({ formMode, category, submitForm, children }: ICategoryFor
   // eslint-disable-next-line no-self-compare
   // const nameRef = useRef<HTMLAreaElement | null>(null);
   const nameRef = useRef<HTMLTextAreaElement>(null);
- 
- 
+
+
   useEffect(() => {
     setTitle(category.title);
     nameRef.current!.focus()

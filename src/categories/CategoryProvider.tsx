@@ -299,7 +299,31 @@ export const CategoryProvider: React.FC<IProps> = ({ children }) => {
       })
     }, [Execute, KnowledgeAPI.endpointCategory, workspace]);
 
-    
+
+  const findCategoryRow = useCallback(
+    (categoryRow: ICategoryRow, id: string): ICategoryRow | undefined => {
+      if (categoryRow.parentId === null)
+        return categoryRow;
+      const { categoryRows } = categoryRow;
+      let cat: ICategoryRow | undefined = categoryRows.find(c => c.id === (id ?? 'null'));
+      if (!cat) {
+        try {
+          categoryRows.forEach(c => {
+            console.log(id, c.id)
+            cat = findCategoryRow(c, id);
+            if (cat) {
+              throw new Error("Stop the loop");
+            }
+          })
+        }
+        catch (e) {
+          // console.log("Loop stopped");
+        }
+      }
+      return cat;
+    }, []);
+
+
   const openNode = useCallback(
     async (catKey: ICategoryKey, questionId: string | null, fromChatBotDlg: string = 'false'): Promise<any> => {
       return new Promise(async (resolve) => {
@@ -342,15 +366,16 @@ export const CategoryProvider: React.FC<IProps> = ({ children }) => {
               const { categoryRowDto } = categoryRowDtoEx;
               console.timeEnd();
               if (categoryRowDto) {
-                const categoryRow = new CategoryRow(categoryRowDto).categoryRow; // deep clone dto
-                const category = findCategory(categoryRow.categoryRows, id!)!;
+                let categoryRow: ICategoryRow | null = new CategoryRow(categoryRowDto).categoryRow;
+                if (categoryRow.parentId !== null) {
+                  categoryRow = findCategoryRow(categoryRow, id!)!;
+                }
                 console.log('>>> openNode categoryRow', { categoryRow })
                 dispatch({
                   type: ActionTypes.SET_NODE_OPENED, payload: {
                     catKey,
                     canEdit,
                     categoryRow,
-                    category: {...category, doc1: '' },
                     questionId: questionId ?? null,
                     fromChatBotDlg: fromChatBotDlg === 'true'
                   }
@@ -367,28 +392,7 @@ export const CategoryProvider: React.FC<IProps> = ({ children }) => {
           dispatch({ type: ActionTypes.SET_ERROR, payload: { error } });
         }
       })
-    }, [workspace, KnowledgeAPI.endpointCategoryRow, Execute, allCategoryRows, canEdit]);
-
-
-  const findCategory = useCallback(
-    (categoryRows: ICategoryRow[], id: string): ICategoryRow | undefined => {
-      let cat: ICategoryRow | undefined = categoryRows.find(c => c.id === (id ?? 'null'));
-      if (!cat) {
-        try {
-          categoryRows.forEach(c => {
-            console.log(id, c.id)
-            cat = findCategory(c.categoryRows, id);
-            if (cat) {
-              throw new Error("Stop the loop");
-            }
-          })
-        }
-        catch (e) {
-          // console.log("Loop stopped");
-        }
-      }
-      return cat;
-    }, []);
+    }, [workspace, KnowledgeAPI.endpointCategoryRow, Execute, allCategoryRows, findCategoryRow, canEdit]);
 
 
 
@@ -421,7 +425,7 @@ export const CategoryProvider: React.FC<IProps> = ({ children }) => {
 
 
   const expandCategory = useCallback(
-    async ({ categoryKey, includeQuestionId, newCategoryRow, newQuestionRow, formMode, byClick=false }: IExpandInfo): Promise<any> => {
+    async ({ categoryKey, includeQuestionId, newCategoryRow, newQuestionRow, formMode, byClick = false }: IExpandInfo): Promise<any> => {
       try {
         //const { keyExpanded } = state;
         dispatch({ type: ActionTypes.SET_ROW_EXPANDING, payload: {} });
@@ -462,40 +466,69 @@ export const CategoryProvider: React.FC<IProps> = ({ children }) => {
       const { topId, id } = categoryRow;
       //const { topRows } = state;
       const topRow: ICategoryRow = topRows.find(c => c.id === topId)!;
-      //const categoryRow: ICategoryRow = findCategory(topRow.categoryRows, id)!;
+      //const categoryRow: ICategoryRow = findCategoryRow(topRow.categoryRows, id)!;
       const catRow: ICategoryRow = (topRow.id === id)
         ? topRow
-        : findCategory(topRow.categoryRows, id)!;
+        : findCategoryRow(topRow, id)!;
       categoryRow = { ...catRow, isExpanded: false, categoryRows: [], questionRows: [] }
       // rerender
       dispatch({ type: ActionTypes.SET_ROW_COLLAPSED, payload: { categoryRow } })
-    }, [findCategory, topRows]);
+    }, [findCategoryRow, topRows]);
 
 
   const addSubCategory = useCallback(
-    async (categoryRow: ICategoryRow) => {
+    async (categoryRow: ICategoryRow | null) => {
       try {
-        dispatch({ type: ActionTypes.CLOSE_CATEGORY_FORM, payload: {} })
-        const { topId, parentId, id, level, isExpanded, categoryRows } = categoryRow;
-        const categoryKey: ICategoryKey = { topId, parentId, id };
-        if (parentId === null) {
+        if (formMode !== FormMode.None) {
+          dispatch({ type: ActionTypes.CLOSE_CATEGORY_FORM, payload: {} })
+        }
+        const newCategoryRow: ICategoryRow = {
+          ...initialCategory,
+          topId: 'generateId',
+          parentId: null,
+          id: 'generateId',
+          level: 1,
+          title: ''
+        }
+        if (categoryRow === null) { // add topRow
           dispatch({
-            type: ActionTypes.SET_CATEGORY_TO_ADD, payload: {
-              categoryRow, //: newCategoryRow,
-              category: { ...categoryRow, variations: [], doc1: '' }
+            type: ActionTypes.SET_CATEGORY_TO_ADD_TOP, payload: {
+              //categoryRow: { categoryRow, categoryRows: [newCategoryRow, ...categoryRow.categoryRows]
+              newCategoryRow
             }
           });
         }
         else {
-          alert(123)
-          const newCategoryRow: ICategoryRow = {
-            ...initialCategory,
-            topId,
-            parentId,
-            id: 'generateId',
-            level,
-            title: 'new Category'
+          const { topId, parentId, level } = categoryRow;
+          if (parentId !== null) {
+            const topRow: ICategoryRow = state.topRows.find(c => c.id === topId)!;
+            categoryRow = findCategoryRow(topRow, parentId!)!;
           }
+          dispatch({
+            type: ActionTypes.SET_CATEGORY_TO_ADD, payload: {
+              categoryRow: { 
+                ...categoryRow, 
+                level: level + 1,
+                categoryRows: [newCategoryRow, ...categoryRow.categoryRows]
+              },
+              newCategoryRow: {...newCategoryRow, level: level + 1}
+            }
+          })
+          // dispatch({
+          //   type: ActionTypes.SET_CATEGORY, payload: {
+          //     categoryRow: { ...newCategoryRow, doc1: ''}
+          //   }
+          // })
+          //const categoryKey: ICategoryKey = { topId, parentId, id };
+          // const newCategoryRow: ICategoryRow = {
+          //   ...initialCategory,
+          //   topId,
+          //   parentId,
+          //   id: 'generateId',
+          //   level,
+          //   title: '' // new Category
+          // }
+          /*
           if (isExpanded) {
             categoryRows.map(g => g.isExpanded = false);
             const categoryRow2: ICategoryRow = {
@@ -520,13 +553,14 @@ export const CategoryProvider: React.FC<IProps> = ({ children }) => {
               dispatch({ type: ActionTypes.SET_CATEGORY, payload: { categoryRow: category } });
             }
           }
+            */
         }
       }
       catch (error: any) {
         console.log('error', error);
         dispatch({ type: ActionTypes.SET_ERROR, payload: { error } });
       }
-    }, [expandCategory]);
+    }, [findCategoryRow, formMode, state.topRows]);
 
 
   const cancelAddCategory = useCallback(
@@ -568,16 +602,14 @@ export const CategoryProvider: React.FC<IProps> = ({ children }) => {
               //categoryDto.TopId = topId!;
               const category = new Category(categoryDto).category;
               console.log('Category successfully created', { category })
-              if (category.parentId === null) {
-                //category.parentId = 'ROOT';
-                dispatch({ type: ActionTypes.SET_CATEGORY_ADDED, payload: { categoryRow: category } }); // ICategory extends ICategory Row
-              }
 
-              console.log('ZOVEM loadAllCategoryRows()')
               await loadAllCategoryRows()
                 .then(async (done: boolean) => {
-                  /*await*/ loadTopRows();
-                  if (category.parentId) {
+                  await loadTopRows();
+                  if (category.parentId === null) {
+                    dispatch({ type: ActionTypes.SET_CATEGORY_ADDED, payload: { categoryRow: category } }); // ICategory extends ICategory Row
+                  }
+                  else {
                     const parentCategoryKey: ICategoryKey = {
                       topId: category.topId,
                       parentId: "doesn't matter",
@@ -866,7 +898,7 @@ export const CategoryProvider: React.FC<IProps> = ({ children }) => {
           const topRow: ICategoryRow = state.topRows.find(c => c.id === topId)!;
           const catRow: ICategoryRow = (topRow.id === topRow.topId)
             ? topRow
-            : findCategory(topRow.categoryRows, id)!;
+            : findCategoryRow(topRow, id)!;
           catRow.questionRows = [newQuestionRow, ...catRow.questionRows];
           dispatch({ type: ActionTypes.ADD_NEW_QUESTION_TO_ROW, payload: { categoryRow: catRow, newQuestionRow } });
           dispatch({ type: ActionTypes.SET_QUESTION, payload: { question, formMode: FormMode.AddingQuestion } });
@@ -886,7 +918,7 @@ export const CategoryProvider: React.FC<IProps> = ({ children }) => {
         console.log('error', error);
         dispatch({ type: ActionTypes.SET_ERROR, payload: { error } });
       }
-    }, [expandCategory, findCategory, getCat, state.topRows]);
+    }, [expandCategory, findCategoryRow, getCat, state.topRows]);
 
 
   const createQuestion = useCallback(
@@ -1222,13 +1254,13 @@ export const CategoryProvider: React.FC<IProps> = ({ children }) => {
     (topRow: ICategoryRow, id: string, title: string): void => {
       //const { topRows } = state;
       //const topRow: ICategoryRow = topRows.find(c => c.id === topId)!;
-      //const categoryRow: ICategoryRow = findCategory(topRow.categoryRows, id)!;
-      if (true || state.loadingCategory) // just in case
+      //const categoryRow: ICategoryRow = findCategoryRow(topRow.categoryRows, id)!;
+      if (!activeCategory || state.loadingCategory) // just in case
         return;
       // const categoryRow: ICategoryRow = (topRow.id === id)
       //   ? topRow
-      //   : findCategory(topRow.categoryRows, id)!;
-      const categoryRow: ICategoryRow = findCategory(topRow.categoryRows, id)!;
+      //   : findCategoryRow(topRow.categoryRows, id)!;
+      let categoryRow: ICategoryRow | null = findCategoryRow(topRow, id)!;
       if (categoryRow && categoryRow.title !== title) {
         console.log(ActionTypes.CATEGORY_TITLE_CHANGED, 'Sent>>>>>>>>>>:', categoryRow.title, title)
         categoryRow.title = title;
@@ -1236,16 +1268,16 @@ export const CategoryProvider: React.FC<IProps> = ({ children }) => {
         //console.log(ActionTypes.CATEGORY_TITLE_CHANGED, 'Sent>>>>>>>>>>:', categoryRow.title)
         dispatch({ type: ActionTypes.CATEGORY_TITLE_CHANGED, payload: { categoryRow } })
       }
-    }, [findCategory, state.loadingCategory])
+    }, [activeCategory, findCategoryRow, state.loadingCategory])
 
 
   const onQuestionTitleChanged = useCallback(
     (topRow: ICategoryRow, categoryId: string, id: string, title: string): void => {
       //const { categoryRows } = topRow;
-      //const categoryRow: ICategoryRow = findCategory(categoryRows, categoryId)!;
+      //const categoryRow: ICategoryRow = findCategoryRow(categoryRows, categoryId)!;
       const categoryRow: ICategoryRow = (topRow.id === categoryId)
         ? topRow
-        : findCategory(topRow.categoryRows, categoryId)!;
+        : findCategoryRow(topRow, categoryId)!;
       if (categoryRow) {
         const questionRow = categoryRow.questionRows.find(q => q.id === id)!;
         console.log(categoryRow.questionRows, id)
@@ -1253,10 +1285,10 @@ export const CategoryProvider: React.FC<IProps> = ({ children }) => {
       }
       // rerender
       dispatch({ type: ActionTypes.QUESTION_TITLE_CHANGED, payload: { categoryRow } })
-    }, [findCategory])
+    }, [findCategoryRow])
 
   const contextValue: ICategoriesContext = {
-    state, loadAllCategoryRows: loadAllCategoryRows, openNode, loadTopRows,
+    state, loadAllCategoryRows, openNode, loadTopRows,
     addSubCategory, cancelAddCategory, createCategory,
     viewCategory, editCategory, updateCategory, deleteCategory, deleteCategoryVariation,
     expandCategory, collapseCategory, onCategoryTitleChanged,

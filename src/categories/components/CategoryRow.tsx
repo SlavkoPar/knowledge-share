@@ -6,8 +6,8 @@ import QPlus from 'assets/QPlus.png';
 import { ListGroup, Button, Badge } from "react-bootstrap";
 
 import { useGlobalState } from 'global/GlobalProvider'
-import { ICategoryKey, ICategoryRow, FormMode, IExpandInfo, CategoryKey } from "categories/types";
-import { useCategoryContext } from 'categories/CategoryProvider'
+import { ICategoryKey, ICategoryRow, FormMode, IExpandInfo, CategoryKey, ActionTypes } from "categories/types";
+import { useCategoryContext, useCategoryDispatch } from 'categories/CategoryProvider'
 import { useHover } from 'hooks/useHover';
 
 import CategoryList from "categories/components/CategoryList";
@@ -15,6 +15,7 @@ import EditCategory from "categories/components/EditCategory";
 import ViewCategory from "categories/components/ViewCategory";
 import QuestionList from './questions/QuestionList';
 import AddCategory from './AddCategory';
+import { CategoryReducer, subCatRow } from 'categories/CategoryReducer';
 
 const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, questionId: string | null }) => {
 
@@ -29,11 +30,12 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
     const { canEdit, authUser } = useGlobalState();
 
     const { state, addSubCategory, viewCategory, editCategory, deleteCategory, expandCategory, collapseCategory, addQuestion } = useCategoryContext();
-    let { formMode, keyExpanded, activeCategory, rowExpanding, loadingCategory, categoryLoaded } = state;
+    const dispatch = useCategoryDispatch();
 
+    let { formMode, keyExpanded, activeCategory, rowExpanding, loadingCategory, categoryLoaded } = state;
     const isSelected = activeCategory !== null && (activeCategory.id === id);
 
-    const alreadyAdding = formMode === FormMode.AddingCategory;
+    const inAdding = formMode === FormMode.AddingCategory;
     // TODO proveri ovo
     const showQuestions = isExpanded && numOfQuestions > 0 // || questions.find(q => q.inAdding) // && !questions.find(q => q.inAdding); // We don't have questions loaded
 
@@ -79,10 +81,10 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
             await viewCategory(categoryRow, questionId ?? 'null');
     }
 
-    
+
     useEffect(() => {
         (async () => {
-            if (isSelected && !loadingCategory && !categoryLoaded) {
+            if (isSelected && !loadingCategory && !categoryLoaded && !inAdding) {
                 console.log('editCategoryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy')
                 switch (formMode) {
                     case FormMode.ViewingCategory:
@@ -96,7 +98,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
                 }
             }
         })()
-    }, [canEdit, categoryLoaded, categoryRow, editCategory, formMode, isSelected, loadingCategory, questionId, viewCategory]);
+    }, [canEdit, categoryLoaded, categoryRow, editCategory, formMode, inAdding, isSelected, loadingCategory, questionId, viewCategory]);
 
     const [hoverRef, hoverProps] = useHover();
 
@@ -109,7 +111,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
                     className="py-0 px-1" //  bg-light"
                     onClick={(e) => { handleExpandClick(); e.stopPropagation() }}
                     title="Expand"
-                    disabled={alreadyAdding || (!hasSubCategories && numOfQuestions === 0)}
+                    disabled={inAdding || (!hasSubCategories && numOfQuestions === 0)}
                 >
                     <FontAwesomeIcon icon={isExpanded ? faCaretDown : faCaretRight} size='lg' />
                 </Button>
@@ -129,58 +131,48 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
                     className={`py-0 ms-0 me-1 category-row-title ${isSelected ? 'fw-bold text-white bg-transparent' : ''}`}
                     title={id}
                     onClick={onSelectCategory}
-                    disabled={alreadyAdding}
+                    disabled={inAdding}
                 >
-                    {title}
+                    {title}&nbsp;<span>{formMode.substring(0, 3)}</span>&nbsp;<span>{hoverProps.isHovered?'hov':'jok'}</span>
                 </Button>
 
-                <Badge pill bg="secondary" className={numOfQuestions === 0 ? 'd-none' : 'd-inline'}>
-                    {numOfQuestions}Q
-                    {/* <FontAwesomeIcon icon={faQuestion} size='sm' /> */}
-                    {/* <img width="22" height="18" src={Q} alt="Question" /> */}
-                </Badge>
+                {numOfQuestions > 0 &&
+                    <Badge pill bg="secondary" className={'d-inline bg-transparent'}>
+                        {numOfQuestions}Q
+                        {/* <FontAwesomeIcon icon={faQuestion} size='sm' /> */}
+                        {/* <img width="22" height="18" src={Q} alt="Question" /> */}
+                    </Badge>
+                }
 
-                {canEdit && !alreadyAdding && hoverProps.isHovered &&
-                    <>
-                        {/* <Button variant='link' size="sm" className="ms-1 py-0 px-0"
-                            //onClick={() => { dispatch({ type: ActionTypes.EDIT, category }) }}>
-                            onClick={() => edit()}
-                        >
-                            <FontAwesomeIcon icon={faEdit} size='lg' />
-                        </Button> */}
+                {canEdit && hoverProps.isHovered && // && !alreadyAdding
+                    // <div className="position-absolute d-flex align-items-center top-0 end-0 me-3">
+                    <div className="position-absolute d-flex align-items-center top-0 end-0 me-3">
                         <Button
                             variant='link'
                             size="sm"
-                            className="py-0 mx-1 text-primary float-end"
+                            className="py-0 mx-1 text-white"
                             title="Add SubCategory"
-                            onClick={() => {
+                            onClick={async () => {
+                                dispatch({ type: ActionTypes.CLOSE_CATEGORY_FORM, payload: {} })
+                                if (!isExpanded) {
+                                    await handleExpandClick();
+                                }
                                 categoryRow.level += 1;
                                 addSubCategory(categoryRow);
-                                //</>const categoryInfo: ICategoryInfo = { categoryKey: { topId, id: parentId }, level: 0 }
-                                // dispatch({
-                                //     type: ActionTypes.ADD_SUB_CATEGORY,
-                                //     payload: {
-                                //         topId,
-                                //         categoryKey,
-                                //         level: categoryRow.level + 1
-                                //     }
-                                // })
-                                // if (!isExpanded)
-                                //     dispatch({ type: ActionTypes.SET_EXPANDED, payload: { categoryKey } });
                             }}
                         >
                             <FontAwesomeIcon icon={faPlus} size='lg' />
                         </Button>
-                    </>
+                    </div>
                 }
 
                 {/* TODO what about archive questions  numOfQuestions === 0 &&*/}
-                {canEdit && !alreadyAdding && hoverProps.isHovered && !hasSubCategories &&
-                    <div className="position-absolute d-flex align-items-center top-0 end-0">
+                {canEdit && !inAdding && hoverProps.isHovered && !hasSubCategories &&
+                    <div className="position-absolute d-flex align-items-center top-0 end-0 ">
                         <Button
                             variant='link'
                             size="sm"
-                            className="py-0 mx-1 text-secondary float-end"
+                            className="py-0 mx-1 text-secondary"
                             title="Add Question"
                             onClick={async () => {
                                 //const categoryInfo: ICategoryInfo = { categoryKey: { workspace: topId, id: categoryRow.id }, level: categoryRow.level }
@@ -190,7 +182,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
                             <img width="22" height="18" src={QPlus} alt="Add Question" />
                         </Button>
 
-                        <Button variant='link' size="sm" className="py-0 mx-1 float-end"
+                        <Button variant='link' size="sm" className="py-0 mx-1"
                             disabled={hasSubCategories || numOfQuestions > 0}
                             onClick={deleteCategoryRow}
                         >
@@ -199,9 +191,11 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
                     </div>
                 }
             </div>
-            <div className='ps-3'>
-                {showQuestions && <QuestionList categoryRow={categoryRow} />}
-            </div>
+            {showQuestions &&
+                <div className='ps-3'>
+                    <QuestionList categoryRow={categoryRow} />
+                </div>
+            }
         </>
 
     // console.log({ title, isExpanded })
@@ -218,29 +212,29 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
                 className="py-0 px-1 w-100 category-bg"
                 as="li"
             >
-                {/*inAdding &&*/isSelected && formMode === FormMode.AddingCategory &&
+                {isSelected && formMode === FormMode.AddingCategory &&
                     <>
-                        <div className="">
+                        <div className="border border-3 border-success rounded float-end">
                             {Row1}
                         </div>
+                        {/* ms-0 d-md-none w-100 */}
                         <div className="ms-0 d-md-none w-100">
                             <AddCategory />
                         </div>
                     </>
                 }
+
                 {isSelected && formMode === FormMode.EditingCategory &&
                     <>
                         {/* <div class="d-none d-md-block">
                             This content will be hidden on small screens and below, 
                             but visible on medium screens and above.</div> */}
-                        <div className="">
+                        <div className="border border-3 border-success rounded">
                             {Row1}
                         </div>
-
+                        {/* <div id='divInLine' className="ms-0 d-md-none w-100"> */}
                         <div id='divInLine' className="ms-0 d-md-none w-100">
-                            {formMode === FormMode.EditingCategory &&
-                                <EditCategory inLine={false} />
-                            }
+                            <EditCategory inLine={false} />
                         </div>
                     </>
                 }
@@ -248,24 +242,24 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
                 {isSelected && formMode === FormMode.ViewingCategory &&
                     <>
                         {/* <div class="d-lg-none">hide on lg and wider screens</div> */}
-                        <div className="">
+                        <div className="border border-3 border-success rounded">
                             {Row1}
                         </div>
+                        {/* <div id='divInLine' className="ms-0 d-md-none w-100"> */}
                         <div id='divInLine' className="ms-0 d-md-none w-100">
                             <ViewCategory inLine={false} />
                         </div>
-
                     </>
                 }
 
-                { (formMode === FormMode.None || !isSelected) &&
-                    <div className="">
+                {!isSelected &&
+                    <div className="border border-3 border-warning rounded">
                         {Row1}
                     </div>
                 }
 
                 {/* {isSelected &&
-                    <div className="d-md-none">
+                    <div className="d-none d-md-block">
                         {Row1}
                     </div>
                 } */}

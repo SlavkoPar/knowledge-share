@@ -575,7 +575,7 @@ export interface ICategoriesContext {
 	loadAllCategoryRows: () => Promise<boolean>;
 	openNode: (catKey: ICategoryKey, questionId: string | null, fromChatBotDlg?: string) => Promise<any>;
 	loadTopRows: () => Promise<any>,
-	addSubCategory: (categoryRow: ICategoryRow) => Promise<any>;
+	addSubCategory: (categoryRow: ICategoryRow|null) => Promise<any>;
 	cancelAddCategory: () => Promise<any>;
 	createCategory: (category: ICategory) => void,
 	viewCategory: (categoryRow: ICategoryRow, includeQuestionId: string) => void,
@@ -709,6 +709,7 @@ export enum ActionTypes {
 	SET_ROW_EXPANDED = 'SET_ROW_EXPANDED',
 	SET_ROW_COLLAPSING = 'SET_ROW_COLLAPSING',
 	SET_ROW_COLLAPSED = 'SET_ROW_COLLAPSED',
+	SET_CATEGORY_TO_ADD_TOP = 'SET_CATEGORY_TO_ADD_TOP',
 	SET_CATEGORY_TO_ADD = 'SET_CATEGORY_TO_ADD',
 	SET_CATEGORY_ADDED = 'SET_CATEGORY_ADDED',
 	SET_ALL_CATEGORY_ROWS = 'SET_ALL_CATEGORY_ROWS',
@@ -761,7 +762,7 @@ export const doNotModifyTree = [
 	//ActionTypes.SET_TOP_ROWS,
 	ActionTypes.NODE_OPENING,
 	//ActionTypes.SET_NODE_OPENED,
-	ActionTypes.SET_CATEGORY_TO_ADD,
+	//ActionTypes.SET_CATEGORY_TO_ADD,
 	ActionTypes.SET_CATEGORY_UPDATED,
 	ActionTypes.ADD_NEW_QUESTION_TO_ROW,
 	ActionTypes.CANCEL_CATEGORY_FORM,
@@ -806,7 +807,7 @@ export type Payload = {
 	[ActionTypes.SET_NODE_OPENED]: {
 		// categoryNodesUpTheTree: ICategoryKeyExtended[]; /// we could have used Id only
 		categoryRow?: ICategoryRow;
-		category: ICategory,
+		//category: ICategory,
 		//formMode: FormMode,
 		canEdit: boolean;
 		catKey: ICategoryKey;
@@ -897,9 +898,16 @@ export type Payload = {
 		categoryRow: ICategoryRow;
 	};
 
-	[ActionTypes.SET_CATEGORY_TO_ADD]: {
+	[ActionTypes.SET_CATEGORY_TO_ADD_TOP]: {
 		categoryRow?: ICategoryRow;
-		category: ICategory;
+		newCategoryRow: ICategoryRow;
+		//category: ICategory;
+	};
+
+	[ActionTypes.SET_CATEGORY_TO_ADD]: {
+		categoryRow: ICategoryRow;
+		newCategoryRow: ICategoryRow;
+		//category: ICategory;
 	};
 
 	[ActionTypes.SET_CATEGORY_ADDED]: {

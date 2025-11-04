@@ -91,6 +91,7 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
 
   const [topRow] = useState<ICategoryRow>(topRows.find(c => c.id === topId)!);
   
+    /*
     const  debouncedTitle = useDebounce(title, 300);
     useEffect(() => {
       if (debouncedTitle && !submited) {
@@ -102,6 +103,7 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
         onQuestionTitleChanged(topRow, parentId!, id, debouncedTitle);
       }
     }, [debouncedTitle, id, onQuestionTitleChanged, parentId, submited, title, topRow]);
+    */
 
   /*
   const debouncedTitleHandler = 

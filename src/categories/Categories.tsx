@@ -74,7 +74,6 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
     //     questionRows: []
     // }
 
-
     let tekst = '';
 
     // useEffect(() => {
@@ -179,22 +178,7 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
 
                 <Button variant="secondary" size="sm" type="button" style={{ padding: '1px 4px' }}
                     onClick={
-                        () => addSubCategory({
-                            topId: 'generateId', // for top rows: topId = ToUpperCase(id)
-                            id: 'generateId',
-                            parentId: null,
-                            level: 1,
-                            isExpanded: false,
-                            categoryRows: [],
-                            kind: 0,
-                            title: '',
-                            link: null,
-                            header: '',
-                            hasSubCategories: false,
-                            variations: [],
-                            numOfQuestions: 0,
-                            questionRows: []
-                        })
+                        () => addSubCategory(null)
                     }
                 >
                     Add Category

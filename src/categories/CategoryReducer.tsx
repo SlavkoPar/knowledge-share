@@ -5,6 +5,23 @@ import {
   actionStoringToLocalStorage, FormMode, doNotModifyTree, doNotCallInnerReducerActions
 } from "categories/types";
 
+export const subCatRow: ICategoryRow = {
+  topId: 'generateId', // for top rows: topId = ToUpperCase(id)
+  id: 'generateId',
+  parentId: null,
+  level: 1,
+  isExpanded: false,
+  categoryRows: [],
+  kind: 0,
+  title: '',
+  link: null,
+  header: '',
+  hasSubCategories: false,
+  variations: [],
+  numOfQuestions: 0,
+  questionRows: []
+}
+
 export const initialQuestion: IQuestion = {
   topId: '',
   parentId: 'null',
@@ -183,11 +200,11 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
     }
 
     case ActionTypes.SET_NODE_OPENED: {
-      const { category, catKey, questionId, canEdit } = action.payload;
+      const { categoryRow, catKey, questionId, canEdit } = action.payload;
       const { id } = catKey; //;
       return {
         ...state,
-        activeCategory: category,
+        activeCategory: { ...categoryRow, doc1: '' } as ICategory,
         formMode: canEdit ? FormMode.EditingCategory : FormMode.ViewingCategory,
         categoryId_questionId_done: `${id}_${questionId}`,
         nodeOpening: false,
@@ -200,7 +217,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
     case ActionTypes.SET_LOADING_CATEGORY:
       return {
         ...state,
-        // activeCategory: null,
+        //activeCategory: null,
         loadingCategory: true,
         categoryLoaded: false
       }
@@ -318,7 +335,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         loadingCategory: false,
         categoryLoaded: true,
         //keyExpanded: { ...categoryKey },
-        activeCategory: categoryRow, // null
+        activeCategory: categoryRow,
         activeQuestion: null,
         selectedQuestionId: null,
 
@@ -352,14 +369,14 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
           categoryId: id,
           questionId
         },
-        activeCategory: null,
+        //activeCategory: null,
         activeQuestion: null,
         selectedQuestionId: questionId, //selectedQuestionId ?? null,
         loadingQuestion: false,
         questionLoaded: false,
         rowExpanding: false,
         rowExpanded: true,
-        formMode
+        //formMode
       }
     }
 
@@ -409,21 +426,35 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
       };
     }
 
-    case ActionTypes.SET_CATEGORY_TO_ADD: {
-      const { categoryRow, category } = action.payload; // ICategory extends ICategoryRow
+   case ActionTypes.SET_CATEGORY_TO_ADD_TOP: {
+      const { newCategoryRow } = action.payload; // ICategory extends ICategoryRow
       //const { topId } = category;
       //console.assert(IsCategory(categoryRow))
       // TODO what about instanceof?
-      //const category: ICategory = categoryRow as ICategory;
-      const activeCategory: ICategory = { ...category, isExpanded: false }
       return {
         ...state,
         loadingCategory: false,
         categoryLoaded: true,
-        activeCategory,
+        activeCategory: { ...newCategoryRow, doc1: '', isExpanded: false },
         activeQuestion: null,
         selectedQuestionId: null,
-        topRows: [categoryRow!, ...state.topRows],
+        topRows: [newCategoryRow!, ...state.topRows],
+        formMode: FormMode.AddingCategory,
+      };
+    }
+
+    case ActionTypes.SET_CATEGORY_TO_ADD: {
+      const { newCategoryRow } = action.payload; // ICategory extends ICategoryRow
+      //const { topId } = category;
+      //console.assert(IsCategory(categoryRow))
+      // TODO what about instanceof?
+      return {
+        ...state,
+        loadingCategory: false,
+        categoryLoaded: true,
+        activeCategory: { ...newCategoryRow!, doc1: '', isExpanded: false },
+        activeQuestion: null,
+        selectedQuestionId: null,
         formMode: FormMode.AddingCategory,
       };
     }
@@ -444,11 +475,11 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         categoryLoaded: false,
         //topRowsLoaded,
         //categoryKeyExpanded: state.categoryKeyExpanded ? { ...state.categoryKeyExpanded, questionId: null } : null,
-        activeCategory, //: null,
+        activeCategory,
         activeQuestion: null,
         selectedQuestionId: null,
-        keyExpanded: { topId, categoryId: id, questionId: null } // set id to call openNode from categories
-        //nodeOpened: true
+        keyExpanded: { topId, categoryId: id, questionId: null }, // set id to call openNode from categories
+        nodeOpened: false
       };
     }
 
