@@ -7,7 +7,7 @@ import { ListGroup, Button, Badge } from "react-bootstrap";
 import { useGlobalState } from 'global/GlobalProvider'
 import { FormMode, ICategoryKey, IQuestionRow } from "categories/types";
 import { useCategoryContext } from 'categories/CategoryProvider'
-import { useHover } from 'hooks/useHover';
+import { useHover } from "@uidotdev/usehooks";
 
 import AddQuestion from "categories/components/questions/AddQuestion";
 import EditQuestion from "categories/components/questions/EditQuestion";
@@ -53,7 +53,7 @@ const QuestionRow = ({ questionRow, isSelected }: { questionRow: IQuestionRow, i
             await viewQuestion(questionRow);
     }
 
-    const [hoverRef, hoverProps] = useHover();
+    const [hoverRef, hovering] = useHover();
 
     useEffect(() => {
         (async () => {
@@ -69,14 +69,15 @@ const QuestionRow = ({ questionRow, isSelected }: { questionRow: IQuestionRow, i
                             : await viewQuestion(questionRow);
                         break;
                 }
-                hoverRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                // hoverRef!.current?
+                document.getElementById(`QuestionRow${id}`)!.scrollIntoView({ behavior: 'smooth', block: 'end' });
             }
         })()
         // after using new Question() in getQuestion() editQuestion gets modified // viewQuestion, editQuestion
-    }, [canEdit, formMode, hoverRef, isSelected, questionLoaded, questionRow, viewQuestion, editQuestion]);
+    }, [canEdit, editQuestion, formMode, id, isSelected, questionLoaded, questionRow, viewQuestion]);
 
     const Row1 =
-        <div ref={hoverRef} className={`p-0 d-flex justify-content-start align-items-center w-100 position-relative question-row${showForm ? '-selected' : ''}`}>
+        <div ref={hoverRef} id={`QuestionRow${id}`} className={`p-0 d-flex justify-content-start align-items-center w-100 position-relative question-row${showForm ? '-selected' : ''}`}>
             <Button
                 variant='link'
                 size="sm"
@@ -100,7 +101,7 @@ const QuestionRow = ({ questionRow, isSelected }: { questionRow: IQuestionRow, i
                 {/* <img width="22" height="18" src={A} alt="Answer"></img> */}
             </Badge>
 
-            {/* {canEdit && !alreadyAdding && hoverProps.isHovered &&
+            {/* {canEdit && !alreadyAdding && hovering &&
                 <Button variant='link' size="sm" className="ms-1 py-0 px-1 text-secondary"
                     //onClick={() => { dispatch({ type: ActionTypes.EDIT, question }) }}>
                     onClick={() => edit(_id!)}
@@ -109,7 +110,7 @@ const QuestionRow = ({ questionRow, isSelected }: { questionRow: IQuestionRow, i
                 </Button>
             } */}
 
-            {canEdit && !alreadyAdding && hoverProps.isHovered &&
+            {canEdit && !alreadyAdding && hovering &&
                 <div className="position-absolute d-flex align-items-center top-0 end-0">
                     <Button variant='link' size="sm" className="ms-0 p-0 text-secondary"
                         onClick={del}

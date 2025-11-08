@@ -11,8 +11,9 @@ import QuestionList from "categories/components/questions/QuestionList";
 import VariationList from "categories/VariationList";
 import { Select } from "common/components/Select";
 import { kindOptions } from "common/kindOptions ";
-import { useDebounce } from "hooks/useDebounce";
+//import { useDebounce } from "hooks/useDebounce";
 //import { debounce } from "common/utilities";
+import { useDebounce } from "@uidotdev/usehooks";
 
 const CategoryForm = ({ formMode, category, submitForm, children }: ICategoryFormProps) => {
 
@@ -27,6 +28,7 @@ const CategoryForm = ({ formMode, category, submitForm, children }: ICategoryFor
   const adding = formMode === FormMode.AddingCategory;
 
   const { topId, id, variations, questionRows, title: catTitle } = category;
+  console.log('CategoryForm render: ', { topId, id, catTitle, formMode })
   const categoryKey: ICategoryKey = new CategoryKey(category).categoryKey!;
   //const categoryKeyExpanded: IQuestionKey = { topId, id, questionId };
 
@@ -51,8 +53,11 @@ const CategoryForm = ({ formMode, category, submitForm, children }: ICategoryFor
     dispatch({ type: ActionTypes.CANCEL_CATEGORY_FORM, payload: {} })
   }
 
-  const [title, setTitle] = useState(catTitle);
-  const {Id, Value} = useDebounce(id, title, 300);
+  // const [title, setTitle] = useState(catTitle);
+  // const {Id, Value} = useDebounce(id, title, 500);
+
+  const [searchTerm, setSearchTerm] = React.useState(catTitle);
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   const formik = useFormik({
     enableReinitialize: true,
@@ -72,25 +77,26 @@ const CategoryForm = ({ formMode, category, submitForm, children }: ICategoryFor
       console.log('CategoryForm.onSubmit', JSON.stringify(values, null, 2))
       submitForm(values);
       //props.handleClose(false);
+      setSearchTerm(values.title);
     }
   });
 
-  const [topRow] = useState<ICategoryRow>(topRows.find(c => c.id === topId)!);
-  
+
   useEffect(() => {
-    //if (debouncedTitle !== title) {
-    //const topRow = topRows.find(c => c.id === id)!;
-    if (topRow && Id === id) {
-      console.log('onCategoryTitleChanged --->>>', id, Value, title)
-      onCategoryTitleChanged(topRow, Id, Value);
-    }
-  }, [Id, Value, id, onCategoryTitleChanged, title, topRows]);
+    const go = async () => {
+      if (debouncedSearchTerm && formik.values.title !== debouncedSearchTerm) {
+        await onCategoryTitleChanged(formik.values, debouncedSearchTerm);
+      }
+    };
+    go();
+  }, [category, debouncedSearchTerm, formik.values, onCategoryTitleChanged]);
 
   const handleChangeTitle = (event: ChangeEvent<HTMLTextAreaElement>) => {
     formik.handleChange(event);
     const value = event.target.value;
     //if (value !== debouncedTitle)
-    setTitle(value);
+    //setTitle(value);
+    setSearchTerm(value);
   };
 
   // eslint-disable-next-line no-self-compare
@@ -99,7 +105,7 @@ const CategoryForm = ({ formMode, category, submitForm, children }: ICategoryFor
 
 
   useEffect(() => {
-    setTitle(category.title);
+    //setTitle(category.title);
     nameRef.current!.focus()
   }, [category.title, nameRef])
 
@@ -112,7 +118,7 @@ const CategoryForm = ({ formMode, category, submitForm, children }: ICategoryFor
       <Row className='text-center text-muted'>
         <Form.Label>Category {viewing ? 'Viewing' : editing ? 'Editing' : 'Adding'}</Form.Label>
       </Row>
-      <Form onSubmit={formik.handleSubmit}>
+      <Form onSubmit={() => formik.handleSubmit}>
 
         <Form.Group controlId="Variations">
           <Stack direction="horizontal" gap={1}>
@@ -158,7 +164,7 @@ const CategoryForm = ({ formMode, category, submitForm, children }: ICategoryFor
             as="textarea"
             name="title"
             placeholder={formik.values.title === "new Category" ? "new Category" : "category text"}
-            value={title}
+            value={searchTerm}
             onChange={handleChangeTitle}
             ref={nameRef}
             //onChange={handleChangeTitle}

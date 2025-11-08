@@ -21,6 +21,7 @@
     "@types/react-autosuggest": "^10.1.11",
     "@types/react-dom": "^19.0.0",
     "@types/react-router-dom": "^5.3.3",
+    "@uidotdev/usehooks": "^2.4.1",
     "autosuggest-highlight": "^3.3.4",
     "bootstrap": "^5.3.6",
     "cra-template-typescript": "1.2.0",

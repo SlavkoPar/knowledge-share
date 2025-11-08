@@ -55,9 +55,7 @@ function App() {
   }, [dispatch, instance, isAuthenticated]) // , isAuthenticated
 
   const locationPathname = location.pathname;
-  console.log('----------->')
   console.log('----------- ====== App locationPathname ===>>>', locationPathname);
-  console.log('----------->')
 
   // const showChatBotDlg = (locationPathname.startsWith('/categories') && allCategoryRowsLoaded) ||
   //   (locationPathname.startsWith('/groups') && groupRowsLoaded);
@@ -102,10 +100,6 @@ function App() {
     return <div>App loading</div>
 
   //alert(process.env.REACT_APP_API_URL)
-  console.log('Appppppppppppppppppppppppppppppppppppppppppppppppp')
-  console.log('Appppppppppppppppppppppppppppppppppppppppppppppppp')
-  console.log('Appppppppppppppppppppppppppppppppppppppppppppppppp')
-  console.log('Appppppppppppppppppppppppppppppppppppppppppppppppp')
   console.log('Appppppppppppppppppppppppppppppppppppppppppppppppp')
 
   return (

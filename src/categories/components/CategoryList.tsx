@@ -20,7 +20,7 @@ const CategoryList = ({ categoryRow, title }: IParentInfo) => {
         level = categoryRow!.level;
     }
 
-    console.log('<<<<<<<<< Renderujem CategoryList', categoryRow ? categoryRow.id : null, categoryRows)
+    // console.log('<<<<<<<<< Renderujem CategoryList', categoryRow ? categoryRow.id : null, categoryRows)
 
     return (
         <div className={level! > 1 ? 'ms-2' : ''} >

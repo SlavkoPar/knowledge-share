@@ -7,8 +7,8 @@ import { Button, Badge } from "react-bootstrap";
 import { useGlobalState } from 'global/GlobalProvider'
 import { ICategoryKey, FormMode } from "categories/types";
 import { useCategoryContext } from 'categories/CategoryProvider'
-import { useHover } from 'hooks/useHover';
 import { IVariation } from 'categories/types'
+import { useHover } from "@uidotdev/usehooks";
 
 // import AddTag from "categorys/components/tags/AddTag";
 // import EditTag from "categorys/components/tags/EditTag";
@@ -52,11 +52,11 @@ const VariationRow = ({ categoryKey, tag, categoryInAdding }: { categoryKey: ICa
         //viewTag(id);
     //}
 
-    const [hoverRef, hoverProps] = useHover();
-
+     const [hoverRef, hovering] = useHover();
+ 
     const Row1 =
         // <div ref={hoverRef} className="d-flex justify-content-start align-items-center text-secondary">
-        <div ref={hoverRef}>
+        <div >
 
             <Badge pill bg="secondary">
                 {/* className={`text-info ${numOfTags === 0 ? 'd-none' : 'd-inline'}`} */}
@@ -74,7 +74,7 @@ const VariationRow = ({ categoryKey, tag, categoryInAdding }: { categoryKey: ICa
                 {name}
             </Button> */}
 
-            {/* {canEdit && !alreadyAdding && hoverProps.isHovered &&
+            {/* {canEdit && !alreadyAdding && hovering &&
                 <Button variant='link' size="sm" className="ms-1 py-0 px-1 text-secondary"
                     //onClick={() => { dispatch({ type: ActionTypes.EDIT, tag }) }}>
                     onClick={() => edit(_id!)}
@@ -83,7 +83,7 @@ const VariationRow = ({ categoryKey, tag, categoryInAdding }: { categoryKey: ICa
                 </Button>
             } */}
 
-            {canEdit && !alreadyAdding && hoverProps.isHovered &&
+            {canEdit && !alreadyAdding && hovering &&
                 <Button variant='link' size="sm" className="ms-0 py-0 mx-0 text-secondary"
                     onClick={del}
                 >
@@ -91,7 +91,7 @@ const VariationRow = ({ categoryKey, tag, categoryInAdding }: { categoryKey: ICa
                 </Button>
             }
 
-            {false && canEdit && !alreadyAdding && hoverProps.isHovered &&
+            {false && canEdit && !alreadyAdding && hovering &&
                 <Button
                     variant='link'
                     size="sm"

@@ -5,7 +5,7 @@ import { faCopy, faEnvelope, faRemove } from '@fortawesome/free-solid-svg-icons'
 import { ListGroup, Button, Modal } from "react-bootstrap";
 
 import { useGlobalContext, useGlobalState } from 'global/GlobalProvider'
-import { useHover } from 'hooks/useHover';
+import { useHover } from "@uidotdev/usehooks";
 import { formatDate } from 'common/utilities'
 import { IAnswerKey } from 'groups/types';
 import { IAssignedAnswer } from "categories/types";
@@ -86,7 +86,7 @@ const AssignedAnswerChatBot = ({ questionTitle, assignedAnswer, isDisabled, unAs
         }
     }
 
-    const [hoverRef, hoverProps] = useHover();
+    const [hoverRef, hovering] = useHover();
 
     const Row1 =
         <div ref={hoverRef} className="d-flex justify-content-start align-items-center w-100 text-info">
@@ -113,7 +113,7 @@ const AssignedAnswerChatBot = ({ questionTitle, assignedAnswer, isDisabled, unAs
                 {answerTitle}
             </Button>
 
-            {canEdit && !alreadyAdding && hoverProps.isHovered && !isDisabled &&
+            {canEdit && !alreadyAdding && hovering && !isDisabled &&
                 <Button variant='link' size="sm" className="ms-1 py-0 mx-1 text-info"
                     onClick={del}
                 >

@@ -200,11 +200,11 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
     }
 
     case ActionTypes.SET_NODE_OPENED: {
-      const { categoryRow, catKey, questionId, canEdit } = action.payload;
+      const { category, catKey, questionId, canEdit } = action.payload;
       const { id } = catKey; //;
       return {
         ...state,
-        activeCategory: { ...categoryRow, doc1: '' } as ICategory,
+        activeCategory: category,
         formMode: canEdit ? FormMode.EditingCategory : FormMode.ViewingCategory,
         categoryId_questionId_done: `${id}_${questionId}`,
         nodeOpening: false,
@@ -375,7 +375,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         loadingQuestion: false,
         questionLoaded: false,
         rowExpanding: false,
-        rowExpanded: true,
+        rowExpanded: true
         //formMode
       }
     }
@@ -435,7 +435,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         ...state,
         loadingCategory: false,
         categoryLoaded: true,
-        activeCategory: { ...newCategoryRow, doc1: '', isExpanded: false },
+        activeCategory: { ...newCategoryRow, doc1: '' },
         activeQuestion: null,
         selectedQuestionId: null,
         topRows: [newCategoryRow!, ...state.topRows],
@@ -452,7 +452,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         ...state,
         loadingCategory: false,
         categoryLoaded: true,
-        activeCategory: { ...newCategoryRow!, doc1: '', isExpanded: false },
+        activeCategory: { ...newCategoryRow!, doc1: '' },
         activeQuestion: null,
         selectedQuestionId: null,
         formMode: FormMode.AddingCategory,
@@ -470,7 +470,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
       //const topRowsLoaded = parentId ? true : false;
       return {
         ...state,
-        formMode: FormMode.None,
+        formMode: FormMode.EditingCategory, // none
         loadingCategory: false,
         categoryLoaded: false,
         //topRowsLoaded,

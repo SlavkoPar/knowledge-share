@@ -1,10 +1,10 @@
 
 import { ListGroup, Button, Badge } from "react-bootstrap";
 
-import { useHover } from 'hooks/useHover';
 import React from "react";
 import { IRelatedFilter } from 'categories/types';
 import { formatDate, formatDateShort } from "common/utilities";
+import { useHover } from "@uidotdev/usehooks";
 
 interface IProps {
     relatedFilter: IRelatedFilter,
@@ -38,10 +38,10 @@ const RelatedFilter = ({ relatedFilter, unAssignFilter }: IProps) => {
         //viewAnswer(id);
     }
 
-    const [hoverRef] = useHover(); // , hoverProps
+    const [hoverRef, hovering] = useHover();
 
     const Row1 =
-        <div ref={hoverRef} className="d-flex justify-content-start align-items-center w-100 text-light related-filter-row">
+        <div className="d-flex justify-content-start align-items-center w-100 text-light related-filter-row">
             <Button
                 variant='link'
                 size="sm"
@@ -63,7 +63,7 @@ const RelatedFilter = ({ relatedFilter, unAssignFilter }: IProps) => {
                 {formatDateShort(lastUsed!.time)}
             </span>
 
-            {/* {canEdit && !alreadyAdding && hoverProps.isHovered && !isDisabled &&
+            {/* {canEdit && !alreadyAdding && hoverProps.hovering && !isDisabled &&
                 <Button variant='link' size="sm" className="ms-1 py-0 mx-1 text-info"
                     onClick={del}
                 >

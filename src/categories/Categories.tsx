@@ -58,34 +58,8 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
         dispatch({ type: ActionTypes.SET_QUESTION_SELECTED, payload: { questionKey } })
     }
 
-    // const categoryRow: ICategoryRow = {
-    //     topId: '',
-    //     id: '',
-    //     parentId: null,
-    //     kind: 0,
-    //     title: '',
-    //     link: '',
-    //     header: '',
-    //     level: 1,
-    //     hasSubCategories: false,
-    //     categoryRows: topRows,
-    //     variations: [],
-    //     numOfQuestions: 0,
-    //     questionRows: []
-    // }
 
     let tekst = '';
-
-    // useEffect(() => {
-    //     (async () => {
-    //         // SET_TOP_ROWS  Level:1
-    //         if (!allCategoryRowsLoaded) {
-    //             console.log('Zovem loadAllCategoryRows()')
-    //             await loadAllCategoryRows();
-    //         }
-    //     })()
-    // }, [allCategoryRowsLoaded, loadAllCategoryRows]);
-
 
     useEffect(() => {
         (async () => {
@@ -195,11 +169,9 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
                         <div id='div-details' className="d-none d-md-block">
                             {activeCategory && formMode === FormMode.ViewingCategory && <ViewCategory inLine={false} />}
                             {activeCategory && formMode === FormMode.EditingCategory &&
-                                <>
-                                    <EditCategory inLine={false} />
-                                </>
+                                <EditCategory inLine={false} />
                             }
-                            {activeCategory && formMode === FormMode.AddingCategory && <AddCategory />}
+                            {activeCategory && formMode === FormMode.AddingCategory && <AddCategory activeCategory={activeCategory} />}
 
                             {activeQuestion && formMode === FormMode.ViewingQuestion && <ViewQuestion inLine={false} />}
                             {activeQuestion && formMode === FormMode.EditingQuestion &&

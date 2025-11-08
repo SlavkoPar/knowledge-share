@@ -6,11 +6,11 @@ import { useGlobalState } from 'global/GlobalProvider'
 import CategoryForm from "categories/components/CategoryForm";
 import { FormMode, ICategory } from "categories/types";
 
-const AddCategory = () => {
+const AddCategory = ({activeCategory}: {activeCategory: ICategory | null}) => {
     const globalState = useGlobalState();
     const { nickName } = globalState.authUser;
     const { createCategory, state } = useCategoryContext();
-    const { activeCategory } = state;
+    //const { activeCategory } = state;
 
     const [formValues] = useState<ICategory>({ ...activeCategory! });
 
@@ -26,7 +26,10 @@ const AddCategory = () => {
         console.log("**********object", cat)
         await createCategory(cat);
     }
+    if (!activeCategory === null) 
+        return null;
 
+    console.log('AddCategory render >>>>>:', activeCategory);
     return (
         <>
             {/* {inLine ?

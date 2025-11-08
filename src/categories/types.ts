@@ -575,7 +575,7 @@ export interface ICategoriesContext {
 	loadAllCategoryRows: () => Promise<boolean>;
 	openNode: (catKey: ICategoryKey, questionId: string | null, fromChatBotDlg?: string) => Promise<any>;
 	loadTopRows: () => Promise<any>,
-	addSubCategory: (categoryRow: ICategoryRow|null) => Promise<any>;
+	addSubCategory: (parentCategoryRow: ICategoryRow|null) => Promise<any>;
 	cancelAddCategory: () => Promise<any>;
 	createCategory: (category: ICategory) => void,
 	viewCategory: (categoryRow: ICategoryRow, includeQuestionId: string) => void,
@@ -586,7 +586,7 @@ export interface ICategoriesContext {
 	expandCategory: (expandInfo: IExpandInfo) => Promise<any>,
 	collapseCategory: (categoryRow: ICategoryRow) => void,
 	// findCategory: (categoryRows: ICategoryRow[], id: string) => ICategoryRow | undefined;
-	onCategoryTitleChanged: (top: ICategoryRow, id: string, title: string) => void;
+	onCategoryTitleChanged: (category: ICategory, title: string) => void;
 	//////////////
 	// questions
 	loadCategoryQuestions: (catParams: ILoadCategoryQuestions) => void;  //(parentInfo: IParentInfo) => void,
@@ -807,7 +807,7 @@ export type Payload = {
 	[ActionTypes.SET_NODE_OPENED]: {
 		// categoryNodesUpTheTree: ICategoryKeyExtended[]; /// we could have used Id only
 		categoryRow?: ICategoryRow;
-		//category: ICategory,
+		category: ICategory,
 		//formMode: FormMode,
 		canEdit: boolean;
 		catKey: ICategoryKey;
