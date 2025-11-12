@@ -454,7 +454,7 @@ export interface ILoadGroupAnswers {
 
 export interface IGroupsContext {
 	state: IGroupsState,
-	openNode: (keyExpanded: IGroupKeyExpanded, fromChatBotDlg?: string) => Promise<any>;
+	expandNodeUpToTheTree: (keyExpanded: IGroupKeyExpanded, fromChatBotDlg?: string) => Promise<any>;
 	loadTopGroupRows: () => Promise<any>,
 	addSubGroup: (groupRow: IGroupRow) => Promise<any>;
 	cancelAddGroup: () => Promise<any>;

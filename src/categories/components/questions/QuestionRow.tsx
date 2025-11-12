@@ -25,7 +25,7 @@ const QuestionRow = ({ questionRow, isSelected }: { questionRow: IQuestionRow, i
     const { canEdit, authUser } = useGlobalState();
     const { state, viewQuestion, addQuestion, editQuestion, deleteQuestion } = useCategoryContext();
 
-    const { activeQuestion, formMode, questionLoaded } = state;
+    const { activeQuestion, formMode, loadingQuestion, questionLoaded } = state;
     //const isSelected = useState(id === selectedQuestionId);
 
     const showForm = activeQuestion !== null && activeQuestion.id === id;
@@ -34,6 +34,7 @@ const QuestionRow = ({ questionRow, isSelected }: { questionRow: IQuestionRow, i
     const alreadyAdding = formMode === FormMode.AddingQuestion;
 
     const del = () => {
+        alert('del, questionRow.id=' + questionRow.id);
         questionRow.modified = {
             time: new Date(),
             nickName: authUser.nickName
@@ -57,7 +58,7 @@ const QuestionRow = ({ questionRow, isSelected }: { questionRow: IQuestionRow, i
 
     useEffect(() => {
         (async () => {
-            if (isSelected && !questionLoaded) {
+            if (isSelected && !loadingQuestion && !questionLoaded) {
                 switch (formMode) {
                     case FormMode.ViewingQuestion:
                         await viewQuestion(questionRow);
@@ -70,14 +71,15 @@ const QuestionRow = ({ questionRow, isSelected }: { questionRow: IQuestionRow, i
                         break;
                 }
                 // hoverRef!.current?
-                document.getElementById(`QuestionRow${id}`)!.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                const el = document.getElementById(`QuestionRow${id}`);
+                el?.scrollIntoView({ behavior: 'smooth', block: 'end' });
             }
         })()
         // after using new Question() in getQuestion() editQuestion gets modified // viewQuestion, editQuestion
-    }, [canEdit, editQuestion, formMode, id, isSelected, questionLoaded, questionRow, viewQuestion]);
+    }, [canEdit, editQuestion, formMode, id, isSelected, loadingQuestion, questionLoaded, questionRow, viewQuestion]);
 
     const Row1 =
-        <div ref={hoverRef} id={`QuestionRow${id}`} className={`p-0 d-flex justify-content-start align-items-center w-100 position-relative question-row${showForm ? '-selected' : ''}`}>
+        <div id={`QuestionRow${id}`} className={`p-0 d-flex justify-content-start align-items-center w-100 position-relative question-row${isSelected ? '-selected' : ''}`}>
             <Button
                 variant='link'
                 size="sm"
@@ -133,6 +135,7 @@ const QuestionRow = ({ questionRow, isSelected }: { questionRow: IQuestionRow, i
             }
         </div>
 
+    // console.log('---@@@@@@@@@@@@@ QuestionRow', { id, isSelected, formMode, questionLoaded })
     return (
         // border border-3 border-danger"
         // <div className="py-0 px-0 w-100 list-group-item border">
@@ -141,45 +144,49 @@ const QuestionRow = ({ questionRow, isSelected }: { questionRow: IQuestionRow, i
             className="py-0 px-0 w-100"
             as="li"
         >
-            {showForm && formMode === FormMode.AddingQuestion &&
+            {isSelected && formMode === FormMode.AddingQuestion &&
                 <>
                     <div id='div-question' className="ms-0 d-md-none w-100">
                         <AddQuestion
                             showCloseButton={true}
                             source={0} />
                     </div>
-                    <div className="d-none d-md-block  border rounded-3">
+                    <div ref={hoverRef} className="d-none d-md-block  border rounded-3">
                         {Row1}
                     </div>
                 </>
             }
 
-            {showForm && formMode === FormMode.EditingQuestion &&
+            {isSelected && formMode === FormMode.EditingQuestion &&
                 <>
                     {/* <div class="d-lg-none">hide on lg and wider screens</div> */}
                     <div id='div-question' className="ms-0 d-md-none w-100">
                         <EditQuestion inLine={true} />
                     </div>
-                    <div className="d-none d-md-block">
+                    <div ref={hoverRef} className="">
+                        {/* d-none d-md-block */}
                         {Row1}
                     </div>
                 </>
             }
 
-            {showForm && formMode === FormMode.ViewingQuestion &&
+            {isSelected && formMode === FormMode.ViewingQuestion &&
                 <>
                     {/* <div class="d-lg-none">hide on lg and wider screens</div> */}
-                    <div id='div-question' className="ms-0 d-md-none w-100">
+                    <div ref={hoverRef} id='div-question' className="">
+                        {/* ms-0 d-md-none w-100 */}
                         <ViewQuestion inLine={true} />
                     </div>
-                    <div className="d-none d-md-block">
+                    <div ref={hoverRef} className="">
+                        {/* d-none d-md-block */}
                         {Row1}
                     </div>
                 </>
             }
 
-            {!showForm &&
-                <div className="d-none d-md-block">
+            {!isSelected &&
+                // d-none d-md-block
+                <div ref={hoverRef} className="">
                     {Row1}
                 </div>
             }

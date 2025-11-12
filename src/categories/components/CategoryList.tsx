@@ -20,8 +20,6 @@ const CategoryList = ({ categoryRow, title }: IParentInfo) => {
         level = categoryRow!.level;
     }
 
-    // console.log('<<<<<<<<< Renderujem CategoryList', categoryRow ? categoryRow.id : null, categoryRows)
-
     return (
         <div className={level! > 1 ? 'ms-2' : ''} >
             <ListGroup as="ul" variant='dark' className="mb-0 category-bg">
@@ -29,7 +27,8 @@ const CategoryList = ({ categoryRow, title }: IParentInfo) => {
                     <CategoryRow
                         //categoryRow={{ ...c, isSelected: c.id === id }}
                         categoryRow={c}
-                        questionId={c.topId === topId && c.id === id ? questionId : null}
+                        questionId={questionId}
+                        // {c.topId === topId && c.id === id ? questionId : null}
                         key={c.id}
                     />
                 )}

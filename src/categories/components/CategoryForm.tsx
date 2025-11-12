@@ -11,8 +11,6 @@ import QuestionList from "categories/components/questions/QuestionList";
 import VariationList from "categories/VariationList";
 import { Select } from "common/components/Select";
 import { kindOptions } from "common/kindOptions ";
-//import { useDebounce } from "hooks/useDebounce";
-//import { debounce } from "common/utilities";
 import { useDebounce } from "@uidotdev/usehooks";
 
 const CategoryForm = ({ formMode, category, submitForm, children }: ICategoryFormProps) => {
@@ -20,8 +18,7 @@ const CategoryForm = ({ formMode, category, submitForm, children }: ICategoryFor
   //const { globalState } = useGlobalContext();
   //const { isDarkMode, variant, bg } = globalState;
 
-  const { state, onCategoryTitleChanged } = useCategoryContext();
-  const { topRows } = state;
+  const { onCategoryTitleChanged } = useCategoryContext();
 
   const viewing = formMode === FormMode.ViewingCategory;
   const editing = formMode === FormMode.EditingCategory;
@@ -35,7 +32,7 @@ const CategoryForm = ({ formMode, category, submitForm, children }: ICategoryFor
   if (!document.getElementById('div-details')) {
 
   }
-  const showQuestions = questionRows.length > 0 //!questions.find(q => q.inAdding);
+  const showQuestions = questionRows && questionRows.length > 0 //!questions.find(q => q.inAdding);
   /* 
   We have, at two places:
     <EditCategory inLine={true} />
@@ -53,10 +50,7 @@ const CategoryForm = ({ formMode, category, submitForm, children }: ICategoryFor
     dispatch({ type: ActionTypes.CANCEL_CATEGORY_FORM, payload: {} })
   }
 
-  // const [title, setTitle] = useState(catTitle);
-  // const {Id, Value} = useDebounce(id, title, 500);
-
-  const [searchTerm, setSearchTerm] = React.useState(catTitle);
+  const [searchTerm, setSearchTerm] = useState(catTitle);
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   const formik = useFormik({
@@ -81,15 +75,15 @@ const CategoryForm = ({ formMode, category, submitForm, children }: ICategoryFor
     }
   });
 
-
   useEffect(() => {
-    const go = async () => {
-      if (debouncedSearchTerm && formik.values.title !== debouncedSearchTerm) {
+    const goBre = async () => {
+      console.log('CategoryForm.useEffect - onCategoryTitleChanged', { debouncedSearchTerm, title: formik.values.title });
+      //if (debouncedSearchTerm && formik.values.title !== debouncedSearchTerm) {
         await onCategoryTitleChanged(formik.values, debouncedSearchTerm);
-      }
+      //}
     };
-    go();
-  }, [category, debouncedSearchTerm, formik.values, onCategoryTitleChanged]);
+    goBre();
+  }, [debouncedSearchTerm, formik.values, onCategoryTitleChanged]);
 
   const handleChangeTitle = (event: ChangeEvent<HTMLTextAreaElement>) => {
     formik.handleChange(event);
@@ -110,6 +104,8 @@ const CategoryForm = ({ formMode, category, submitForm, children }: ICategoryFor
   }, [category.title, nameRef])
 
   const isDisabled = false;
+
+  console.log('CategoryForm render return: ', searchTerm);
 
   return (
     // data-bs-theme={`${isDarkMode ? 'dark' : 'light'}`}

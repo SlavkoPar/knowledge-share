@@ -81,12 +81,22 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
             addSubCategory(categoryRow);
             setQueue(false);
         }
-    }, [addSubCategory, queue]);
+    }, [addSubCategory, categoryRow, queue]);
+
+
+    const [queue2, setQueue2] = useState<boolean>(false);
+    useEffect(() => {
+        if (queue2) {// && categoryRow.id === 'generateId') {
+            addQuestion(categoryKey, isExpanded ?? false);
+            setQueue2(false);
+        }
+    }, [addQuestion, categoryKey, isExpanded, queue2]);
+
 
     useEffect(() => {
         (async () => {
             if (isSelected && !loadingCategory && !categoryLoaded && !inAdding) {
-                console.log('editCategoryyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy')
+                console.log('CategoryRow formMode:', formMode)
                 switch (formMode) {
                     case FormMode.ViewingCategory:
                         await viewCategory(categoryRow, questionId ?? 'null');
@@ -99,7 +109,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
                 }
             }
         })()
-    }, [canEdit, categoryLoaded, categoryRow, editCategory, formMode, inAdding, isSelected, loadingCategory, questionId, viewCategory]);
+    }, [canEdit, categoryKey, categoryLoaded, categoryRow, editCategory, expandCategory, formMode, inAdding, isSelected, loadingCategory, questionId, viewCategory]);
 
     const [hoverRef, hovering] = useHover();
     //console.log("..........................: ", document.querySelectorAll(`#Row${id}`)!.length);
@@ -157,7 +167,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
                             title="Add SubCategory"
                             onClick={async () => {
                                 //dispatch({ type: ActionTypes.CLOSE_CATEGORY_FORM, payload: {} })
-                                if (!isExpanded) {
+                                if (!isExpanded && (hasSubCategories || numOfQuestions > 0)) {
                                     await handleExpandClick();
                                 }
                                 setTimeout(() => setQueue(true), 500);
@@ -186,7 +196,10 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
                             title="Add Question"
                             onClick={async () => {
                                 //const categoryInfo: ICategoryInfo = { categoryKey: { workspace: topId, id: categoryRow.id }, level: categoryRow.level }
-                                addQuestion(categoryKey, isExpanded ?? false);
+                                if (!isExpanded && (hasSubCategories || numOfQuestions > 0)) {
+                                    await handleExpandClick();
+                                }
+                                setTimeout(() => setQueue2(true), 500);
                             }}
                         >
                             <img width="22" height="18" src={QPlus} alt="Add Question" />
@@ -206,8 +219,7 @@ const CategoryRow = ({ categoryRow, questionId }: { categoryRow: ICategoryRow, q
     // if (category.level !== 1)
     //     return (<div>CategoryRow {category.id}</div>)
 
-    //console.log('categoryRow:', id, 'hovering:', hovering);
-
+    // console.log('categoryRow:', { isSelected, formMode, id})
     return (
         <>
             <ListGroup.Item

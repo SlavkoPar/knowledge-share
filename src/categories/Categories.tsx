@@ -27,7 +27,7 @@ interface IProps {
 }
 
 const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
-    const { state, openNode, loadTopRows, addSubCategory } = useCategoryContext();
+    const { state, expandNodesUpToTheTree, loadTopRows, addSubCategory } = useCategoryContext();
     const {
         allCategoryRows, //allCategoryRowsLoaded,
         topRows, topRowsLoading, topRowsLoaded,
@@ -91,8 +91,8 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
                         const categoryId = arr[0];
                         const questionId = arr[1];
                         const catKey: ICategoryKey = { topId: '', id: categoryId, parentId: 'ROOT' };
-                        console.log('zovem openNode 1111111111111111111)', { categoryId_questionId }, { categoryId_questionId_done })
-                        await openNode(catKey, questionId, fromChatBotDlg ?? 'false')
+                        console.log('zovem expandNodesUpToTheTree 1111111111111111111)', { categoryId_questionId }, { categoryId_questionId_done })
+                        await expandNodesUpToTheTree(catKey, questionId, fromChatBotDlg ?? 'false')
                             .then(() => { return null; });
                     }
                 }
@@ -100,14 +100,14 @@ const Providered = ({ categoryId_questionId, fromChatBotDlg }: IProps) => {
                     const { topId, categoryId, questionId } = keyExpanded;
                     if (categoryId !== '') {
                         const catKey: ICategoryKey = { topId, id: categoryId, parentId: 'ROOT' }
-                        console.log('zovem openNode 2222222222222)', { keyExpanded, catKey })
-                        await openNode(catKey, questionId)
+                        console.log('zovem expandNodeUpToTheTree 2222222222222)', { keyExpanded, catKey })
+                        await expandNodesUpToTheTree(catKey, questionId)
                             .then(() => { return null; });
                     }
                 }
             }
         })()
-    }, [keyExpanded, nodeOpening, nodeOpened, openNode, categoryId_questionId, categoryId_questionId_done, topRows, fromChatBotDlg])
+    }, [keyExpanded, nodeOpening, nodeOpened, expandNodesUpToTheTree, categoryId_questionId, categoryId_questionId_done, topRows, fromChatBotDlg])
 
     // useEffect(() => {
     //     setLastRouteVisited(`/categories`);

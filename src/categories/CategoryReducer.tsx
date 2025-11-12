@@ -59,9 +59,7 @@ export const initialCategory: ICategory = {
 export const CategoryReducer: Reducer<ICategoriesState, Actions> = (state, action) => {
 
   console.log('------------------------------->')
-  console.log('------------------------------->')
   console.log('------------------------------->', action.type)
-  console.log('------------------------------->')
   console.log('------------------------------->')
   // ----------------------------------------------------------------------
   // Rubljov: "By giving the right name, you reveal the essence of things"
@@ -185,7 +183,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
     }
 
 
-    case ActionTypes.NODE_OPENING: {
+    case ActionTypes.SET_NODE_EXPANDING_UP_THE_TREE: {
       const { fromChatBotDlg } = action.payload;
       const { keyExpanded, activeCategory, activeQuestion } = state;
       return {
@@ -199,18 +197,19 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
       }
     }
 
-    case ActionTypes.SET_NODE_OPENED: {
-      const { category, catKey, questionId, canEdit } = action.payload;
+    case ActionTypes.SET_NODE_EXPANDED_UP_THE_TREE: {
+      const { category, formMode, catKey, questionId, question } = action.payload;
       const { id } = catKey; //;
       return {
         ...state,
         activeCategory: category,
-        formMode: canEdit ? FormMode.EditingCategory : FormMode.ViewingCategory,
+        activeQuestion: question,
+        selectedQuestionId: questionId,
+        formMode,
         categoryId_questionId_done: `${id}_${questionId}`,
         nodeOpening: false,
         nodeOpened: true,
-        loadingCategories: false
-        //mode: Mode.NULL // reset previosly selected form
+        loadingCategories: false,
       };
     }
 
@@ -355,9 +354,9 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
       const { categoryRow, formMode } = action.payload; // , selectedQuestionId
       const { topId, id } = categoryRow;
       const { keyExpanded } = state;
-      const questionId = (topId === keyExpanded?.topId && id === keyExpanded.categoryId)
-        ? keyExpanded.questionId
-        : null;
+      const questionId = keyExpanded ? keyExpanded.questionId : null; // (topId === keyExpanded?.topId && id === keyExpanded.categoryId)
+      //? keyExpanded.questionId
+      //: null;
       // Do not work with categoryRow, 
       // categoryRow will be proccesed in CategoryReducer, rather than in innerReducer
       return {
@@ -426,7 +425,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
       };
     }
 
-   case ActionTypes.SET_CATEGORY_TO_ADD_TOP: {
+    case ActionTypes.SET_CATEGORY_TO_ADD_TOP: {
       const { newCategoryRow } = action.payload; // ICategory extends ICategoryRow
       //const { topId } = category;
       //console.assert(IsCategory(categoryRow))
@@ -455,7 +454,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         activeCategory: { ...newCategoryRow!, doc1: '' },
         activeQuestion: null,
         selectedQuestionId: null,
-        formMode: FormMode.AddingCategory,
+        formMode: FormMode.AddingCategory
       };
     }
 

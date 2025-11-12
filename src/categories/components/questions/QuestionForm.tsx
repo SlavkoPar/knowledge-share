@@ -1,5 +1,6 @@
 import React, { ChangeEvent, useState } from 'react';
 import { useEffect, useRef } from "react";
+import { useDebounce } from "@uidotdev/usehooks";
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import { Form, CloseButton, Row, Col, Stack } from "react-bootstrap";
@@ -16,7 +17,6 @@ import { useCategoryContext, useCategoryDispatch } from "categories/CategoryProv
 import Dropdown from 'react-bootstrap/Dropdown';
 import AssignedAnswers from './AssignedAnswers';
 import RelatedFilters from './RelatedFilters';
-import { useDebounce } from 'hooks/useDebounce';
 
 const QuestionForm = ({ question, submitForm, children, showCloseButton, source = 0, closeModal }: IQuestionFormProps) => {
 
@@ -24,7 +24,7 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
   // const { isDarkMode, variant, bg } = globalState;
 
   const { state, onQuestionTitleChanged } = useCategoryContext();
-  let { formMode, topRows } = state;
+  let { formMode, topRows  } = state;
 
   const viewing = formMode === FormMode.ViewingQuestion;
   const editing = formMode === FormMode.EditingQuestion;
@@ -32,14 +32,12 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
 
   const isDisabled = viewing;
 
-  const { topId, parentId, id, assignedAnswers, relatedFilters } = question;
+  const { topId, parentId, id, assignedAnswers, relatedFilters, title: qTitle } = question;
   const questionKey = new QuestionKey(question).questionKey;
   // const categoryKey: ICategoryKey = { topId, parentId, id: parentId! }; // proveri
 
   const dispatch = useCategoryDispatch();
 
-
- 
   const closeForm = () => {
     if (closeModal) {
       closeModal();
@@ -58,12 +56,14 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
     }
   }
 
-    const [submited, setSubmited] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(id + '/' + qTitle);
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
+  const [topRow] = useState<ICategoryRow>(topRows.find(c => c.id === topId)!);
 
   // eslint-disable-next-line no-self-compare
-  // const nameRef = useRef<HTMLAreaElement | null>(null);
   const nameRef = useRef<HTMLTextAreaElement>(null);
-  
+
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: question,
@@ -73,11 +73,26 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
     }),
     onSubmit: (values: IQuestion) => {
       // console.log('QuestionForm.onSubmit', JSON.stringify(values, null, 2))
-      setSubmited(true)
       submitForm(values)
       //props.handleClose(false);
+      setSearchTerm(values.id + '/' + values.title);
     }
   });
+
+  useEffect(() => {
+    const goBre = async () => {
+      //if (debouncedSearchTerm && formik.values.title !== debouncedSearchTerm) {
+      //if (debouncedSearchTerm && searchTerm !== debouncedSearchTerm) {
+      const old = debouncedSearchTerm.split('/');
+      const Id = old[0];
+      if (formik.values.id === Id) {
+        console.log('QuestionForm.useEffect - onQuestioTitleChanged', { debouncedSearchTerm, searchTerm, title: formik.values.title });
+        const Title = old[1]
+        await onQuestionTitleChanged(topRow, formik.values, Title);
+      }
+    };
+    goBre();
+  }, [debouncedSearchTerm, formik.values, onQuestionTitleChanged, searchTerm, topRow]);
 
   useEffect(() => {
     nameRef.current!.focus();
@@ -86,45 +101,24 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
     }
   }, [formik, nameRef, source])
 
-  const [title, setTitle] = React.useState(formik.values.title === "new Question" ? "new Question" : "question text")
-
-
-  const [topRow] = useState<ICategoryRow>(topRows.find(c => c.id === topId)!);
-  
-    /*
-    const  debouncedTitle = useDebounce(title, 300);
-    useEffect(() => {
-      if (debouncedTitle && !submited) {
-        // Perform API call or heavy computation with debouncedSearchTerm
-        console.log('>>>>>>------------')
-        console.log('>>>>>>------------', title, debouncedTitle)
-        console.log('>>>>>>------------')
-        console.log('>>>>>>Fetching data for:', debouncedTitle);
-        onQuestionTitleChanged(topRow, parentId!, id, debouncedTitle);
-      }
-    }, [debouncedTitle, id, onQuestionTitleChanged, parentId, submited, title, topRow]);
-    */
-
-  /*
-  const debouncedTitleHandler = 
-  //useCallback(
-    debounce((value: string) => {
-      //dispatch({ type: ActionTypes.QUESTION_TITLE_CHANGED, payload: { categoryId, id, value } })
-      onQuestionTitleChanged(topId, parentId!, id, value);
-    }, 500);
-    //, []);
-  */
 
   const handleChangeTitle = (event: ChangeEvent<HTMLTextAreaElement>) => {
     formik.handleChange(event);
     const value = event.target.value;
-    setTitle(value);
+    //if (value !== debouncedTitle)
+    //setTitle(value);
+    setSearchTerm(id +  '/' + value);
   };
 
   const setParentId = (cat: ICategoryRow) => {
     formik.setFieldValue('parentId', cat.id);
     formik.setFieldValue('categoryTitle', cat.title);
   }
+
+  console.log('@@@@@@@@@@@@@@@@@@@@@ QuestionForm.render: ', { searchTerm, qTitle, debouncedSearchTerm });
+  //useEffect(() => {
+  //  setSearchTerm(qTitle);
+  //}, [qTitle]);
 
   return (
     <div className="form-wrapper px-3 py-1 my-0 my-1 w-100 question-form" >
@@ -192,7 +186,7 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
             //   if (isEdit && formik.initialValues.title !== formik.values.title)
             //     formik.submitForm();
             // }}
-            value={title}
+            value={formik.values.title}
             rows={3}
             className="text-primary w-100"
             disabled={isDisabled}
@@ -256,14 +250,14 @@ const QuestionForm = ({ question, submitForm, children, showCloseButton, source 
           <div className="my-1">
             <AssignedAnswers
               questionKey={questionKey!}
-              questionTitle={title}
+              questionTitle={searchTerm}
               assignedAnswers={assignedAnswers}
               isDisabled={isDisabled}
             />
 
             <RelatedFilters
               questionKey={questionKey!}
-              questionTitle={title}
+              questionTitle={searchTerm}
               relatedFilters={relatedFilters}
             />
 

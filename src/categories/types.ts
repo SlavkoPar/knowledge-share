@@ -101,6 +101,7 @@ export class CategoryRowDto {
 }
 
 export class CategoryRow {
+
 	constructor(categoryRowDto: ICategoryRowDto) {
 		const { TopId, Id, ParentId, Kind, Title, Link, Header, Variations, Level,
 			HasSubCategories, SubCategoryRowDtos,
@@ -341,7 +342,7 @@ export class Category {
 				? new Dto2WhoWhen(Modified).whoWhen
 				: undefined,
 			numOfQuestions: NumOfQuestions!,
-			questionRows: questionRows??[],
+			questionRows: questionRows ?? [],
 			isExpanded: IsExpanded === true,
 			doc1: Doc1
 		}
@@ -573,9 +574,10 @@ export interface ILoadCategoryQuestions {
 export interface ICategoriesContext {
 	state: ICategoriesState,
 	loadAllCategoryRows: () => Promise<boolean>;
-	openNode: (catKey: ICategoryKey, questionId: string | null, fromChatBotDlg?: string) => Promise<any>;
+	getCat: (id: string) => Promise<ICategoryRow | undefined>;
+	expandNodesUpToTheTree: (catKey: ICategoryKey, questionId: string | null, fromChatBotDlg?: string) => Promise<any>;
 	loadTopRows: () => Promise<any>,
-	addSubCategory: (parentCategoryRow: ICategoryRow|null) => Promise<any>;
+	addSubCategory: (parentCategoryRow: ICategoryRow | null) => Promise<any>;
 	cancelAddCategory: () => Promise<any>;
 	createCategory: (category: ICategory) => void,
 	viewCategory: (categoryRow: ICategoryRow, includeQuestionId: string) => void,
@@ -598,7 +600,7 @@ export interface ICategoriesContext {
 	updateQuestion: (oldParentId: string, question: IQuestion, categoryChanged: boolean) => Promise<any>;
 	assignQuestionAnswer: (action: 'Assign' | 'UnAssign', questionKey: IQuestionKey, assignedAnswerKey: IAssignedAnswerKey) => Promise<any>;
 	deleteQuestion: (questionRow: IQuestionRow, isActive: boolean) => void;
-	onQuestionTitleChanged: (topRow: ICategoryRow, categoryId: string, id: string, title: string) => void;
+	onQuestionTitleChanged: (topRow: ICategoryRow, question: IQuestion, title: string) => void;
 }
 
 export interface ICategoryFormProps {
@@ -692,7 +694,7 @@ export class AssignedAnswer {
 export enum ActionTypes {
 	SET_FROM_LOCAL_STORAGE = "SET_FROM_LOCAL_STORAGE",
 	SET_TOP_ROWS = 'SET_TOP_ROWS',
-	SET_NODE_OPENED = "SET_NODE_OPENED",
+	SET_NODE_EXPANDED_UP_THE_TREE = "SET_NODE_EXPANDED_UP_THE_TREE",
 	SET_LOADING_CATEGORY = 'SET_LOADING_CATEGORY',
 	SET_LOADING_QUESTION = 'SET_LOADING_QUESTION',
 	SET_TOP_ROWS_LOADING = 'SET_TOP_ROWS_LOADING',
@@ -723,7 +725,7 @@ export enum ActionTypes {
 	CLOSE_CATEGORY_FORM = 'CLOSE_CATEGORY_FORM',
 	CANCEL_CATEGORY_FORM = 'CANCEL_CATEGORY_FORM',
 
-	NODE_OPENING = "NODE_OPENING",
+	SET_NODE_EXPANDING_UP_THE_TREE = "SET_NODE_EXPANDING_UP_THE_TREE",
 	FORCE_OPEN_NODE = "FORCE_OPEN_NODE",
 
 	// questions
@@ -760,7 +762,7 @@ export const actionStoringToLocalStorage = [
 export const doNotModifyTree = [
 	//ActionTypes.SET_TOP_ROWS_LOADING,
 	//ActionTypes.SET_TOP_ROWS,
-	ActionTypes.NODE_OPENING,
+	ActionTypes.SET_NODE_EXPANDING_UP_THE_TREE,
 	//ActionTypes.SET_NODE_OPENED,
 	//ActionTypes.SET_CATEGORY_TO_ADD,
 	ActionTypes.SET_CATEGORY_UPDATED,
@@ -798,20 +800,20 @@ export type Payload = {
 		categoryRow?: ICategoryRow;
 	}
 
-	[ActionTypes.NODE_OPENING]: {
+	[ActionTypes.SET_NODE_EXPANDING_UP_THE_TREE]: {
 		categoryRow?: ICategoryRow;
 		fromChatBotDlg: boolean;
 		//categoryKeyExpanded: IQuestionKey
 	};
 
-	[ActionTypes.SET_NODE_OPENED]: {
+	[ActionTypes.SET_NODE_EXPANDED_UP_THE_TREE]: {
 		// categoryNodesUpTheTree: ICategoryKeyExtended[]; /// we could have used Id only
 		categoryRow?: ICategoryRow;
-		category: ICategory,
-		//formMode: FormMode,
-		canEdit: boolean;
+		category: ICategory|null,
+		formMode: FormMode,
 		catKey: ICategoryKey;
 		questionId: string | null,
+		question: IQuestion | null,
 		fromChatBotDlg?: boolean;
 	};
 

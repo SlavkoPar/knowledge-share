@@ -14,6 +14,7 @@ const QuestionList = ({ categoryRow }: { categoryRow: ICategoryRow }) => {
 
   categoryRow.level += 1;
   const { questionRows } = categoryRow;
+  // console.log('@@@@@@@@@@@@@ QuestionList', { questionRows })
 
   let hasMoreQuestions = false;
 
@@ -57,7 +58,7 @@ const QuestionList = ({ categoryRow }: { categoryRow: ICategoryRow }) => {
     rootMargin: '0px 0px 100px 0px',
   });
 
-  //console.log("QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQuestionList", id, questionRows)
+  // console.log("QQQQQQQQQQQQQQQQQQQQQQQQQQQQQ QuestionList", questionRows)
   // if (loadingQuestion)
   //   return <div> ... loading</div>
 
