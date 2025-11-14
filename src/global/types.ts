@@ -209,7 +209,7 @@ export interface IGlobalContext {
 	getGroupRows: (categoryId: string | null) => Promise<any>;
 	globalGetGroupRow: (groupRowId: string) => Promise<IGroupRow | undefined>;
 	getGroupRowsByKind: (kind: number) => Promise<IGroupRow[]>;
-	searchAnswers: (filter: string, count: number) => Promise<IAnswerRow[]>;
+	searchAnswers: (filter: string, count: number, questionKey?: IQuestionKey) => Promise<IAnswerRow[]>;
 	getAnswer: (answerKey: IAnswerKey) => Promise<IAnswer | null>;
 	addHistory: (history: IHistory) => Promise<void>;
 	getAnswersRated: (questionKey: IQuestionKey) => Promise<any>;

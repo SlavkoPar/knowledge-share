@@ -155,15 +155,12 @@ const AssignedAnswersChatBot = ({ questionId, questionTitle, assignedAnswers, is
                 <Modal.Body style={{ height: '40vh', width: '50vw' }} className="question-answers">
 
                     {/* <AutoSuggestAnswers
-                        dbp={dbp!}
-                        tekst={''}
-                        alreadyAssigned={
-                            assignedAnswers.length === 0
-                                ? []
-                                : assignedAnswers.map((a: IAssignedAnswer) => a.answerKey.id)
-                        }
-                        onSelectQuestionAnswer={onSelectQuestionAnswer}
-                    /> */}
+                            questionKey={questionKey}
+                            tekst={''}
+                            allGroupRows={allGroupRows}
+                            onSelectAnswer={(assignedAnswerKey: IAssignedAnswerKey) => onSelectAnswer(assignedAnswerKey)}
+                            searchAnswers={searchAnswers}
+                        /> */}
                 </Modal.Body>
             </Modal>
         </div>

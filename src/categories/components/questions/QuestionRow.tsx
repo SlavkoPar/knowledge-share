@@ -34,7 +34,6 @@ const QuestionRow = ({ questionRow, isSelected }: { questionRow: IQuestionRow, i
     const alreadyAdding = formMode === FormMode.AddingQuestion;
 
     const del = () => {
-        alert('del, questionRow.id=' + questionRow.id);
         questionRow.modified = {
             time: new Date(),
             nickName: authUser.nickName
@@ -160,7 +159,8 @@ const QuestionRow = ({ questionRow, isSelected }: { questionRow: IQuestionRow, i
             {isSelected && formMode === FormMode.EditingQuestion &&
                 <>
                     {/* <div class="d-lg-none">hide on lg and wider screens</div> */}
-                    <div id='div-question' className="ms-0 d-md-none w-100">
+                    {/* <div id='div-question' className="ms-0 d-md-none w-100"> */}
+                    <div id='div-question' className="">
                         <EditQuestion inLine={true} />
                     </div>
                     <div ref={hoverRef} className="">

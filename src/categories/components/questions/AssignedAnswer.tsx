@@ -92,7 +92,7 @@ const AssignedAnswer = ({ questionTitle, assignedAnswer, isDisabled, unAssignAns
     const [hoverRef, hovering] = useHover();
 
     const Row1 =
-        <div className="d-flex justify-content-start align-items-center w-100 text-light bg-info">
+        <div ref={hoverRef} className="d-flex justify-content-start align-items-center w-100 text-light bg-info">
             <Button
                 variant='link'
                 size="sm"

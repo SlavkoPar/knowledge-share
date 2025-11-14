@@ -817,7 +817,6 @@ export const CategoryProvider: React.FC<IProps> = ({ children }) => {
                   formMode: FormMode.None
                 }
                 if (parentId) {
-                  alert('argh')
                   await loadTopRows();
                 }
                 else {

@@ -155,12 +155,8 @@ const AssignedAnswers = ({ questionKey, questionTitle, assignedAnswers, isDisabl
                 </Modal.Header>
                 <Modal.Body style={{ height: '40vh', width: '50vw' }} className="answers">
                     <AutoSuggestAnswers
+                        questionKey={questionKey}
                         tekst={''}
-                        alreadyAssigned={
-                            assignedAnswers.length === 0
-                                ? []
-                                : assignedAnswers.map((a: IAssignedAnswer) => ({ topId: a.topId, id: a.id } as IAssignedAnswerKey))
-                        }
                         allGroupRows={allGroupRows}
                         onSelectAnswer={(assignedAnswerKey: IAssignedAnswerKey) => onSelectAnswer(assignedAnswerKey)}
                         searchAnswers={searchAnswers}

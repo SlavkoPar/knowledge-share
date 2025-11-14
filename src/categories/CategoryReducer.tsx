@@ -144,6 +144,7 @@ export const CategoryReducer: Reducer<ICategoriesState, Actions> = (state, actio
     localStorage.setItem('CATEGORIES_STATE', JSON.stringify(locStorage));
   }
 
+  console.log('CategoryReducer newState', newState)
   return newState;
 }
 
@@ -690,6 +691,7 @@ const innerReducer = (state: ICategoriesState, action: Actions): ICategoriesStat
         keyExpanded: { topId, categoryId: parentId, questionId: id },
         activeQuestion: question,
         formMode: FormMode.EditingQuestion,
+        selectedQuestionId: question.id,
         loadingQuestion: false,
         questionLoaded: true
       }

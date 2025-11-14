@@ -7,7 +7,7 @@ import { isMobile } from 'react-device-detect'
 import { debounce, escapeRegexCharacters } from 'common/utilities'
 import './AutoSuggestAnswers.css'
 import { AnswerKey, IAnswerKey, IAnswerRow, IGroupRow } from 'groups/types';
-import { IAssignedAnswerKey } from 'categories/types';
+import { IAssignedAnswerKey, IQuestionKey } from 'categories/types';
 
 
 interface IGroupMy {
@@ -42,18 +42,18 @@ interface IGroupIdTitle {
 const AnswerAutosuggestMulti = Autosuggest as { new(): Autosuggest<IAnswerRow, IGroupMy> };
 
 export class AutoSuggestAnswers extends React.Component<{
+	questionKey: IQuestionKey,
 	tekst: string | undefined,
 	onSelectAnswer: (assignedAnswerKey: IAssignedAnswerKey, underFilter: string) => void,
-	alreadyAssigned?: IAssignedAnswerKey[],
 	allGroupRows: Map<string, IGroupRow>,
-	searchAnswers: (filter: string, count: number) => Promise<IAnswerRow[]>
+	searchAnswers: (filter: string, count: number, questionKey: IQuestionKey) => Promise<IAnswerRow[]>
 }, any> {
 	// region Fields
-	alreadyAssigned: IAssignedAnswerKey[];
+	questionKey: IQuestionKey;
 	state: any;
 	isMob: boolean;
 	allGroupRows: Map<string, IGroupRow>;
-	searchAnswers: (filter: string, count: number) => Promise<IAnswerRow[]>;
+	searchAnswers: (filter: string, count: number, questionKey: IQuestionKey) => Promise<IAnswerRow[]>;
 	debouncedLoadSuggestions: (value: string) => void;
 	//inputAutosuggest: React.RefObject<HTMLInputElement>;
 	// endregion region Constructor
@@ -67,7 +67,7 @@ export class AutoSuggestAnswers extends React.Component<{
 			highlighted: ''
 		};
 		//this.inputAutosuggest = createRef<HTMLInputElement>();
-		this.alreadyAssigned = props.alreadyAssigned ?? [];
+		this.questionKey = props.questionKey;
 		this.allGroupRows = props.allGroupRows;
 		this.searchAnswers = props.searchAnswers;
 		this.isMob = isMobile;
@@ -169,30 +169,28 @@ export class AutoSuggestAnswers extends React.Component<{
 		const answerKeys: IAnswerKey[] = [];
 		try {
 			console.log('--------->>>>> getSuggestions')
-			var answerRows: IAnswerRow[] = await this.searchAnswers(escapedValue, 20);
+			var answerRows: IAnswerRow[] = await this.searchAnswers(escapedValue, 20, this.questionKey);
 			answerRows.forEach((row: IAnswerRow) => {
 				const { id, topId, parentId, title, isSelected } = row;
-				if (!this.alreadyAssigned.includes({topId, id})) {
-					const answerKey = new AnswerKey(row).answerKey!;
-					
-					if (!answerKeys.includes(answerKey)) {
-						answerKeys.push(answerKey);
+				const answerKey = new AnswerKey(row).answerKey!;
 
-						// 2) Group answers by parentId
-						const answ: IAnswerRow = {
-							topId,
-							id,
-							parentId,
-							title,
-							groupTitle: '',
-							isSelected
-						}
-						if (!groupAnswers.has(parentId)) {
-							groupAnswers.set(parentId, [answ]);
-						}
-						else {
-							groupAnswers.get(parentId)!.push(answ);
-						}
+				if (!answerKeys.includes(answerKey)) {
+					answerKeys.push(answerKey);
+
+					// 2) Group answers by parentId
+					const answ: IAnswerRow = {
+						topId,
+						id,
+						parentId,
+						title,
+						groupTitle: '',
+						isSelected
+					}
+					if (!groupAnswers.has(parentId)) {
+						groupAnswers.set(parentId, [answ]);
+					}
+					else {
+						groupAnswers.get(parentId)!.push(answ);
 					}
 				}
 			})
@@ -339,7 +337,7 @@ export class AutoSuggestAnswers extends React.Component<{
 
 	protected onSuggestionSelected(event: React.FormEvent<any>, data: Autosuggest.SuggestionSelectedEventData<IAnswerRow>): void {
 		const answer: IAnswerRow = data.suggestion;
-		const {topId, id } = answer;
+		const { topId, id } = answer;
 
 		// alert(`Selected answer is ${answer.answerId} (${answer.text}).`);
 		this.props.onSelectAnswer({ topId, id }, this.state.value);

@@ -338,13 +338,13 @@ export const GlobalProvider: React.FC<Props> = ({ children }) => {
   }, [allGroupRows, allGroupRowsLoaded, loadAndCacheAllGroupRows]);
 
 
-  const searchAnswers = async (filter: string, count: number): Promise<any> => {
+  const searchAnswers = async (filter: string, count: number, questionKey?: IQuestionKey): Promise<any> => {
     //const { allGroupRows } = globalState;
     return new Promise(async (resolve) => {
       try {
         console.time();
         const filterEncoded = encodeURIComponent(filter);
-        const url = `${KnowledgeAPI.endpointAnswer}/${workspace}/${filterEncoded}/${count}/nesto`;
+        const url = `${KnowledgeAPI.endpointAnswer}/${workspace}/${filterEncoded}/${count}/${questionKey ? `${questionKey.topId}/${questionKey.id}` : 'null/null' }`;
         await Execute("GET", url).then((answerRowDtosEx: IAnswerRowDtosEx) => {
           const { answerRowDtos: dtos, msg } = answerRowDtosEx;
           console.log('ANSWERSSSSS', { answerRowDtos: dtos }, url);
