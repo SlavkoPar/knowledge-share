@@ -158,28 +158,27 @@ const QuestionRow = ({ questionRow, isSelected }: { questionRow: IQuestionRow, i
 
             {isSelected && formMode === FormMode.EditingQuestion &&
                 <>
-                    {/* <div class="d-lg-none">hide on lg and wider screens</div> */}
-                    {/* <div id='div-question' className="ms-0 d-md-none w-100"> */}
-                    <div id='div-question' className="">
-                        <EditQuestion inLine={true} />
-                    </div>
                     <div ref={hoverRef} className="">
                         {/* d-none d-md-block */}
                         {Row1}
+                    </div>
+                    {/* <div class="d-lg-none">hide on lg and wider screens</div> */}
+                    {/* <div id='div-question' className="ms-0 d-md-none w-100"> */}
+                    <div id='div-question' className="ms-0 d-md-none w-100">
+                        <EditQuestion inLine={true} />
                     </div>
                 </>
             }
 
             {isSelected && formMode === FormMode.ViewingQuestion &&
                 <>
-                    {/* <div class="d-lg-none">hide on lg and wider screens</div> */}
-                    <div ref={hoverRef} id='div-question' className="">
-                        {/* ms-0 d-md-none w-100 */}
-                        <ViewQuestion inLine={true} />
-                    </div>
                     <div ref={hoverRef} className="">
                         {/* d-none d-md-block */}
                         {Row1}
+                    </div>
+                    {/* <div class="d-lg-none">hide on lg and wider screens</div> */}
+                    <div ref={hoverRef} id='div-question' className="ms-0 d-md-none w-100">
+                        <ViewQuestion inLine={true} />
                     </div>
                 </>
             }
